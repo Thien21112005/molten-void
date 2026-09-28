@@ -3,6 +3,7 @@ import { Engine, type UIState, type HighScore } from "./game/engine";
 import { cn } from "./utils/cn";
 import { VictoryModal } from "./components/VictoryModal";
 import { RoadmapModal } from "./components/RoadmapModal";
+import { loadProgress, getTotalStars, MAX_POSSIBLE_STARS } from "./game/levels/progress";
 
 const initialUI: UIState = {
   screen: "menu",
@@ -228,6 +229,9 @@ export default function App() {
 
   const eng = () => engineRef.current;
   const inRun = ui.screen === "playing" || ui.screen === "paused" || ui.screen === "gameover";
+  const campaignProgress = loadProgress();
+  const totalCampaignStars = getTotalStars(campaignProgress);
+  const clearedSectorsCount = Object.values(campaignProgress.levels).filter((l) => l.cleared).length;
 
   return (
     <div className="game-root relative h-dvh w-full overflow-hidden bg-void-950 font-ui text-white">
@@ -333,44 +337,94 @@ export default function App() {
       {/* ---- MENU ---- */}
       {ui.screen === "menu" && (
         <Overlay dim={true}>
-          <div className="animate-rise-in m-auto flex w-[min(92vw,29rem)] flex-col items-center justify-center gap-4 sm:gap-5 py-6">
-            <div className="flex flex-col items-center text-center">
-              <p className="mb-2 text-[11px] font-bold tracking-[0.5em] text-ice-400/90">A PHYSICS SLINGSHOT PUZZLER</p>
-              <h1 className="animate-float-slow font-display leading-[0.95]">
-                <span className="block text-5xl text-ember-400 [text-shadow:0_0_34px_rgba(255,122,26,0.65),0_4px_0_rgba(90,25,0,0.8)] sm:text-6xl">
-                  MOLTEN
-                </span>
-                <span className="block text-5xl text-ice-400 [text-shadow:0_0_34px_rgba(46,230,201,0.6),0_4px_0_rgba(0,70,60,0.8)] sm:text-6xl">
-                  VOID
-                </span>
-              </h1>
-              <p className="mt-3 text-sm font-semibold tracking-wide text-white/70">
-                Sling comet cores. Shatter every crystal. Chain combos.
-              </p>
-            </div>
+          <div className="animate-rise-in relative m-auto flex w-[min(95vw,56rem)] flex-col overflow-hidden rounded-3xl border-2 border-void-700/80 bg-void-950/90 p-5 sm:p-7 md:p-8 shadow-[0_0_80px_rgba(0,0,0,0.85)] backdrop-blur-xl">
+            {/* Cosmic Ambient Background Blurs */}
+            <div className="pointer-events-none absolute -top-12 -left-12 h-64 w-64 rounded-full bg-ember-500/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-cyan-500/15 blur-3xl" />
 
-            <div className="flex flex-col items-center gap-2.5">
-              <ChunkBtn primary onClick={() => eng()?.play()} className="w-60 text-xl" icon={<IconPlay className="h-5 w-5" />}>
-                Play Campaign
-              </ChunkBtn>
+            {/* Responsive Dual Column Dashboard */}
+            <div className="relative z-10 grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 md:gap-8">
+              {/* Left Column: Command & Slingshot Launchpad */}
+              <div className="flex flex-col justify-between gap-5">
+                <div className="flex flex-col items-center text-center md:items-start md:text-left">
+                  <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-ice-500/40 bg-ice-950/50 px-3 py-1 text-[10px] font-bold tracking-[0.25em] text-ice-300 shadow-[0_0_12px_rgba(46,230,201,0.2)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-ice-400 animate-pulse" />
+                    DEEP SPACE EXPEDITION &bull; 15 SECTORS
+                  </div>
 
-              <ChunkBtn onClick={() => eng()?.openRoadmap()} className="w-60 text-base" icon={<IconMap className="h-4 w-4" />}>
-                Select Level (1-15)
-              </ChunkBtn>
+                  <h1 className="animate-float-slow font-display leading-[0.9] tracking-tight">
+                    <span className="block text-5xl sm:text-6xl text-ember-400 [text-shadow:0_0_34px_rgba(255,122,26,0.65),0_4px_0_rgba(90,25,0,0.8)]">
+                      MOLTEN
+                    </span>
+                    <span className="block text-5xl sm:text-6xl text-ice-400 [text-shadow:0_0_34px_rgba(46,230,201,0.6),0_4px_0_rgba(0,70,60,0.8)]">
+                      VOID
+                    </span>
+                  </h1>
 
-              {ui.best > 0 && (
-                <p className="text-xs font-bold tracking-[0.3em] text-ember-300/80">
-                  BEST <span className="font-display text-sm text-ember-300">{ui.best.toLocaleString("en-US")}</span>
-                </p>
-              )}
-            </div>
+                  <p className="mt-3 text-xs sm:text-sm font-semibold tracking-wide text-white/70">
+                    Sling comet cores &bull; Shatter crystal lattices &bull; Chain orbital combos across 15 handcrafted sectors.
+                  </p>
+                </div>
 
-            <div className="w-full">
-              <ScoreTable hs={ui.hs} />
-            </div>
+                {/* Campaign Progress Stats Bar */}
+                <div className="grid grid-cols-3 gap-2 rounded-2xl border border-void-700/80 bg-void-900/80 p-3 shadow-inner">
+                  <div className="flex flex-col items-center text-center">
+                    <span className="text-[10px] font-bold tracking-wider text-white/40">CAMPAIGN STARS</span>
+                    <span className="font-display text-sm sm:text-base text-amber-300">
+                      ★ {totalCampaignStars} <span className="text-[10px] text-white/40">/ {MAX_POSSIBLE_STARS}</span>
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center border-x border-void-800 text-center">
+                    <span className="text-[10px] font-bold tracking-wider text-white/40">BEST RUN</span>
+                    <span className="font-display text-sm sm:text-base text-ember-400">
+                      {ui.best > 0 ? ui.best.toLocaleString("en-US") : "0"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center text-center">
+                    <span className="text-[10px] font-bold tracking-wider text-white/40">SECTORS WON</span>
+                    <span className="font-display text-sm sm:text-base text-ice-300">
+                      {clearedSectorsCount} <span className="text-[10px] text-white/40">/ 15</span>
+                    </span>
+                  </div>
+                </div>
 
-            <div className="w-full rounded-xl border border-void-700/80 bg-void-950/75 p-3.5 backdrop-blur-sm">
-              <Controls />
+                {/* Primary Launch Actions */}
+                <div className="flex flex-col gap-3">
+                  <ChunkBtn
+                    primary
+                    onClick={() => eng()?.play()}
+                    className="w-full py-3.5 text-lg shadow-[0_6px_0_#8f2f0c,0_12px_28px_rgba(255,110,30,0.4)]"
+                    icon={<IconPlay className="h-5 w-5" />}
+                  >
+                    Play Campaign
+                  </ChunkBtn>
+
+                  <ChunkBtn
+                    onClick={() => eng()?.openRoadmap()}
+                    className="w-full py-3 text-base"
+                    icon={<IconMap className="h-4.5 w-4.5" />}
+                  >
+                    Cosmic Roadmap (15 Levels)
+                  </ChunkBtn>
+                </div>
+              </div>
+
+              {/* Right Column: Telemetry Leaderboard & Flight Controls */}
+              <div className="flex flex-col justify-between gap-4">
+                {/* High Scores Terminal */}
+                <div className="flex-1">
+                  <ScoreTable hs={ui.hs} />
+                </div>
+
+                {/* Flight & Slingshot Controls Guide */}
+                <div className="rounded-xl border border-void-700/80 bg-void-950/80 p-3.5 shadow-md backdrop-blur-sm">
+                  <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-[0.25em] text-ice-400/90">
+                    <span>FLIGHT &amp; SLINGSHOT CONTROLS</span>
+                    <span className="text-white/40">TACTICAL</span>
+                  </div>
+                  <Controls />
+                </div>
+              </div>
             </div>
           </div>
         </Overlay>
