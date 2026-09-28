@@ -165,9 +165,9 @@ function Controls({ compact }: { compact?: boolean }) {
         <span className="text-white/50">pull back &amp; release to sling</span>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <span className="kbd">&#8592;</span>
-        <span className="kbd">&#8594;</span>
-        <span className="text-white/50">aim</span>
+        <span className="kbd">&#8593;</span>
+        <span className="kbd">&#8595;</span>
+        <span className="text-white/50">aim angle</span>
         <span className="kbd">SPACE</span>
         <span className="text-white/50">hold to charge, release to fire</span>
       </div>
@@ -281,7 +281,7 @@ export default function App() {
           <div className="animate-pulse-soft rounded-lg border border-ember-400/40 bg-void-900/85 px-4 py-2 text-center">
             <p className="font-display text-[13px] tracking-wide text-ember-300">PULL BACK &amp; RELEASE</p>
             <p className="mt-0.5 text-xs font-semibold text-white/55">
-              drag anywhere, or <span className="text-ice-300">&#8592; &#8594; + hold SPACE</span>
+              drag anywhere, or <span className="text-ice-300">&#8593; &#8595; + hold SPACE</span>
             </p>
           </div>
         </div>

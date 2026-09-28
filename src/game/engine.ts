@@ -379,15 +379,19 @@ export class Engine {
 
     if (this.screen !== "playing") return;
 
-    if (k === "ArrowLeft" || k === "a" || k === "A") this.kbAimX = -1;
-    else if (k === "ArrowRight" || k === "d" || k === "D") this.kbAimX = 1;
+    if (k === "ArrowUp" || k === "w" || k === "W" || k === "ArrowLeft" || k === "a" || k === "A") {
+      this.kbAimX = -1;
+      if (this.aimMode === "none" && !this.orb?.alive) this.aimMode = "kb";
+    } else if (k === "ArrowDown" || k === "s" || k === "S" || k === "ArrowRight" || k === "d" || k === "D") {
+      this.kbAimX = 1;
+      if (this.aimMode === "none" && !this.orb?.alive) this.aimMode = "kb";
+    }
 
-    if ((k === " " || k === "ArrowUp" || k === "w" || k === "W") && !e.repeat) {
+    if (k === " " && !e.repeat) {
       if (!this.orb?.alive && this.orbs > 0) {
         this.aimMode = "kb";
         this.charging = true;
         this.chargePow = 0;
-        this.chargeDir = 1;
         this.chargeBucket = -1;
       }
     }
@@ -395,11 +399,11 @@ export class Engine {
 
   private onKeyUp = (e: KeyboardEvent) => {
     const k = e.key;
-    if (k === "ArrowLeft" || k === "a" || k === "A") {
+    if (k === "ArrowUp" || k === "w" || k === "W" || k === "ArrowLeft" || k === "a" || k === "A") {
       if (this.kbAimX === -1) this.kbAimX = 0;
-    } else if (k === "ArrowRight" || k === "d" || k === "D") {
+    } else if (k === "ArrowDown" || k === "s" || k === "S" || k === "ArrowRight" || k === "d" || k === "D") {
       if (this.kbAimX === 1) this.kbAimX = 0;
-    } else if (k === " " || k === "ArrowUp" || k === "w" || k === "W") {
+    } else if (k === " ") {
       if (this.charging) {
         this.charging = false;
         this.aimMode = "none";
