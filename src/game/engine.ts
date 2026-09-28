@@ -1,4 +1,5 @@
 import { sfx } from "./audio";
+import { loadSettings } from "./settings";
 import {
   getLevelConfig,
   saveLevelClear,
@@ -777,7 +778,10 @@ export class Engine {
     const cols = gold
       ? ["255,210,62", "255,243,176", "255,160,46"]
       : ["125,252,231", "46,230,201", "230,255,250"];
-    for (let i = 0; i < 13; i++) {
+    const isReduced = loadSettings().particleDensity === "reduced";
+    const pCount1 = isReduced ? 6 : 13;
+    const pCount2 = isReduced ? 4 : 10;
+    for (let i = 0; i < pCount1; i++) {
       const a = rand(0, TAU);
       const sp = rand(120, 430);
       this.particles.push({
@@ -796,7 +800,7 @@ export class Engine {
         drag: 0.6,
       });
     }
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < pCount2; i++) {
       const a = rand(0, TAU);
       const sp = rand(220, 620);
       this.particles.push({
@@ -1247,7 +1251,9 @@ export class Engine {
     const dt = 1 / 50;
     const pts: { x: number; y: number }[] = [];
     let hit: { x: number; y: number } | null = null;
-    for (let i = 0; i < 70; i++) {
+    const cfg = loadSettings();
+    const maxSteps = cfg.trajectoryGuide === "minimal" ? 22 : 70;
+    for (let i = 0; i < maxSteps; i++) {
       vy += this.G * dt;
       x += vx * dt;
       y += vy * dt;
@@ -1289,8 +1295,10 @@ export class Engine {
     const { ctx, W, H } = this;
     ctx.clearRect(0, 0, W, H);
 
-    const sx = (Math.random() * 2 - 1) * this.shake;
-    const sy = (Math.random() * 2 - 1) * this.shake;
+    const cfg = loadSettings();
+    const shakeAmt = cfg.screenShake ? this.shake : 0;
+    const sx = (Math.random() * 2 - 1) * shakeAmt;
+    const sy = (Math.random() * 2 - 1) * shakeAmt;
     ctx.save();
     ctx.translate(sx, sy);
 

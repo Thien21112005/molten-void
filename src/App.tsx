@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Engine, type UIState, type HighScore } from "./game/engine";
 import { cn } from "./utils/cn";
 import { VictoryModal } from "./components/VictoryModal";
 import { RoadmapModal } from "./components/RoadmapModal";
+import { SettingsModal } from "./components/SettingsModal";
 import { loadProgress, getTotalStars, MAX_POSSIBLE_STARS } from "./game/levels/progress";
+import { TRANSLATIONS, loadLanguage, type Language, type Translations } from "./game/i18n";
 
 const initialUI: UIState = {
   screen: "menu",
   score: 0,
   level: 1,
-  orbs: 3,
+  orbs: 4,
   maxOrbs: 9,
   gems: 0,
   best: 0,
@@ -27,6 +29,15 @@ function IconMap({ className }: { className?: string }) {
       <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
       <line x1="8" y1="2" x2="8" y2="18" />
       <line x1="16" y1="6" x2="16" y2="22" />
+    </svg>
+  );
+}
+
+function IconGear({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   );
 }
@@ -62,51 +73,46 @@ function IconHome({ className }: { className?: string }) {
     </svg>
   );
 }
-function IconSound({ className, muted }: { className?: string; muted?: boolean }) {
+function IconSound({ muted, className }: { muted: boolean; className?: string }) {
+  if (muted) {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" />
+        <line x1="23" y1="9" x2="17" y2="15" />
+        <line x1="17" y1="9" x2="23" y2="15" />
+      </svg>
+    );
+  }
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M4 9.5v5h3.5L13 19V5L7.5 9.5H4z" fill="currentColor" stroke="none" />
-      {muted ? (
-        <path d="M16.5 9l5 6m0-6-5 6" />
-      ) : (
-        <>
-          <path d="M16.5 9.5a4 4 0 0 1 0 5" />
-          <path d="M19 7.5a7.5 7.5 0 0 1 0 9" />
-        </>
-      )}
-    </svg>
-  );
-}
-function IconGem({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className}>
-      <path d="M12 2.5 20 9l-8 12.5L4 9l8-6.5z" fill="currentColor" opacity="0.9" />
-      <path d="M4 9h16M12 2.5 8.5 9l3.5 12.5L15.5 9 12 2.5z" stroke="#0b0718" strokeWidth="1.1" fill="none" />
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
     </svg>
   );
 }
 function IconCore({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className}>
-      <circle cx="12" cy="12" r="9" fill="url(#coreGrad)" />
-      <circle cx="12" cy="12" r="9" fill="none" stroke="#ff7a1a" strokeWidth="1.4" />
       <defs>
-        <radialGradient id="coreGrad">
-          <stop offset="0%" stopColor="#fff3c4" />
-          <stop offset="45%" stopColor="#ffd23e" />
-          <stop offset="100%" stopColor="#ff6a12" />
+        <radialGradient id="icg" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#ffd23e" />
+          <stop offset="55%" stopColor="#ff7a1a" />
+          <stop offset="100%" stopColor="#8f2000" />
         </radialGradient>
       </defs>
+      <circle cx="12" cy="12" r="9" fill="url(#icg)" />
+      <circle cx="9" cy="9" r="3" fill="#fff" opacity="0.6" />
     </svg>
   );
 }
 
-/* ---------- UI bits ---------- */
+/* ---------- UI primitives ---------- */
 
 function ChunkBtn({
   children,
   onClick,
-  primary,
+  primary = false,
   className,
   icon,
 }: {
@@ -123,7 +129,7 @@ function ChunkBtn({
         onClick();
       }}
       className={cn(
-        "btn-chunk flex items-center justify-center gap-2.5 px-6 py-3.5 text-base uppercase tracking-wide",
+        "btn-chunk flex items-center justify-center gap-2.5 px-6 py-3.5 text-base uppercase tracking-wide cursor-pointer transition active:scale-95",
         primary
           ? "bg-gradient-to-b from-ember-400 to-ember-600 text-void-950 shadow-[0_5px_0_#8f2f0c,0_10px_24px_rgba(255,110,30,0.35)] hover:brightness-110"
           : "border-2 border-void-700 bg-void-800 text-ice-300 shadow-[0_5px_0_#0a0716] hover:border-ice-500/60 hover:text-ice-400",
@@ -136,15 +142,25 @@ function ChunkBtn({
   );
 }
 
-function ScoreTable({ hs, highlight }: { hs: HighScore[]; highlight?: { s: number; nb: boolean } }) {
+function ScoreTable({
+  hs,
+  highlight,
+  t,
+}: {
+  hs: HighScore[];
+  highlight?: { s: number; nb: boolean };
+  t: Translations;
+}) {
   return (
     <div className="w-full rounded-xl border-2 border-void-700 bg-void-950/70 px-4 py-3">
       <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-[0.28em] text-ember-300/90">
-        <span>HIGH SCORES</span>
-        <span className="text-ice-400/80">TOP 5</span>
+        <span>{t.highScores}</span>
+        <span className="text-ice-400/80">{t.top5}</span>
       </div>
       {hs.length === 0 ? (
-        <p className="py-3 text-center text-sm font-semibold tracking-wider text-white/40">NO RUNS YET — BE THE FIRST</p>
+        <p className="py-3 text-center text-sm font-semibold tracking-wider text-white/40">
+          {t.noRunsYet}
+        </p>
       ) : (
         <ul className="space-y-1">
           {hs.map((h, i) => {
@@ -170,28 +186,28 @@ function ScoreTable({ hs, highlight }: { hs: HighScore[]; highlight?: { s: numbe
   );
 }
 
-function Controls({ compact }: { compact?: boolean }) {
+function Controls({ compact, t }: { compact?: boolean; t: Translations }) {
   return (
     <div className={cn("flex flex-col items-center gap-2 text-[13px] font-semibold text-white/65", compact && "text-xs")}>
       <div className="flex items-center gap-2">
         <span className="kbd">DRAG</span>
-        <span className="text-white/50">pull back &amp; release to sling</span>
+        <span className="text-white/50">{t.dragHint}</span>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-2">
         <span className="kbd">&#8593;</span>
         <span className="kbd">&#8595;</span>
-        <span className="text-white/50">aim angle</span>
+        <span className="text-white/50">{t.aimAngleHint}</span>
         <span className="kbd">SPACE</span>
-        <span className="text-white/50">hold to charge, release to fire</span>
+        <span className="text-white/50">{t.chargeHint}</span>
       </div>
       {!compact && (
         <div className="flex flex-wrap items-center justify-center gap-2">
           <span className="kbd">P</span>
-          <span className="text-white/50">pause</span>
+          <span className="text-white/50">{t.paused.toLowerCase()}</span>
           <span className="kbd">R</span>
-          <span className="text-white/50">instant restart</span>
+          <span className="text-white/50">{t.quickRestartHint}</span>
           <span className="kbd">M</span>
-          <span className="text-white/50">sound</span>
+          <span className="text-white/50">{t.masterSound.toLowerCase()}</span>
         </div>
       )}
     </div>
@@ -218,6 +234,12 @@ export default function App() {
   const engineRef = useRef<Engine | null>(null);
   const [ui, setUi] = useState<UIState>(initialUI);
 
+  // Settings & Localization state
+  const [showSettings, setShowSettings] = useState(false);
+  const [lang, setLang] = useState<Language>(() => loadLanguage());
+  const [refreshKey, setRefreshKey] = useState(0);
+  const t = TRANSLATIONS[lang];
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -229,7 +251,8 @@ export default function App() {
 
   const eng = () => engineRef.current;
   const inRun = ui.screen === "playing" || ui.screen === "paused" || ui.screen === "gameover";
-  const campaignProgress = loadProgress();
+
+  const campaignProgress = useMemo(() => loadProgress(), [refreshKey, ui.screen]);
   const totalCampaignStars = getTotalStars(campaignProgress);
   const clearedSectorsCount = Object.values(campaignProgress.levels).filter((l) => l.cleared).length;
 
@@ -244,21 +267,19 @@ export default function App() {
           style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
         >
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold tracking-[0.34em] text-ember-300/80">SCORE</span>
+            <span className="text-[10px] font-bold tracking-[0.34em] text-ember-300/80">{t.score}</span>
             <span
               key={ui.score}
               className="animate-pop-in inline-block font-display text-2xl leading-none text-white [text-shadow:0_0_18px_rgba(255,160,46,0.45)] sm:text-3xl"
             >
               {ui.score.toLocaleString("en-US")}
             </span>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="rounded-md border border-ember-400/40 bg-void-900/80 px-2 py-0.5 text-[11px] font-bold tracking-[0.18em] text-ember-300">
-                LV {ui.level}
-              </span>
-              <span className="flex items-center gap-1 rounded-md border border-ice-500/40 bg-void-900/80 px-2 py-0.5 text-[11px] font-bold tracking-[0.18em] text-ice-300">
-                <IconGem className="h-3 w-3 text-ice-400" />
-                {ui.gems}
-              </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] font-bold tracking-[0.34em] text-ice-400/80">{t.level}</span>
+              <span className="font-display text-xl leading-none text-white sm:text-2xl">{ui.level}</span>
             </div>
           </div>
 
@@ -277,7 +298,7 @@ export default function App() {
               </span>
             </div>
 
-            {/* Quick Action Controls: Sound Toggle + Pause */}
+            {/* Quick Action Controls: Sound Toggle + Settings + Pause */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => eng()?.toggleMute()}
@@ -288,6 +309,14 @@ export default function App() {
                 )}
               >
                 <IconSound muted={ui.muted} className="h-4.5 w-4.5" />
+              </button>
+
+              <button
+                onClick={() => setShowSettings(true)}
+                aria-label={t.settings}
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-void-700/80 bg-void-900/90 text-white/80 shadow-md transition hover:border-ice-400/60 hover:text-ice-300 active:translate-y-0.5"
+              >
+                <IconGear className="h-4.5 w-4.5" />
               </button>
 
               {ui.screen === "playing" && (
@@ -319,19 +348,31 @@ export default function App() {
         </div>
       )}
 
-      {/* ---- persistent sound toggle (outside run) ---- */}
+      {/* ---- persistent sound & settings buttons (outside run) ---- */}
       {!inRun && (
-        <button
-          onClick={() => eng()?.toggleMute()}
-          aria-label={ui.muted ? "Unmute" : "Mute"}
-          className={cn(
-            "absolute z-50 flex h-10 w-10 items-center justify-center rounded-lg border bg-void-900/85 transition hover:text-ice-300 active:translate-y-0.5",
-            ui.muted ? "border-rose-alert/50 text-rose-alert" : "border-void-700/80 text-white/80",
-          )}
+        <div
+          className="absolute z-50 flex items-center gap-2"
           style={{ top: "max(0.75rem, env(safe-area-inset-top))", right: "0.75rem" }}
         >
-          <IconSound muted={ui.muted} className="h-5 w-5" />
-        </button>
+          <button
+            onClick={() => eng()?.toggleMute()}
+            aria-label={ui.muted ? "Unmute" : "Mute"}
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-lg border bg-void-900/85 transition hover:text-ice-300 active:translate-y-0.5",
+              ui.muted ? "border-rose-alert/50 text-rose-alert" : "border-void-700/80 text-white/80",
+            )}
+          >
+            <IconSound muted={ui.muted} className="h-5 w-5" />
+          </button>
+
+          <button
+            onClick={() => setShowSettings(true)}
+            aria-label={t.settings}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-void-700/80 bg-void-900/85 text-white/80 transition hover:border-ice-400/60 hover:text-ice-300 active:translate-y-0.5"
+          >
+            <IconGear className="h-5 w-5" />
+          </button>
+        </div>
       )}
 
       {/* ---- MENU ---- */}
@@ -362,26 +403,26 @@ export default function App() {
                   </h1>
 
                   <p className="mt-3 text-xs sm:text-sm font-semibold tracking-wide text-white/70">
-                    Sling comet cores &bull; Shatter crystal lattices &bull; Chain orbital combos across 15 handcrafted sectors.
+                    {t.tagline}
                   </p>
                 </div>
 
                 {/* Campaign Progress Stats Bar */}
                 <div className="grid grid-cols-3 gap-2 rounded-2xl border border-void-700/80 bg-void-900/80 p-3 shadow-inner">
                   <div className="flex flex-col items-center text-center">
-                    <span className="text-[10px] font-bold tracking-wider text-white/40">CAMPAIGN STARS</span>
+                    <span className="text-[10px] font-bold tracking-wider text-white/40">{t.campaignStars}</span>
                     <span className="font-display text-sm sm:text-base text-amber-300">
                       ★ {totalCampaignStars} <span className="text-[10px] text-white/40">/ {MAX_POSSIBLE_STARS}</span>
                     </span>
                   </div>
                   <div className="flex flex-col items-center border-x border-void-800 text-center">
-                    <span className="text-[10px] font-bold tracking-wider text-white/40">BEST RUN</span>
+                    <span className="text-[10px] font-bold tracking-wider text-white/40">{t.bestRun}</span>
                     <span className="font-display text-sm sm:text-base text-ember-400">
                       {ui.best > 0 ? ui.best.toLocaleString("en-US") : "0"}
                     </span>
                   </div>
                   <div className="flex flex-col items-center text-center">
-                    <span className="text-[10px] font-bold tracking-wider text-white/40">SECTORS WON</span>
+                    <span className="text-[10px] font-bold tracking-wider text-white/40">{t.sectorsWon}</span>
                     <span className="font-display text-sm sm:text-base text-ice-300">
                       {clearedSectorsCount} <span className="text-[10px] text-white/40">/ 15</span>
                     </span>
@@ -389,23 +430,33 @@ export default function App() {
                 </div>
 
                 {/* Primary Launch Actions */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2.5">
                   <ChunkBtn
                     primary
                     onClick={() => eng()?.play()}
                     className="w-full py-3.5 text-lg shadow-[0_6px_0_#8f2f0c,0_12px_28px_rgba(255,110,30,0.4)]"
                     icon={<IconPlay className="h-5 w-5" />}
                   >
-                    Play Campaign
+                    {t.playCampaign}
                   </ChunkBtn>
 
-                  <ChunkBtn
-                    onClick={() => eng()?.openRoadmap()}
-                    className="w-full py-3 text-base"
-                    icon={<IconMap className="h-4.5 w-4.5" />}
-                  >
-                    Cosmic Roadmap (15 Levels)
-                  </ChunkBtn>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <ChunkBtn
+                      onClick={() => eng()?.openRoadmap()}
+                      className="py-2.5 text-sm"
+                      icon={<IconMap className="h-4 w-4" />}
+                    >
+                      {t.cosmicRoadmap}
+                    </ChunkBtn>
+
+                    <ChunkBtn
+                      onClick={() => setShowSettings(true)}
+                      className="py-2.5 text-sm"
+                      icon={<IconGear className="h-4 w-4" />}
+                    >
+                      {t.settings}
+                    </ChunkBtn>
+                  </div>
                 </div>
               </div>
 
@@ -413,16 +464,16 @@ export default function App() {
               <div className="flex flex-col justify-between gap-4">
                 {/* High Scores Terminal */}
                 <div className="flex-1">
-                  <ScoreTable hs={ui.hs} />
+                  <ScoreTable hs={ui.hs} t={t} />
                 </div>
 
                 {/* Flight & Slingshot Controls Guide */}
                 <div className="rounded-xl border border-void-700/80 bg-void-950/80 p-3.5 shadow-md backdrop-blur-sm">
                   <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-[0.25em] text-ice-400/90">
-                    <span>FLIGHT &amp; SLINGSHOT CONTROLS</span>
-                    <span className="text-white/40">TACTICAL</span>
+                    <span>{t.controlsTitle}</span>
+                    <span className="text-white/40">{t.tactical}</span>
                   </div>
-                  <Controls />
+                  <Controls t={t} />
                 </div>
               </div>
             </div>
@@ -458,28 +509,33 @@ export default function App() {
       {ui.screen === "paused" && (
         <Overlay>
           <div className="animate-pop-in m-auto flex w-[min(92vw,22rem)] flex-col items-center rounded-2xl border-2 border-void-700 bg-void-900/95 p-6 shadow-[0_10px_0_rgba(0,0,0,0.45)]">
-            <h2 className="font-display text-3xl text-ice-400 [text-shadow:0_0_24px_rgba(46,230,201,0.5)]">PAUSED</h2>
+            <h2 className="font-display text-3xl text-ice-400 [text-shadow:0_0_24px_rgba(46,230,201,0.5)]">{t.paused}</h2>
             <p className="mt-1 text-xs font-bold tracking-[0.28em] text-white/50">
-              SCORE {ui.score.toLocaleString("en-US")} &middot; LV {ui.level}
+              {t.score} {ui.score.toLocaleString("en-US")} &middot; LV {ui.level}
             </p>
-            <div className="mt-5 flex w-full flex-col gap-3">
+            <div className="mt-5 flex w-full flex-col gap-2.5">
               <ChunkBtn primary onClick={() => eng()?.resume()} icon={<IconPlay className="h-4 w-4" />}>
-                Resume
+                {t.resume}
               </ChunkBtn>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 <ChunkBtn onClick={() => eng()?.restart()} icon={<IconRestart className="h-4 w-4" />}>
-                  Restart
+                  {t.restart}
                 </ChunkBtn>
                 <ChunkBtn onClick={() => eng()?.openRoadmap()} icon={<IconMap className="h-4 w-4" />}>
                   Roadmap
                 </ChunkBtn>
               </div>
-              <ChunkBtn onClick={() => eng()?.toMenu()} icon={<IconHome className="h-4 w-4" />}>
-                Menu
-              </ChunkBtn>
+              <div className="grid grid-cols-2 gap-2.5">
+                <ChunkBtn onClick={() => setShowSettings(true)} icon={<IconGear className="h-4 w-4" />}>
+                  {t.settings}
+                </ChunkBtn>
+                <ChunkBtn onClick={() => eng()?.toMenu()} icon={<IconHome className="h-4 w-4" />}>
+                  {t.menu}
+                </ChunkBtn>
+              </div>
             </div>
             <div className="mt-5">
-              <Controls compact />
+              <Controls compact t={t} />
             </div>
           </div>
         </Overlay>
@@ -490,40 +546,40 @@ export default function App() {
         <Overlay>
           <div className="animate-pop-in m-auto flex w-[min(94vw,26rem)] flex-col items-center rounded-2xl border-2 border-void-700 bg-void-900/95 p-6 shadow-[0_10px_0_rgba(0,0,0,0.45)]">
             <p className="text-[11px] font-bold tracking-[0.4em] text-rose-alert">CORES DEPLETED</p>
-            <h2 className="mt-1 font-display text-4xl text-ember-400 [text-shadow:0_0_28px_rgba(255,122,26,0.6)]">GAME OVER</h2>
+            <h2 className="mt-1 font-display text-4xl text-ember-400 [text-shadow:0_0_28px_rgba(255,122,26,0.6)]">{t.gameOver}</h2>
 
             <div className="mt-4 flex items-end gap-6">
               <div className="text-center">
-                <p className="text-[10px] font-bold tracking-[0.3em] text-white/50">SCORE</p>
+                <p className="text-[10px] font-bold tracking-[0.3em] text-white/50">{t.score}</p>
                 <p className="font-display text-4xl text-white [text-shadow:0_0_20px_rgba(255,160,46,0.5)]">
                   {ui.score.toLocaleString("en-US")}
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-[10px] font-bold tracking-[0.3em] text-white/50">LEVEL</p>
+                <p className="text-[10px] font-bold tracking-[0.3em] text-white/50">{t.level}</p>
                 <p className="font-display text-4xl text-ice-400">{ui.level}</p>
               </div>
               {ui.newBest && (
                 <div className="animate-shake-x mb-1 rounded-md border-2 border-ember-300 bg-ember-500/20 px-2.5 py-1 font-display text-xs text-ember-300">
-                  NEW BEST!
+                  {t.newBest}
                 </div>
               )}
             </div>
 
             <div className="mt-4 w-full">
-              <ScoreTable hs={ui.hs} highlight={{ s: ui.score, nb: ui.newBest }} />
+              <ScoreTable hs={ui.hs} highlight={{ s: ui.score, nb: ui.newBest }} t={t} />
             </div>
 
             <div className="mt-5 flex w-full flex-col gap-2.5">
               <ChunkBtn primary onClick={() => eng()?.restart()} className="w-full text-lg" icon={<IconRestart className="h-5 w-5" />}>
-                Sling Again
+                {t.restart}
               </ChunkBtn>
               <div className="grid grid-cols-2 gap-2.5">
                 <ChunkBtn onClick={() => eng()?.openRoadmap()} icon={<IconMap className="h-4 w-4" />}>
                   Roadmap
                 </ChunkBtn>
                 <ChunkBtn onClick={() => eng()?.toMenu()} icon={<IconHome className="h-4 w-4" />}>
-                  Menu
+                  {t.menu}
                 </ChunkBtn>
               </div>
             </div>
@@ -531,6 +587,20 @@ export default function App() {
               PRESS <span className="text-ember-300">R</span> FOR INSTANT RESTART
             </p>
           </div>
+        </Overlay>
+      )}
+
+      {/* ---- SETTINGS MODAL ---- */}
+      {showSettings && (
+        <Overlay dim={true}>
+          <SettingsModal
+            onClose={() => setShowSettings(false)}
+            onLanguageChange={(newLang) => setLang(newLang)}
+            onResetProgress={() => {
+              setRefreshKey((k) => k + 1);
+              eng()?.toMenu();
+            }}
+          />
         </Overlay>
       )}
     </div>
