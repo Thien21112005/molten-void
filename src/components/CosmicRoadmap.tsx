@@ -22,7 +22,7 @@ interface NodeCoord {
 }
 
 // 15 Level Nodes arranged horizontally from Left (Level 1) to Right (Level 15)
-// in a rolling cosmic wave / S-curve (width = 2540px, height = 520px)
+// in a rolling cosmic wave / S-curve (width = 2560px, height = 520px)
 const LEVEL_NODES: NodeCoord[] = [
   { id: 1, x: 140, y: 260 },   // Start Station (Left Center)
   { id: 2, x: 290, y: 370 },   // Dip down
@@ -84,7 +84,6 @@ export function CosmicRoadmap({
 
       // Add 3 decorative stepping stardust beads along each segment
       for (const t of [0.25, 0.5, 0.75]) {
-        // Cubic bezier interpolation formula
         const u = 1 - t;
         const tt = t * t;
         const uu = u * u;
@@ -130,31 +129,45 @@ export function CosmicRoadmap({
     }
   };
 
-  // Mouse Drag-to-Scroll Handlers (Horizontal)
+  // Immediate, buttery-smooth mouse drag with window event listeners
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
+    e.preventDefault(); // Stop native drag ghosting & text selection
     setIsDragging(true);
     setHasDragged(false);
     setDragStartX(e.clientX);
     setScrollStartX(containerRef.current?.scrollLeft || 0);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !containerRef.current) return;
-    const deltaX = e.clientX - dragStartX;
-    if (Math.abs(deltaX) > 5) {
-      setHasDragged(true);
-    }
-    containerRef.current.scrollLeft = scrollStartX - deltaX;
-  };
+  useEffect(() => {
+    if (!isDragging) return;
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const deltaX = e.clientX - dragStartX;
+      if (Math.abs(deltaX) > 4) {
+        setHasDragged(true);
+      }
+      containerRef.current.scrollLeft = scrollStartX - deltaX;
+    };
 
-  // Touch Drag Handlers for Mobile
+    const handleWindowMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener("mousemove", handleWindowMouseMove);
+    window.addEventListener("mouseup", handleWindowMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleWindowMouseMove);
+      window.removeEventListener("mouseup", handleWindowMouseUp);
+    };
+  }, [isDragging, dragStartX, scrollStartX]);
+
+  // Mobile Touch Drag Handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
+    setIsDragging(true);
     setDragStartX(touch.clientX);
     setScrollStartX(containerRef.current?.scrollLeft || 0);
     setHasDragged(false);
@@ -164,10 +177,14 @@ export function CosmicRoadmap({
     if (!containerRef.current) return;
     const touch = e.touches[0];
     const deltaX = touch.clientX - dragStartX;
-    if (Math.abs(deltaX) > 6) {
+    if (Math.abs(deltaX) > 4) {
       setHasDragged(true);
     }
     containerRef.current.scrollLeft = scrollStartX - deltaX;
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
   };
 
   return (
@@ -208,14 +225,12 @@ export function CosmicRoadmap({
       <div
         ref={containerRef}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         className={cn(
-          "relative flex-1 select-none overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-thin scrollbar-thumb-void-700/60",
-          isDragging ? "cursor-grabbing" : "cursor-grab",
+          "relative flex-1 select-none overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-void-700/60",
+          isDragging ? "cursor-grabbing select-none" : "cursor-grab scroll-smooth",
         )}
       >
         {/* Full Width Map Space Canvas */}
@@ -225,12 +240,217 @@ export function CosmicRoadmap({
         >
           {/* Cosmic Nebula Cloud Backgrounds */}
           <div className="pointer-events-none absolute inset-0 opacity-40">
-            <div className="absolute top-[20%] left-[8%] h-64 w-80 rounded-full bg-amber-500/15 blur-3xl" />
-            <div className="absolute top-[40%] left-[40%] h-72 w-96 rounded-full bg-cyan-500/15 blur-3xl" />
-            <div className="absolute top-[15%] left-[75%] h-64 w-80 rounded-full bg-violet-600/15 blur-3xl" />
+            <div className="absolute top-[18%] left-[6%] h-72 w-88 rounded-full bg-amber-500/15 blur-3xl" />
+            <div className="absolute top-[38%] left-[38%] h-80 w-96 rounded-full bg-cyan-500/15 blur-3xl" />
+            <div className="absolute top-[14%] left-[68%] h-72 w-96 rounded-full bg-violet-600/15 blur-3xl" />
+            <div className="absolute top-[28%] left-[88%] h-80 w-80 rounded-full bg-rose-600/15 blur-3xl" />
           </div>
 
-          {/* SVG Radiant Cosmic Energy Road */}
+          {/* ================= RICH COSMIC DECORATIONS ================= */}
+
+          {/* 1. Gas Giant Planet (Saturn-like with glowing rings) */}
+          <div
+            className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+            style={{ left: "500px", top: "90px", animationDuration: "6s" }}
+          >
+            <svg width="130" height="96" viewBox="0 0 130 96">
+              <defs>
+                <radialGradient id="gasGiantGrad" cx="35%" cy="35%" r="65%">
+                  <stop offset="0%" stopColor="#c084fc" />
+                  <stop offset="40%" stopColor="#8b5cf6" />
+                  <stop offset="80%" stopColor="#312e81" />
+                  <stop offset="100%" stopColor="#0f0c29" />
+                </radialGradient>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(46,230,201,0)" />
+                  <stop offset="25%" stopColor="rgba(46,230,201,0.85)" />
+                  <stop offset="50%" stopColor="rgba(255,210,62,0.9)" />
+                  <stop offset="75%" stopColor="rgba(46,230,201,0.85)" />
+                  <stop offset="100%" stopColor="rgba(46,230,201,0)" />
+                </linearGradient>
+              </defs>
+              {/* Back half of ring */}
+              <ellipse cx="65" cy="50" rx="58" ry="15" fill="none" stroke="url(#ringGrad)" strokeWidth="6" transform="rotate(-18 65 50)" opacity="0.65" strokeDasharray="100 220" strokeDashoffset="45" />
+              {/* Planet sphere */}
+              <circle cx="65" cy="50" r="28" fill="url(#gasGiantGrad)" className="drop-shadow-[0_0_20px_rgba(139,92,246,0.55)]" />
+              {/* Surface bands */}
+              <ellipse cx="65" cy="48" rx="27.5" ry="13" fill="none" stroke="#e9d5ff" strokeWidth="1.5" opacity="0.25" />
+              <ellipse cx="65" cy="53" rx="27" ry="8" fill="none" stroke="#f472b6" strokeWidth="1.2" opacity="0.3" />
+              {/* Front half of ring */}
+              <ellipse cx="65" cy="50" rx="58" ry="15" fill="none" stroke="url(#ringGrad)" strokeWidth="6.5" transform="rotate(-18 65 50)" strokeDasharray="180 220" strokeDashoffset="150" />
+              <ellipse cx="65" cy="50" rx="50" ry="11" fill="none" stroke="#2ee6c9" strokeWidth="1.6" transform="rotate(-18 65 50)" opacity="0.45" />
+            </svg>
+            <span className="block text-center font-display text-[9px] tracking-widest text-purple-300/80 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]">
+              AETHON GAS GIANT
+            </span>
+          </div>
+
+          {/* 2. Recon Fighter Spaceship (Near Level 1-2) */}
+          <div
+            className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+            style={{ left: "220px", top: "120px", animationDelay: "1.2s", animationDuration: "5s" }}
+          >
+            <svg width="84" height="52" viewBox="0 0 84 52" className="drop-shadow-[0_0_18px_rgba(46,230,201,0.6)]">
+              <defs>
+                <linearGradient id="scoutHull" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#0f172a" />
+                  <stop offset="50%" stopColor="#334155" />
+                  <stop offset="100%" stopColor="#64748b" />
+                </linearGradient>
+                <linearGradient id="thrusterFire" x1="100%" y1="0%" x2="0%" y2="0%">
+                  <stop offset="0%" stopColor="#2ee6c9" />
+                  <stop offset="50%" stopColor="#38bdf8" />
+                  <stop offset="100%" stopColor="transparent" />
+                </linearGradient>
+              </defs>
+              {/* Thruster exhaust jet */}
+              <polygon points="22,26 2,22 0,26 2,30" fill="url(#thrusterFire)" />
+              {/* Wings */}
+              <polygon points="24,11 50,23 40,27 22,22" fill="#090d16" stroke="#2ee6c9" strokeWidth="1.5" />
+              <polygon points="24,41 50,29 40,25 22,30" fill="#090d16" stroke="#2ee6c9" strokeWidth="1.5" />
+              {/* Fuselage */}
+              <polygon points="22,22 72,26 22,30 18,26" fill="url(#scoutHull)" stroke="#94a3b8" strokeWidth="1.6" />
+              {/* Canopy */}
+              <polygon points="42,24 60,26 42,28" fill="#38bdf8" opacity="0.95" />
+              {/* Beacon lights */}
+              <circle cx="24" cy="11" r="2.2" fill="#ff4d6d" />
+              <circle cx="24" cy="41" r="2.2" fill="#2ee6c9" />
+            </svg>
+            <span className="block text-center font-display text-[8px] tracking-widest text-ice-400/90">
+              EXPEDITION SCOUT
+            </span>
+          </div>
+
+          {/* 3. Deep Space Orbital Relay Station (Above Level 7) */}
+          <div
+            className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+            style={{ left: "1100px", top: "85px", animationDelay: "2.4s", animationDuration: "5.5s" }}
+          >
+            <svg width="88" height="54" viewBox="0 0 88 54" className="drop-shadow-[0_0_16px_rgba(56,189,248,0.5)]">
+              {/* Left Solar Panel */}
+              <rect x="4" y="17" width="24" height="20" rx="2" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.4" />
+              <line x1="16" y1="17" x2="16" y2="37" stroke="#60a5fa" strokeWidth="1" />
+              <line x1="4" y1="27" x2="28" y2="27" stroke="#60a5fa" strokeWidth="1" />
+              {/* Center Core */}
+              <rect x="36" y="19" width="16" height="16" rx="3" fill="#cbd5e1" stroke="#334155" strokeWidth="1.8" />
+              {/* Radar Dish & Antenna */}
+              <path d="M44 19 L44 8 M37 10 Q44 4 51 10" fill="none" stroke="#ffd23e" strokeWidth="1.6" />
+              <circle cx="44" cy="6" r="1.8" fill="#ff4d6d" />
+              {/* Right Solar Panel */}
+              <rect x="60" y="17" width="24" height="20" rx="2" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.4" />
+              <line x1="72" y1="17" x2="72" y2="37" stroke="#60a5fa" strokeWidth="1" />
+              <line x1="60" y1="27" x2="84" y2="27" stroke="#60a5fa" strokeWidth="1" />
+              {/* Solar struts */}
+              <line x1="28" y1="27" x2="36" y2="27" stroke="#94a3b8" strokeWidth="2.4" />
+              <line x1="52" y1="27" x2="60" y2="27" stroke="#94a3b8" strokeWidth="2.4" />
+            </svg>
+            <span className="block text-center font-display text-[8px] tracking-wider text-cyan-300/80">
+              ORBITAL RELAY IX
+            </span>
+          </div>
+
+          {/* 4. Heavy Cruiser Exploration Ship (Between Level 8 & 10) */}
+          <div
+            className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+            style={{ left: "1420px", top: "190px", animationDelay: "0.8s", animationDuration: "6.2s" }}
+          >
+            <svg width="100" height="54" viewBox="0 0 100 54" className="drop-shadow-[0_0_22px_rgba(255,160,46,0.5)]">
+              <defs>
+                <linearGradient id="cruiserPlume" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="transparent" />
+                  <stop offset="60%" stopColor="#f05423" />
+                  <stop offset="100%" stopColor="#ffd23e" />
+                </linearGradient>
+              </defs>
+              {/* Twin Thrusters */}
+              <polygon points="14,19 2,17 0,19 2,21" fill="url(#cruiserPlume)" />
+              <polygon points="14,35 2,33 0,35 2,37" fill="url(#cruiserPlume)" />
+              {/* Cruiser Hull */}
+              <path d="M14 17 L36 12 L78 21 L94 27 L78 33 L36 42 L14 37 L20 27 Z" fill="#171230" stroke="#ffa02e" strokeWidth="1.8" />
+              <polygon points="40,18 72,23 72,31 40,36" fill="#241c46" stroke="#818cf8" strokeWidth="1" />
+              {/* Command Deck Bridge */}
+              <rect x="48" y="24" width="16" height="6" rx="2" fill="#38bdf8" />
+              {/* Plasma Array */}
+              <circle cx="78" cy="19" r="1.8" fill="#f43f5e" />
+              <circle cx="78" cy="35" r="1.8" fill="#f43f5e" />
+            </svg>
+            <span className="block text-center font-display text-[8px] tracking-wider text-ember-400/90 drop-shadow-[0_0_6px_rgba(255,160,46,0.6)]">
+              VOID CRUISER V-II
+            </span>
+          </div>
+
+          {/* 5. Cratered Volcanic Moon (Beneath Level 5-6 Summit) */}
+          <div
+            className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+            style={{ left: "800px", top: "420px", animationDelay: "1.8s", animationDuration: "5.8s" }}
+          >
+            <svg width="76" height="76" viewBox="0 0 76 76">
+              <defs>
+                <radialGradient id="moonGrad" cx="35%" cy="35%" r="65%">
+                  <stop offset="0%" stopColor="#f8fafc" />
+                  <stop offset="45%" stopColor="#94a3b8" />
+                  <stop offset="85%" stopColor="#334155" />
+                  <stop offset="100%" stopColor="#0f172a" />
+                </radialGradient>
+              </defs>
+              <circle cx="38" cy="38" r="28" fill="url(#moonGrad)" className="drop-shadow-[0_0_18px_rgba(148,163,184,0.45)]" />
+              {/* Craters */}
+              <ellipse cx="28" cy="28" rx="6" ry="4.5" fill="#475569" stroke="#1e293b" strokeWidth="1" opacity="0.85" />
+              <ellipse cx="48" cy="35" rx="7.5" ry="6" fill="#475569" stroke="#1e293b" strokeWidth="1" opacity="0.8" />
+              <ellipse cx="34" cy="48" rx="4.5" ry="3.5" fill="#475569" stroke="#1e293b" strokeWidth="0.8" opacity="0.75" />
+              <circle cx="24" cy="44" r="2.5" fill="#334155" opacity="0.6" />
+              <circle cx="46" cy="20" r="2.8" fill="#334155" opacity="0.6" />
+            </svg>
+            <span className="block text-center font-display text-[8px] tracking-wider text-slate-400/80">
+              LUNA PRIME
+            </span>
+          </div>
+
+          {/* 6. Molten Void Accretion Disk / Singularity Core (Near Level 15) */}
+          <div
+            className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+            style={{ left: "2480px", top: "115px", animationDelay: "0.5s", animationDuration: "7s" }}
+          >
+            <svg width="130" height="130" viewBox="0 0 130 130" className="drop-shadow-[0_0_40px_rgba(255,122,26,0.9)]">
+              {/* Swirling accretion disk rings */}
+              <ellipse cx="65" cy="65" rx="58" ry="25" fill="none" stroke="#ff7a1a" strokeWidth="4.5" transform="rotate(-25 65 65)" opacity="0.85" />
+              <ellipse cx="65" cy="65" rx="47" ry="17" fill="none" stroke="#ffd23e" strokeWidth="2.8" transform="rotate(-25 65 65)" opacity="0.9" />
+              {/* Event Horizon Dark Core */}
+              <circle cx="65" cy="65" r="24" fill="#000000" stroke="#ff4d6d" strokeWidth="2.4" />
+              <circle cx="65" cy="65" r="29" fill="none" stroke="#ffa02e" strokeWidth="1.2" opacity="0.6" />
+            </svg>
+            <span className="block text-center font-display text-[9px] font-bold tracking-widest text-ember-300 drop-shadow-[0_0_10px_rgba(255,160,46,0.9)]">
+              SINGULARITY CORE
+            </span>
+          </div>
+
+          {/* 7. Asteroid Clusters */}
+          {/* Cluster A (Near Level 2-3) */}
+          <div className="pointer-events-none absolute" style={{ left: "360px", top: "190px" }}>
+            <svg width="48" height="48" viewBox="0 0 48 48" className="opacity-80">
+              <polygon points="12,4 24,10 20,22 8,18 4,10" fill="#334155" stroke="#64748b" strokeWidth="1.2" />
+              <polygon points="32,24 44,28 40,40 28,38 24,30" fill="#1e293b" stroke="#475569" strokeWidth="1" />
+              <polygon points="10,34 18,36 16,44 8,42" fill="#475569" stroke="#64748b" strokeWidth="0.8" />
+            </svg>
+          </div>
+
+          {/* Cluster B (Near Level 11-12) */}
+          <div className="pointer-events-none absolute" style={{ left: "1720px", top: "420px" }}>
+            <svg width="52" height="48" viewBox="0 0 52 48" className="opacity-80">
+              <polygon points="16,6 30,12 26,26 12,22 6,12" fill="#1e1b4b" stroke="#818cf8" strokeWidth="1.2" />
+              <polygon points="36,28 48,32 44,44 32,42 28,34" fill="#312e81" stroke="#a78bfa" strokeWidth="1" />
+            </svg>
+          </div>
+
+          {/* Cluster C (Near Level 13-14) */}
+          <div className="pointer-events-none absolute" style={{ left: "2160px", top: "110px" }}>
+            <svg width="44" height="44" viewBox="0 0 44 44" className="opacity-75">
+              <polygon points="10,4 22,8 18,20 6,16 2,8" fill="#241c46" stroke="#c084fc" strokeWidth="1.2" />
+              <polygon points="26,24 38,26 34,36 24,34 20,28" fill="#171230" stroke="#7c3aed" strokeWidth="1" />
+            </svg>
+          </div>
+
+          {/* ================= SVG RADIANT COSMIC ENERGY ROAD ================= */}
           <svg
             className="pointer-events-none absolute inset-0"
             width={MAP_WIDTH}
@@ -291,7 +511,7 @@ export function CosmicRoadmap({
               strokeWidth="10"
               strokeLinecap="round"
               strokeLinejoin="round"
-              opacity="0.8"
+              opacity="0.85"
             />
 
             {/* 5. Center pulsating celestial dashed guidance line */}
@@ -325,14 +545,14 @@ export function CosmicRoadmap({
                     fill="none"
                     stroke="#2ee6c9"
                     strokeWidth="1"
-                    opacity="0.3"
+                    opacity="0.35"
                   />
                 )}
               </g>
             ))}
           </svg>
 
-          {/* Floating Space Crystals & Asteroids along the wave */}
+          {/* Floating Space Crystals along the wave */}
           <div className="pointer-events-none absolute inset-0">
             {LEVEL_NODES.map((node, i) => {
               if (i % 2 !== 0) return null;
@@ -364,7 +584,7 @@ export function CosmicRoadmap({
             })}
           </div>
 
-          {/* 15 Level Station Nodes */}
+          {/* ================= 15 LEVEL STATION NODES ================= */}
           {LEVEL_NODES.map((pos) => {
             const level = LEVELS.find((l) => l.id === pos.id)!;
             const unlocked = isLevelUnlocked(progress, level.id);
