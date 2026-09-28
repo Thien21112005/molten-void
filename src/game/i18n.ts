@@ -46,6 +46,10 @@ export interface Translations {
   audioCategory: string;
   masterSound: string;
   musicVolume: string;
+  musicTrackLabel: string;
+  musicTrackArmageddon: string;
+  musicTrackSynth: string;
+  nowPlayingArmageddon: string;
   sfxVolume: string;
   gameplayCategory: string;
   screenShake: string;
@@ -118,6 +122,10 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     audioCategory: "Âm Thanh & Nhạc Nền",
     masterSound: "Âm Thanh Tổng",
     musicVolume: "Nhạc Nền Không Gian (BGM)",
+    musicTrackLabel: "Bản Nhạc Nền (BGM)",
+    musicTrackArmageddon: "Armageddon (Alibi Music)",
+    musicTrackSynth: "Procedural Synth",
+    nowPlayingArmageddon: "Đang phát: Epic Battle: Armageddon — Alibi Music",
     sfxVolume: "Hiệu Ứng Âm Thanh (SFX)",
     gameplayCategory: "Hình Ảnh & Hiệu Năng",
     screenShake: "Rung Chấn Màn Hình (Screen Shake)",
@@ -187,6 +195,10 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     audioCategory: "Audio & Music",
     masterSound: "Master Audio",
     musicVolume: "Cosmic Music (BGM)",
+    musicTrackLabel: "BGM Soundtrack",
+    musicTrackArmageddon: "Armageddon (Alibi Music)",
+    musicTrackSynth: "Procedural Synth",
+    nowPlayingArmageddon: "Now Playing: Epic Battle: Armageddon — Alibi Music",
     sfxVolume: "Sound Effects (SFX)",
     gameplayCategory: "Graphics & Performance",
     screenShake: "Screen Shake",

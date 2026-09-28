@@ -3,6 +3,14 @@
 type OscType = OscillatorType;
 
 export type MusicMode = "ambient" | "battle" | "off";
+export type MusicTrack = "armageddon" | "synth";
+
+function getAudioUrl(filename: string): string {
+  const meta = import.meta as unknown as { env?: { BASE_URL?: string } };
+  const base = meta?.env?.BASE_URL || "./";
+  const cleanBase = base.endsWith("/") ? base : base + "/";
+  return `${cleanBase}audio/${filename}`;
+}
 
 // Chord definitions in Hz for 8-bar Dark Heroic progression (D minor root)
 interface ChordHarmonics {
@@ -41,8 +49,12 @@ export class SoundEngine {
   muted = false;
   sfxVolume = 0.8;
   musicVolume = 0.6;
+  musicTrack: MusicTrack = "armageddon";
 
-  // Music sequencer state
+  // Native HTML5 background audio (Armageddon - Alibi Music)
+  private bgmAudio: HTMLAudioElement | null = null;
+
+  // Music sequencer state (procedural synth backup)
   private musicMode: MusicMode = "ambient";
   private isSequencerRunning = false;
   private timerId: number | null = null;
@@ -58,6 +70,10 @@ export class SoundEngine {
       if (savedSfx !== null) this.sfxVolume = Math.max(0, Math.min(1, parseFloat(savedSfx)));
       const savedMusic = localStorage.getItem("mv_music_vol");
       if (savedMusic !== null) this.musicVolume = Math.max(0, Math.min(1, parseFloat(savedMusic)));
+      const savedTrack = localStorage.getItem("mv_music_track") as MusicTrack | null;
+      if (savedTrack === "armageddon" || savedTrack === "synth") {
+        this.musicTrack = savedTrack;
+      }
     } catch {
       /* ignore storage errors */
     }
@@ -69,38 +85,41 @@ export class SoundEngine {
       const AC: typeof AudioContext | undefined =
         window.AudioContext ||
         (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (!AC) return;
+      if (AC) {
+        this.ctx = new AC();
 
-      this.ctx = new AC();
+        // Master output node
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = this.muted ? 0 : 1.0;
+        this.masterGain.connect(this.ctx.destination);
 
-      // Master output node
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = this.muted ? 0 : 1.0;
-      this.masterGain.connect(this.ctx.destination);
+        // Separate SFX channel
+        this.sfxGain = this.ctx.createGain();
+        this.sfxGain.gain.value = this.sfxVolume * 0.75;
+        this.sfxGain.connect(this.masterGain);
 
-      // Separate SFX channel
-      this.sfxGain = this.ctx.createGain();
-      this.sfxGain.gain.value = this.sfxVolume * 0.75;
-      this.sfxGain.connect(this.masterGain);
+        // Separate BGM channel
+        this.musicGain = this.ctx.createGain();
+        this.musicGain.gain.value = this.musicVolume * 0.42;
+        this.musicGain.connect(this.masterGain);
 
-      // Separate BGM channel
-      this.musicGain = this.ctx.createGain();
-      this.musicGain.gain.value = this.musicVolume * 0.42;
-      this.musicGain.connect(this.masterGain);
+        // Noise buffer for percussion and energy whooshes
+        const len = this.ctx.sampleRate;
+        this.noiseBuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+        const d = this.noiseBuf.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
 
-      // Noise buffer for percussion and energy whooshes
-      const len = this.ctx.sampleRate;
-      this.noiseBuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
-      const d = this.noiseBuf.getChannelData(0);
-      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-
-      // Start music sequencer clock
-      this.startMusicSequencer();
+        // Start music sequencer clock for procedural synth
+        this.startMusicSequencer();
+      }
     }
 
-    if (this.ctx.state === "suspended") {
+    if (this.ctx && this.ctx.state === "suspended") {
       void this.ctx.resume();
     }
+
+    // Trigger BGM track playback
+    this.updateMusicPlayback();
   }
 
   /* ================= VOLUME & CHANNELS ================= */
@@ -115,6 +134,10 @@ export class SoundEngine {
     if (this.ctx && this.masterGain) {
       this.masterGain.gain.setTargetAtTime(m ? 0 : 1.0, this.ctx.currentTime, 0.02);
     }
+    if (this.bgmAudio) {
+      this.bgmAudio.muted = m;
+    }
+    this.updateMusicPlayback();
   }
 
   setSfxVolume(vol: number) {
@@ -139,10 +162,92 @@ export class SoundEngine {
     if (this.ctx && this.musicGain) {
       this.musicGain.gain.setTargetAtTime(this.musicVolume * 0.42, this.ctx.currentTime, 0.02);
     }
+    if (this.bgmAudio) {
+      this.bgmAudio.volume = this.getCalculatedBgmVolume();
+    }
+    this.updateMusicPlayback();
   }
 
   setMusicMode(mode: MusicMode) {
     this.musicMode = mode;
+    this.updateMusicPlayback();
+  }
+
+  setMusicTrack(track: MusicTrack) {
+    this.musicTrack = track;
+    try {
+      localStorage.setItem("mv_music_track", track);
+    } catch {
+      /* ignore */
+    }
+    this.updateMusicPlayback();
+  }
+
+  /* ================= NATIVE BGM TRACK MANAGEMENT ================= */
+
+  private initBgmAudio() {
+    if (this.bgmAudio || typeof document === "undefined") return;
+
+    const audioEl = document.createElement("audio");
+    audioEl.loop = true;
+    audioEl.preload = "auto";
+
+    // Detect browser opus/webm support; fallback to AAC/m4a
+    const canPlayWebm = audioEl.canPlayType && audioEl.canPlayType("audio/webm; codecs=opus").replace(/no/, "");
+    const primaryFile = canPlayWebm ? "bgm-armageddon.webm" : "bgm-armageddon.m4a";
+    const fallbackFile = canPlayWebm ? "bgm-armageddon.m4a" : "bgm-armageddon.webm";
+
+    audioEl.src = getAudioUrl(primaryFile);
+
+    audioEl.addEventListener("error", () => {
+      if (!audioEl.src.endsWith(fallbackFile)) {
+        audioEl.src = getAudioUrl(fallbackFile);
+        if (this.musicMode !== "off" && !this.muted && this.musicTrack === "armageddon") {
+          void audioEl.play().catch(() => {});
+        }
+      }
+    });
+
+    audioEl.volume = this.getCalculatedBgmVolume();
+    audioEl.muted = this.muted;
+    this.bgmAudio = audioEl;
+  }
+
+  private getCalculatedBgmVolume(): number {
+    if (this.muted || this.musicMode === "off") return 0;
+    // Battle mode (high intensity during shot aiming & flying): 75%
+    // Ambient mode (menus, pause, victory, roadmap): 42%
+    const factor = this.musicMode === "battle" ? 0.75 : 0.42;
+    return Math.max(0, Math.min(1, this.musicVolume * factor));
+  }
+
+  updateMusicPlayback() {
+    if (this.musicTrack === "armageddon") {
+      this.initBgmAudio();
+      if (!this.bgmAudio) return;
+
+      if (this.muted || this.musicMode === "off" || this.musicVolume <= 0.001) {
+        if (!this.bgmAudio.paused) {
+          this.bgmAudio.pause();
+        }
+      } else {
+        this.bgmAudio.muted = false;
+        this.bgmAudio.volume = this.getCalculatedBgmVolume();
+        if (this.bgmAudio.paused) {
+          const p = this.bgmAudio.play();
+          if (p !== undefined) {
+            p.catch(() => {
+              // Browser autoplay policy requires user interaction before playback
+            });
+          }
+        }
+      }
+    } else {
+      // Procedural Synth selected: pause HTML5 audio
+      if (this.bgmAudio && !this.bgmAudio.paused) {
+        this.bgmAudio.pause();
+      }
+    }
   }
 
   /* ================= PROCEDURAL MUSIC SEQUENCER ================= */
@@ -169,13 +274,17 @@ export class SoundEngine {
 
   destroy() {
     this.stopMusicSequencer();
+    if (this.bgmAudio) {
+      this.bgmAudio.pause();
+      this.bgmAudio = null;
+    }
     if (this.ctx && this.ctx.state !== "closed") {
       void this.ctx.close();
     }
   }
 
   private onSequencerTick() {
-    if (!this.ctx || !this.isSequencerRunning || this.musicMode === "off") return;
+    if (!this.ctx || !this.isSequencerRunning || this.musicMode === "off" || this.musicTrack !== "synth") return;
 
     while (this.nextStepTime < this.ctx.currentTime + this.scheduleLookahead) {
       this.scheduleMusicStep(this.currentStep, this.nextStepTime);
@@ -447,3 +556,17 @@ export class SoundEngine {
 
 export const sfx = new SoundEngine();
 export const audio = sfx;
+
+// Global first user-gesture unlock to overcome browser autoplay restrictions
+if (typeof window !== "undefined") {
+  const onFirstGesture = () => {
+    audio.ensure();
+    window.removeEventListener("pointerdown", onFirstGesture);
+    window.removeEventListener("keydown", onFirstGesture);
+    window.removeEventListener("touchstart", onFirstGesture);
+  };
+  window.addEventListener("pointerdown", onFirstGesture, { passive: true });
+  window.addEventListener("keydown", onFirstGesture, { passive: true });
+  window.addEventListener("touchstart", onFirstGesture, { passive: true });
+}
+

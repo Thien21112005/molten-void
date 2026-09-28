@@ -1,4 +1,4 @@
-import { audio } from "./audio";
+import { audio, type MusicTrack } from "./audio";
 import { loadLanguage, saveLanguage, type Language } from "./i18n";
 
 export interface GameSettings {
@@ -6,6 +6,7 @@ export interface GameSettings {
   muted: boolean;
   musicVolume: number;
   sfxVolume: number;
+  musicTrack: MusicTrack;
   screenShake: boolean;
   particleDensity: "full" | "reduced";
   trajectoryGuide: "full" | "minimal";
@@ -20,6 +21,7 @@ export function loadSettings(): GameSettings {
     muted: audio.muted,
     musicVolume: audio.musicVolume,
     sfxVolume: audio.sfxVolume,
+    musicTrack: audio.musicTrack,
     screenShake: true,
     particleDensity: "full",
     trajectoryGuide: "full",
@@ -34,6 +36,7 @@ export function loadSettings(): GameSettings {
       muted: typeof data.muted === "boolean" ? data.muted : def.muted,
       musicVolume: typeof data.musicVolume === "number" ? data.musicVolume : def.musicVolume,
       sfxVolume: typeof data.sfxVolume === "number" ? data.sfxVolume : def.sfxVolume,
+      musicTrack: data.musicTrack === "synth" ? "synth" : "armageddon",
       screenShake: typeof data.screenShake === "boolean" ? data.screenShake : def.screenShake,
       particleDensity: data.particleDensity === "reduced" ? "reduced" : "full",
       trajectoryGuide: data.trajectoryGuide === "minimal" ? "minimal" : "full",
@@ -56,5 +59,7 @@ export function applySettings(settings: GameSettings) {
   audio.setMuted(settings.muted);
   audio.setMusicVolume(settings.musicVolume);
   audio.setSfxVolume(settings.sfxVolume);
+  audio.setMusicTrack(settings.musicTrack);
   saveSettings(settings);
 }
+

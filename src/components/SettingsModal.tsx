@@ -39,6 +39,7 @@ export function SettingsModal({
   };
 
   const handleMuteToggle = () => {
+    audio.ensure();
     audio.click();
     updateSetting("muted", !settings.muted);
   };
@@ -172,6 +173,64 @@ export function SettingsModal({
                 disabled={settings.muted}
                 className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-void-950 accent-ember-400 disabled:opacity-40"
               />
+
+              {/* BGM Track Selection */}
+              <div className="mt-3">
+                <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-wider text-ice-400/80 uppercase">
+                  <span>{t.musicTrackLabel}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      audio.ensure();
+                      audio.click();
+                      updateSetting("musicTrack", "armageddon");
+                    }}
+                    className={cn(
+                      "flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition active:scale-95 cursor-pointer",
+                      settings.musicTrack === "armageddon"
+                        ? "border-ember-400 bg-ember-500/20 text-ember-300 shadow-[0_0_14px_rgba(255,122,26,0.3)] ring-1 ring-ember-400/40"
+                        : "border-void-700 bg-void-800/70 text-white/60 hover:bg-void-800 hover:text-white",
+                    )}
+                  >
+                    <span className="text-xs font-bold leading-tight flex items-center gap-1.5">
+                      ⚔️ {t.musicTrackArmageddon}
+                    </span>
+                    <span className="text-[10px] text-white/50 mt-1">Alibi Music &bull; Epic Battle</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      audio.ensure();
+                      audio.click();
+                      updateSetting("musicTrack", "synth");
+                    }}
+                    className={cn(
+                      "flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition active:scale-95 cursor-pointer",
+                      settings.musicTrack === "synth"
+                        ? "border-ember-400 bg-ember-500/20 text-ember-300 shadow-[0_0_14px_rgba(255,122,26,0.3)] ring-1 ring-ember-400/40"
+                        : "border-void-700 bg-void-800/70 text-white/60 hover:bg-void-800 hover:text-white",
+                    )}
+                  >
+                    <span className="text-xs font-bold leading-tight flex items-center gap-1.5">
+                      🌌 {t.musicTrackSynth}
+                    </span>
+                    <span className="text-[10px] text-white/50 mt-1">WebAudio Synth &bull; 122 BPM</span>
+                  </button>
+                </div>
+
+                {settings.musicTrack === "armageddon" && !settings.muted && (
+                  <div className="mt-2.5 flex items-center gap-2 rounded-xl border border-ember-500/30 bg-ember-500/10 px-3 py-2 text-[11px] font-semibold text-ember-300 shadow-inner">
+                    <span className="relative flex h-2 w-2 flex-shrink-0">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ember-400 opacity-75"></span>
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-ember-500"></span>
+                    </span>
+                    <span className="truncate">{t.nowPlayingArmageddon}</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* SFX Volume */}
