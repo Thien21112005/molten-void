@@ -302,36 +302,40 @@ export default function App() {
 
       {/* ---- MENU ---- */}
       {ui.screen === "menu" && (
-        <Overlay dim={false}>
-          <div className="animate-rise-in m-auto flex w-[min(94vw,27rem)] flex-col items-center">
-            <p className="mb-1 text-[11px] font-bold tracking-[0.5em] text-ice-400/90">A PHYSICS SLINGSHOT PUZZLER</p>
-            <h1 className="animate-float-slow text-center font-display leading-[0.95]">
-              <span className="block text-5xl text-ember-400 [text-shadow:0_0_34px_rgba(255,122,26,0.65),0_4px_0_rgba(90,25,0,0.8)] sm:text-6xl">
-                MOLTEN
-              </span>
-              <span className="block text-5xl text-ice-400 [text-shadow:0_0_34px_rgba(46,230,201,0.6),0_4px_0_rgba(0,70,60,0.8)] sm:text-6xl">
-                VOID
-              </span>
-            </h1>
-            <p className="mt-3 text-center text-sm font-semibold tracking-wide text-white/70">
-              Sling comet cores. Shatter every crystal. Chain combos.
-            </p>
-
-            <ChunkBtn primary onClick={() => eng()?.play()} className="mt-6 w-56 text-xl" icon={<IconPlay className="h-5 w-5" />}>
-              Play
-            </ChunkBtn>
-
-            {ui.best > 0 && (
-              <p className="mt-3 text-xs font-bold tracking-[0.3em] text-ember-300/80">
-                BEST <span className="font-display text-sm text-ember-300">{ui.best.toLocaleString("en-US")}</span>
+        <Overlay dim={true}>
+          <div className="animate-rise-in m-auto flex w-[min(92vw,29rem)] flex-col items-center justify-center gap-4 sm:gap-5 py-6">
+            <div className="flex flex-col items-center text-center">
+              <p className="mb-2 text-[11px] font-bold tracking-[0.5em] text-ice-400/90">A PHYSICS SLINGSHOT PUZZLER</p>
+              <h1 className="animate-float-slow font-display leading-[0.95]">
+                <span className="block text-5xl text-ember-400 [text-shadow:0_0_34px_rgba(255,122,26,0.65),0_4px_0_rgba(90,25,0,0.8)] sm:text-6xl">
+                  MOLTEN
+                </span>
+                <span className="block text-5xl text-ice-400 [text-shadow:0_0_34px_rgba(46,230,201,0.6),0_4px_0_rgba(0,70,60,0.8)] sm:text-6xl">
+                  VOID
+                </span>
+              </h1>
+              <p className="mt-3 text-sm font-semibold tracking-wide text-white/70">
+                Sling comet cores. Shatter every crystal. Chain combos.
               </p>
-            )}
+            </div>
 
-            <div className="mt-4 w-full">
+            <div className="flex flex-col items-center gap-2">
+              <ChunkBtn primary onClick={() => eng()?.play()} className="w-56 text-xl" icon={<IconPlay className="h-5 w-5" />}>
+                Play
+              </ChunkBtn>
+
+              {ui.best > 0 && (
+                <p className="text-xs font-bold tracking-[0.3em] text-ember-300/80">
+                  BEST <span className="font-display text-sm text-ember-300">{ui.best.toLocaleString("en-US")}</span>
+                </p>
+              )}
+            </div>
+
+            <div className="w-full">
               <ScoreTable hs={ui.hs} />
             </div>
 
-            <div className="mt-4 w-full">
+            <div className="w-full rounded-xl border border-void-700/80 bg-void-950/75 p-3.5 backdrop-blur-sm">
               <Controls />
             </div>
           </div>
