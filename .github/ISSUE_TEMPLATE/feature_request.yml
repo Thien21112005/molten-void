@@ -1,0 +1,19 @@
+name: Feature Request
+description: Suggest an idea or new mechanic for Molten Void
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for suggesting an enhancement!
+  - type: textarea
+    id: feature
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of what you would like to see added.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation / Use Case
+      description: Why would this be a great addition to the game?

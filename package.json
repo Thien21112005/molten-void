@@ -1,0 +1,36 @@
+{
+  "name": "molten-void",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A polished physics slingshot puzzle web game built with React 19, TypeScript, Tailwind CSS v4, and HTML5 Canvas with procedural Web Audio synthesis.",
+  "author": "Thien21112005",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://thien21112005.github.io/molten-void",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Thien21112005/molten-void.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "clsx": "2.1.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "tailwind-merge": "3.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.1.17",
+    "@types/node": "22.19.17",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "5.1.1",
+    "tailwindcss": "4.1.17",
+    "typescript": "5.9.3",
+    "vite": "7.3.2",
+    "vite-plugin-singlefile": "2.3.0"
+  }
+}

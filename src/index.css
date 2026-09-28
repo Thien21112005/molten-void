@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Bungee", "Rajdhani", sans-serif;
+  --font-ui: "Rajdhani", sans-serif;
+
+  --color-void-950: #070510;
+  --color-void-900: #0d0a1c;
+  --color-void-800: #171230;
+  --color-void-700: #241c46;
+  --color-ember-300: #ffd23e;
+  --color-ember-400: #ffa02e;
+  --color-ember-500: #ff7a1a;
+  --color-ember-600: #f05423;
+  --color-ice-300: #7dfce7;
+  --color-ice-400: #2ee6c9;
+  --color-ice-500: #14b8a0;
+  --color-rose-alert: #ff4d6d;
+
+  --animate-float-slow: floaty 4.5s ease-in-out infinite;
+  --animate-pop-in: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-rise-in: riseIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pulse-soft: pulseSoft 1.6s ease-in-out infinite;
+  --animate-shake-x: shakeX 0.4s ease-in-out both;
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes popIn {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes riseIn {
+  0% {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes pulseSoft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+@keyframes shakeX {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--color-void-950);
+  color: #f4efe4;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+.game-root {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.kbd {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  padding: 4px 7px 5px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 210, 62, 0.35);
+  border-bottom-width: 3px;
+  background: #171230;
+  color: #ffd23e;
+  white-space: nowrap;
+}
+
+.btn-chunk {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  border-radius: 12px;
+  transition:
+    transform 0.07s ease,
+    box-shadow 0.07s ease,
+    filter 0.15s ease;
+}
+.btn-chunk:active {
+  transform: translateY(3px);
+}
