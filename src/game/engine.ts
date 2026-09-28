@@ -315,6 +315,11 @@ export class Engine {
     this.pullCur = this.ptrPos(e);
   };
 
+  private maxDragDistance(): number {
+    const minDim = Math.min(this.W, this.H);
+    return clamp(minDim * 0.22, 130, 190);
+  }
+
   private onPtrUp = (e: PointerEvent) => {
     if (this.aimMode !== "pull" || e.pointerId !== this.pointerId) return;
     this.aimMode = "none";
@@ -323,11 +328,11 @@ export class Engine {
     const dx = this.pullStart.x - this.pullCur.x;
     const dy = this.pullStart.y - this.pullCur.y;
     const len = Math.hypot(dx, dy);
-    if (len < 16) {
-      if (len > 6) sfx.cancel();
+    if (len < 10) {
+      if (len > 4) sfx.cancel();
       return;
     }
-    const power = clamp(len / (Math.min(this.W, this.H) * 0.55), 0, 1);
+    const power = clamp(len / this.maxDragDistance(), 0, 1);
     this.fire(Math.atan2(dy, dx), power);
   };
 
@@ -1398,9 +1403,9 @@ export class Engine {
       const dx = this.pullStart.x - this.pullCur.x;
       const dy = this.pullStart.y - this.pullCur.y;
       const len = Math.hypot(dx, dy);
-      if (len > 16) {
+      if (len > 10) {
         angle = Math.atan2(dy, dx);
-        power = clamp(len / (Math.min(this.W, this.H) * 0.55), 0, 1);
+        power = clamp(len / this.maxDragDistance(), 0, 1);
       }
     } else if (this.aimMode === "kb") {
       angle = this.kbAngle;
@@ -1444,11 +1449,12 @@ export class Engine {
       let ox = x;
       let oy = y;
       if (angle !== null && power > 0.02) {
-        const pull = 8 + power * (this.padR * 1.3);
+        const maxVisualPull = clamp(this.padR * 2.8, 55, 95);
+        const pull = 6 + power * maxVisualPull;
         ox = x - Math.cos(angle) * pull;
         oy = y - Math.sin(angle) * pull;
-        ctx.strokeStyle = "rgba(255,210,122,0.8)";
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(255,210,122,0.85)";
+        ctx.lineWidth = 3.5;
         ctx.beginPath();
         ctx.moveTo(x - Math.cos(angle + 1.3) * R, y - Math.sin(angle + 1.3) * R);
         ctx.lineTo(ox, oy);
