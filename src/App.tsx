@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Engine, type UIState, type HighScore } from "./game/engine";
 import { cn } from "./utils/cn";
+import { VictoryModal } from "./components/VictoryModal";
+import { RoadmapModal } from "./components/RoadmapModal";
 
 const initialUI: UIState = {
   screen: "menu",
@@ -17,6 +19,16 @@ const initialUI: UIState = {
 };
 
 /* ---------- inline SVG icons (no emoji) ---------- */
+
+function IconMap({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+      <line x1="8" y1="2" x2="8" y2="18" />
+      <line x1="16" y1="6" x2="16" y2="22" />
+    </svg>
+  );
+}
 
 function IconPause({ className }: { className?: string }) {
   return (
@@ -319,9 +331,13 @@ export default function App() {
               </p>
             </div>
 
-            <div className="flex flex-col items-center gap-2">
-              <ChunkBtn primary onClick={() => eng()?.play()} className="w-56 text-xl" icon={<IconPlay className="h-5 w-5" />}>
-                Play
+            <div className="flex flex-col items-center gap-2.5">
+              <ChunkBtn primary onClick={() => eng()?.play()} className="w-60 text-xl" icon={<IconPlay className="h-5 w-5" />}>
+                Play Campaign
+              </ChunkBtn>
+
+              <ChunkBtn onClick={() => eng()?.openRoadmap()} className="w-60 text-base" icon={<IconMap className="h-4 w-4" />}>
+                Select Level (1-15)
               </ChunkBtn>
 
               {ui.best > 0 && (
@@ -342,6 +358,30 @@ export default function App() {
         </Overlay>
       )}
 
+      {/* ---- ROADMAP ---- */}
+      {ui.screen === "roadmap" && (
+        <Overlay>
+          <RoadmapModal
+            currentLevel={ui.level}
+            onSelectLevel={(lvl) => eng()?.startLevel(lvl)}
+            onBackToMenu={() => eng()?.toMenu()}
+          />
+        </Overlay>
+      )}
+
+      {/* ---- VICTORY ---- */}
+      {ui.screen === "victory" && ui.victoryData && (
+        <Overlay>
+          <VictoryModal
+            data={ui.victoryData}
+            hasNextLevel={ui.victoryData.level < 15}
+            onNextLevel={() => eng()?.nextLevel()}
+            onRetry={() => eng()?.restart()}
+            onOpenRoadmap={() => eng()?.openRoadmap()}
+          />
+        </Overlay>
+      )}
+
       {/* ---- PAUSED ---- */}
       {ui.screen === "paused" && (
         <Overlay>
@@ -358,10 +398,13 @@ export default function App() {
                 <ChunkBtn onClick={() => eng()?.restart()} icon={<IconRestart className="h-4 w-4" />}>
                   Restart
                 </ChunkBtn>
-                <ChunkBtn onClick={() => eng()?.toMenu()} icon={<IconHome className="h-4 w-4" />}>
-                  Menu
+                <ChunkBtn onClick={() => eng()?.openRoadmap()} icon={<IconMap className="h-4 w-4" />}>
+                  Roadmap
                 </ChunkBtn>
               </div>
+              <ChunkBtn onClick={() => eng()?.toMenu()} icon={<IconHome className="h-4 w-4" />}>
+                Menu
+              </ChunkBtn>
             </div>
             <div className="mt-5">
               <Controls compact />
@@ -399,13 +442,18 @@ export default function App() {
               <ScoreTable hs={ui.hs} highlight={{ s: ui.score, nb: ui.newBest }} />
             </div>
 
-            <div className="mt-5 flex w-full flex-col gap-3">
+            <div className="mt-5 flex w-full flex-col gap-2.5">
               <ChunkBtn primary onClick={() => eng()?.restart()} className="w-full text-lg" icon={<IconRestart className="h-5 w-5" />}>
                 Sling Again
               </ChunkBtn>
-              <ChunkBtn onClick={() => eng()?.toMenu()} className="w-full" icon={<IconHome className="h-4 w-4" />}>
-                Main Menu
-              </ChunkBtn>
+              <div className="grid grid-cols-2 gap-2.5">
+                <ChunkBtn onClick={() => eng()?.openRoadmap()} icon={<IconMap className="h-4 w-4" />}>
+                  Roadmap
+                </ChunkBtn>
+                <ChunkBtn onClick={() => eng()?.toMenu()} icon={<IconHome className="h-4 w-4" />}>
+                  Menu
+                </ChunkBtn>
+              </div>
             </div>
             <p className="mt-3 text-[11px] font-semibold tracking-[0.2em] text-white/40">
               PRESS <span className="text-ember-300">R</span> FOR INSTANT RESTART

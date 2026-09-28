@@ -1,11 +1,31 @@
 import { sfx } from "./audio";
+import {
+  getLevelConfig,
+  saveLevelClear,
+  loadProgress,
+  getTotalStars,
+  TOTAL_LEVELS,
+  type PlayerProgress,
+} from "./levels";
 
-export type Screen = "menu" | "playing" | "paused" | "gameover";
+export type Screen = "menu" | "playing" | "paused" | "gameover" | "victory" | "roadmap";
 
 export interface HighScore {
   s: number;
   l: number;
   d: string;
+}
+
+export interface VictoryData {
+  level: number;
+  levelName: string;
+  stars: number;
+  score: number;
+  levelScore: number;
+  coresBonus: number;
+  isNewBestScore: boolean;
+  isNewBestStars: boolean;
+  totalStars: number;
 }
 
 export interface UIState {
@@ -20,6 +40,8 @@ export interface UIState {
   hs: HighScore[];
   muted: boolean;
   firstShot: boolean;
+  victoryData?: VictoryData;
+  progress?: PlayerProgress;
 }
 
 const HS_KEY = "mv_hs_v1";
@@ -130,6 +152,8 @@ export class Engine {
   private best = 0;
   private firstShot = false;
   private t = 0;
+  private levelScore = 0;
+  private victoryData: VictoryData | null = null;
 
   // world
   private gems: Gem[] = [];
@@ -160,7 +184,6 @@ export class Engine {
   private kbAimX = 0;
   private charging = false;
   private chargePow = 0;
-  private chargeDir = 1;
   private chargeBucket = -1;
 
   // statics (pre-rendered)
@@ -233,27 +256,48 @@ export class Engine {
 
   // ---------- public controls ----------
 
-  play() {
+  play(startLevel = 1) {
+    this.score = 0;
+    this.startLevel(startLevel);
+  }
+
+  startLevel(lvl: number) {
     sfx.ensure();
     sfx.click();
-    this.score = 0;
-    this.level = 1;
-    this.orbs = 3;
-    this.combo = 0;
-    this.newBest = false;
+    this.level = clamp(lvl, 1, TOTAL_LEVELS);
+    this.levelScore = 0;
     this.pending = null;
     this.particles.length = 0;
     this.texts.length = 0;
     this.orb = null;
     this.firstShot = false;
-    this.buildLevel(1);
-    this.banner(`LEVEL 1`, "SHATTER EVERY CRYSTAL");
+    this.victoryData = null;
+    this.buildLevel(this.level);
+    const cfg = getLevelConfig(this.level);
+    this.banner(`LEVEL ${this.level}`, cfg.name.toUpperCase());
     this.screen = "playing";
     this.pushUI();
   }
 
+  nextLevel() {
+    if (this.level < TOTAL_LEVELS) {
+      this.startLevel(this.level + 1);
+    } else {
+      this.openRoadmap();
+    }
+  }
+
   restart() {
-    this.play();
+    this.startLevel(this.level);
+  }
+
+  openRoadmap() {
+    sfx.ensure();
+    sfx.click();
+    this.screen = "roadmap";
+    this.aimMode = "none";
+    this.charging = false;
+    this.pushUI();
   }
 
   pause() {
@@ -279,6 +323,7 @@ export class Engine {
     this.orb = null;
     this.aimMode = "none";
     this.charging = false;
+    this.victoryData = null;
     this.buildLevel(1);
     this.pushUI();
   }
@@ -621,89 +666,46 @@ export class Engine {
     this.orb = null;
     this.combo = 0;
     this.pending = null;
+    this.firstShot = false;
 
-    const gemCount = Math.min(2 + n, 12);
-    const goldCount = n >= 3 ? 1 : 0;
+    const cfg = getLevelConfig(n);
+    this.orbs = cfg.parOrbs;
+    this.levelScore = 0;
 
-    const zone = this.landscape
-      ? { x0: W * 0.42, x1: W * 0.93, y0: H * 0.14, y1: H * 0.78 }
-      : { x0: W * 0.13, x1: W * 0.87, y0: H * 0.12, y1: H * 0.44 };
-
-    // blocks first (gems avoid them)
-    if (n >= 2) {
-      const count = Math.min(1 + Math.floor((n - 2) / 2), 4);
-      for (let i = 0; i < count; i++) {
-        for (let tries = 0; tries < 24; tries++) {
-          let b: Block;
-          if (this.landscape) {
-            const bw = clamp(Math.min(W, H) * 0.02, 10, 16);
-            const bh = rand(H * 0.16, H * 0.3);
-            b = {
-              x: rand(W * 0.38, W * 0.92 - bw),
-              y: rand(H * 0.18, H * 0.82 - bh),
-              w: bw,
-              h: bh,
-            };
-          } else {
-            const bh = clamp(Math.min(W, H) * 0.02, 10, 16);
-            const bw = rand(W * 0.18, W * 0.3);
-            b = {
-              x: rand(W * 0.06, W * 0.94 - bw),
-              y: rand(H * 0.47, H * 0.68 - bh),
-              w: bw,
-              h: bh,
-            };
-          }
-          const ok = this.blocks.every((o) => {
-            const sep = 30;
-            return b.x > o.x + o.w + sep || b.x + b.w < o.x - sep || b.y > o.y + o.h + sep || b.y + b.h < o.y - sep;
-          });
-          const farFromLauncher = Math.hypot(b.x + b.w / 2 - this.launcher.x, b.y + b.h / 2 - this.launcher.y) > Math.min(W, H) * 0.3;
-          if (ok && farFromLauncher) {
-            this.blocks.push(b);
-            break;
-          }
-        }
-      }
+    // Load handcrafted obstacles
+    for (const b of cfg.blocks) {
+      const bw = Math.max(12, b.rw * (this.landscape ? W : H));
+      const bh = Math.max(16, b.rh * H);
+      const bx = b.rx * W;
+      const by = b.ry * H;
+      this.blocks.push({
+        x: clamp(bx, 4, W - bw - 4),
+        y: clamp(by, 4, H - bh - 4),
+        w: bw,
+        h: bh,
+      });
     }
 
-    // gems
-    let placed = 0;
-    for (let i = 0; i < gemCount; i++) {
-      const r = this.gemR;
-      let x = 0;
-      let y = 0;
-      let good = false;
-      for (let tries = 0; tries < 260 && !good; tries++) {
-        x = rand(zone.x0, zone.x1);
-        y = rand(zone.y0, zone.y1);
-        const dLauncher = Math.hypot(x - this.launcher.x, y - this.launcher.y);
-        if (dLauncher < Math.min(W, H) * 0.42) continue;
-        let clash = false;
-        for (const o of this.gems) {
-          if (Math.hypot(x - o.x, y - o.y) < r * 2 + o.r * 2 + 10) {
-            clash = true;
-            break;
-          }
-        }
-        if (!clash)
-          for (const b of this.blocks) {
-            const cx = clamp(x, b.x - r, b.x + b.w + r);
-            const cy = clamp(y, b.y - r, b.y + b.h + r);
-            if (Math.hypot(x - cx, y - cy) < r + 6) {
-              clash = true;
-              break;
-            }
-          }
-        if (!clash) good = true;
-      }
-      this.gems.push({ x, y, r, kind: i >= gemCount - goldCount ? "gold" : "ice", phase: rand(0, TAU), dead: false });
-      placed++;
+    // Load handcrafted crystals
+    for (const g of cfg.gems) {
+      const gx = g.rx * W;
+      const gy = g.ry * H;
+      this.gems.push({
+        x: clamp(gx, this.gemR + 4, W - this.gemR - 4),
+        y: clamp(gy, this.gemR + 4, H - this.gemR - 4),
+        r: this.gemR,
+        kind: g.kind,
+        phase: rand(0, TAU),
+        dead: false,
+      });
     }
 
-    // default kb aim: angle toward zone center
-    this.kbAngle = Math.atan2((zone.y0 + zone.y1) / 2 - this.launcher.y, (zone.x0 + zone.x1) / 2 - this.launcher.x);
-    void placed;
+    // Default aim angle toward average crystal center
+    if (this.gems.length > 0) {
+      const avgX = this.gems.reduce((s, g) => s + g.x, 0) / this.gems.length;
+      const avgY = this.gems.reduce((s, g) => s + g.y, 0) / this.gems.length;
+      this.kbAngle = Math.atan2(avgY - this.launcher.y, avgX - this.launcher.x);
+    }
   }
 
   // ---------- game actions ----------
@@ -753,6 +755,7 @@ export class Engine {
     const gold = g.kind === "gold";
     const pts = (gold ? 500 : 100) * this.combo;
     this.score += pts;
+    this.levelScore += pts;
 
     if (gold) {
       if (this.orbs < MAX_ORBS) this.orbs++;
@@ -905,13 +908,41 @@ export class Engine {
   }
 
   private doLevelClear() {
-    const bonus = 200 + this.level * 50;
-    this.score += bonus;
-    if (this.orbs < MAX_ORBS) this.orbs++;
+    const cfg = getLevelConfig(this.level);
+    let stars = 1;
+    if (this.orbs >= cfg.star3MinOrbs) {
+      stars = 3;
+    } else if (this.orbs >= cfg.star2MinOrbs) {
+      stars = 2;
+    }
+
+    const coresBonus = this.orbs * 300;
+    this.score += coresBonus;
+    this.levelScore += coresBonus;
+
+    const { isNewBestScore, isNewBestStars } = saveLevelClear(
+      this.level,
+      stars,
+      this.levelScore,
+    );
+    const progress = loadProgress();
+
+    this.victoryData = {
+      level: this.level,
+      levelName: cfg.name,
+      stars,
+      score: this.score,
+      levelScore: this.levelScore,
+      coresBonus,
+      isNewBestScore,
+      isNewBestStars,
+      totalStars: getTotalStars(progress),
+    };
+
     this.flash = 0.55;
     this.shake = Math.min(26, this.shake + 5);
     sfx.levelClear();
-    this.banner(`LEVEL ${this.level} CLEAR`, `+${bonus}  ·  +1 CORE`);
+
     // confetti
     const cols = ["255,160,46", "46,230,201", "255,210,62", "255,255,255", "255,77,109"];
     for (let i = 0; i < 46; i++) {
@@ -933,7 +964,8 @@ export class Engine {
         drag: 0.4,
       });
     }
-    this.pending = { type: "next", t: 1.25 };
+
+    this.screen = "victory";
     this.pushUI();
   }
 
@@ -1572,6 +1604,8 @@ export class Engine {
       hs: this.hs,
       muted: sfx.muted,
       firstShot: this.firstShot,
+      victoryData: this.victoryData ?? undefined,
+      progress: loadProgress(),
     });
   }
 }
