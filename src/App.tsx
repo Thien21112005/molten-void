@@ -258,8 +258,9 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex flex-col items-end gap-1.5">
-            <div className="flex items-center gap-1.5 rounded-lg border border-void-700/80 bg-void-900/80 px-2.5 py-1.5">
+          <div className="pointer-events-auto flex flex-col items-end gap-2">
+            {/* Orbs Counter Pill */}
+            <div className="flex items-center gap-1.5 rounded-lg border border-void-700/80 bg-void-900/90 px-2.5 py-1.5 shadow-md">
               <IconCore className={cn("h-4 w-4", ui.orbs === 0 && "opacity-30 grayscale")} />
               {Array.from({ length: ui.orbs }).map((_, i) => (
                 <span
@@ -271,15 +272,30 @@ export default function App() {
                 {ui.orbs}
               </span>
             </div>
-            {ui.screen === "playing" && (
+
+            {/* Quick Action Controls: Sound Toggle + Pause */}
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => eng()?.pause()}
-                aria-label="Pause"
-                className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-lg border border-void-700/80 bg-void-900/80 text-white/80 transition hover:border-ember-400/60 hover:text-ember-300 active:translate-y-0.5"
+                onClick={() => eng()?.toggleMute()}
+                aria-label={ui.muted ? "Unmute" : "Mute"}
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-lg border bg-void-900/90 shadow-md transition hover:text-ice-300 active:translate-y-0.5",
+                  ui.muted ? "border-rose-alert/50 text-rose-alert" : "border-void-700/80 text-white/80",
+                )}
               >
-                <IconPause className="h-5 w-5" />
+                <IconSound muted={ui.muted} className="h-4.5 w-4.5" />
               </button>
-            )}
+
+              {ui.screen === "playing" && (
+                <button
+                  onClick={() => eng()?.pause()}
+                  aria-label="Pause"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-void-700/80 bg-void-900/90 text-white/80 shadow-md transition hover:border-ember-400/60 hover:text-ember-300 active:translate-y-0.5"
+                >
+                  <IconPause className="h-4.5 w-4.5" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -299,18 +315,20 @@ export default function App() {
         </div>
       )}
 
-      {/* ---- persistent sound toggle ---- */}
-      <button
-        onClick={() => eng()?.toggleMute()}
-        aria-label={ui.muted ? "Unmute" : "Mute"}
-        className={cn(
-          "absolute z-50 flex h-10 w-10 items-center justify-center rounded-lg border bg-void-900/85 transition active:translate-y-0.5",
-          ui.muted ? "border-rose-alert/50 text-rose-alert" : "border-void-700/80 text-white/80 hover:text-ice-300",
-        )}
-        style={{ top: "max(0.75rem, env(safe-area-inset-top))", right: inRun ? "4.75rem" : "0.75rem" }}
-      >
-        <IconSound muted={ui.muted} className="h-5 w-5" />
-      </button>
+      {/* ---- persistent sound toggle (outside run) ---- */}
+      {!inRun && (
+        <button
+          onClick={() => eng()?.toggleMute()}
+          aria-label={ui.muted ? "Unmute" : "Mute"}
+          className={cn(
+            "absolute z-50 flex h-10 w-10 items-center justify-center rounded-lg border bg-void-900/85 transition hover:text-ice-300 active:translate-y-0.5",
+            ui.muted ? "border-rose-alert/50 text-rose-alert" : "border-void-700/80 text-white/80",
+          )}
+          style={{ top: "max(0.75rem, env(safe-area-inset-top))", right: "0.75rem" }}
+        >
+          <IconSound muted={ui.muted} className="h-5 w-5" />
+        </button>
+      )}
 
       {/* ---- MENU ---- */}
       {ui.screen === "menu" && (
