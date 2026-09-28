@@ -1012,9 +1012,7 @@ export class Engine {
       this.kbAngle = clamp(this.kbAngle + this.kbAimX * 2.4 * dt, a0, a1);
     }
     if (this.charging) {
-      this.chargePow = clamp(this.chargePow + this.chargeDir * 1.3 * dt, 0, 1);
-      if (this.chargePow >= 1) this.chargeDir = -1;
-      if (this.chargePow <= 0) this.chargeDir = 1;
+      this.chargePow = Math.min(1, this.chargePow + 1.15 * dt);
       const bucket = Math.floor(this.chargePow * 10);
       if (bucket !== this.chargeBucket) {
         this.chargeBucket = bucket;
