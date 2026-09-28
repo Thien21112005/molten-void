@@ -212,7 +212,7 @@ export function CosmicRoadmap({
 
         {/* Total Stars Counter */}
         <div className="flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-950/40 px-3 py-1.5 shadow-[0_0_15px_rgba(255,179,38,0.2)]">
-          <svg viewBox="0 0 24 24" fill="#ffb326" className="h-4 w-4 drop-shadow-[0_0_6px_rgba(255,179,38,0.8)]">
+          <svg viewBox="0 0 24 24" fill="#ffb326" className="h-4 w-4 overflow-visible drop-shadow-[0_0_6px_rgba(255,179,38,0.8)]">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
           <span className="font-display text-xs tracking-wide text-amber-300 sm:text-sm">
@@ -253,8 +253,12 @@ export function CosmicRoadmap({
             className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
             style={{ left: "500px", top: "90px", animationDuration: "6s" }}
           >
-            <svg width="130" height="96" viewBox="0 0 130 96">
+            <svg width="140" height="110" viewBox="0 0 140 110" className="overflow-visible">
               <defs>
+                <radialGradient id="gasGiantAtmosphere" cx="50%" cy="50%" r="50%">
+                  <stop offset="60%" stopColor="rgba(168,85,247,0.35)" />
+                  <stop offset="100%" stopColor="rgba(168,85,247,0)" />
+                </radialGradient>
                 <radialGradient id="gasGiantGrad" cx="35%" cy="35%" r="65%">
                   <stop offset="0%" stopColor="#c084fc" />
                   <stop offset="40%" stopColor="#8b5cf6" />
@@ -269,18 +273,20 @@ export function CosmicRoadmap({
                   <stop offset="100%" stopColor="rgba(46,230,201,0)" />
                 </linearGradient>
               </defs>
+              {/* Pure SVG circular atmospheric glow - zero square clipping */}
+              <circle cx="70" cy="55" r="44" fill="url(#gasGiantAtmosphere)" />
               {/* Back half of ring */}
-              <ellipse cx="65" cy="50" rx="58" ry="15" fill="none" stroke="url(#ringGrad)" strokeWidth="6" transform="rotate(-18 65 50)" opacity="0.65" strokeDasharray="100 220" strokeDashoffset="45" />
+              <ellipse cx="70" cy="55" rx="58" ry="15" fill="none" stroke="url(#ringGrad)" strokeWidth="6" transform="rotate(-18 70 55)" opacity="0.65" strokeDasharray="100 220" strokeDashoffset="45" />
               {/* Planet sphere */}
-              <circle cx="65" cy="50" r="28" fill="url(#gasGiantGrad)" className="drop-shadow-[0_0_20px_rgba(139,92,246,0.55)]" />
+              <circle cx="70" cy="55" r="28" fill="url(#gasGiantGrad)" />
               {/* Surface bands */}
-              <ellipse cx="65" cy="48" rx="27.5" ry="13" fill="none" stroke="#e9d5ff" strokeWidth="1.5" opacity="0.25" />
-              <ellipse cx="65" cy="53" rx="27" ry="8" fill="none" stroke="#f472b6" strokeWidth="1.2" opacity="0.3" />
+              <ellipse cx="70" cy="53" rx="27.5" ry="13" fill="none" stroke="#e9d5ff" strokeWidth="1.5" opacity="0.25" />
+              <ellipse cx="70" cy="58" rx="27" ry="8" fill="none" stroke="#f472b6" strokeWidth="1.2" opacity="0.3" />
               {/* Front half of ring */}
-              <ellipse cx="65" cy="50" rx="58" ry="15" fill="none" stroke="url(#ringGrad)" strokeWidth="6.5" transform="rotate(-18 65 50)" strokeDasharray="180 220" strokeDashoffset="150" />
-              <ellipse cx="65" cy="50" rx="50" ry="11" fill="none" stroke="#2ee6c9" strokeWidth="1.6" transform="rotate(-18 65 50)" opacity="0.45" />
+              <ellipse cx="70" cy="55" rx="58" ry="15" fill="none" stroke="url(#ringGrad)" strokeWidth="6.5" transform="rotate(-18 70 55)" strokeDasharray="180 220" strokeDashoffset="150" />
+              <ellipse cx="70" cy="55" rx="50" ry="11" fill="none" stroke="#2ee6c9" strokeWidth="1.6" transform="rotate(-18 70 55)" opacity="0.45" />
             </svg>
-            <span className="block text-center font-display text-[9px] tracking-widest text-purple-300/80 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]">
+            <span className="block text-center font-display text-[9px] tracking-widest text-purple-300/80">
               AETHON GAS GIANT
             </span>
           </div>
@@ -290,8 +296,12 @@ export function CosmicRoadmap({
             className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
             style={{ left: "220px", top: "120px", animationDelay: "1.2s", animationDuration: "5s" }}
           >
-            <svg width="84" height="52" viewBox="0 0 84 52" className="drop-shadow-[0_0_18px_rgba(46,230,201,0.6)]">
+            <svg width="84" height="52" viewBox="0 0 84 52" className="overflow-visible">
               <defs>
+                <radialGradient id="scoutAura" cx="50%" cy="50%" r="50%">
+                  <stop offset="40%" stopColor="rgba(46,230,201,0.22)" />
+                  <stop offset="100%" stopColor="rgba(46,230,201,0)" />
+                </radialGradient>
                 <linearGradient id="scoutHull" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#0f172a" />
                   <stop offset="50%" stopColor="#334155" />
@@ -303,6 +313,7 @@ export function CosmicRoadmap({
                   <stop offset="100%" stopColor="transparent" />
                 </linearGradient>
               </defs>
+              <ellipse cx="42" cy="26" rx="42" ry="24" fill="url(#scoutAura)" />
               {/* Thruster exhaust jet */}
               <polygon points="22,26 2,22 0,26 2,30" fill="url(#thrusterFire)" />
               {/* Wings */}
@@ -326,7 +337,14 @@ export function CosmicRoadmap({
             className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
             style={{ left: "1100px", top: "85px", animationDelay: "2.4s", animationDuration: "5.5s" }}
           >
-            <svg width="88" height="54" viewBox="0 0 88 54" className="drop-shadow-[0_0_16px_rgba(56,189,248,0.5)]">
+            <svg width="88" height="54" viewBox="0 0 88 54" className="overflow-visible">
+              <defs>
+                <radialGradient id="relayAura" cx="50%" cy="50%" r="50%">
+                  <stop offset="35%" stopColor="rgba(56,189,248,0.22)" />
+                  <stop offset="100%" stopColor="rgba(56,189,248,0)" />
+                </radialGradient>
+              </defs>
+              <ellipse cx="44" cy="27" rx="44" ry="26" fill="url(#relayAura)" />
               {/* Left Solar Panel */}
               <rect x="4" y="17" width="24" height="20" rx="2" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.4" />
               <line x1="16" y1="17" x2="16" y2="37" stroke="#60a5fa" strokeWidth="1" />
@@ -354,14 +372,19 @@ export function CosmicRoadmap({
             className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
             style={{ left: "1420px", top: "190px", animationDelay: "0.8s", animationDuration: "6.2s" }}
           >
-            <svg width="100" height="54" viewBox="0 0 100 54" className="drop-shadow-[0_0_22px_rgba(255,160,46,0.5)]">
+            <svg width="100" height="54" viewBox="0 0 100 54" className="overflow-visible">
               <defs>
+                <radialGradient id="cruiserAura" cx="50%" cy="50%" r="50%">
+                  <stop offset="35%" stopColor="rgba(255,160,46,0.22)" />
+                  <stop offset="100%" stopColor="rgba(255,160,46,0)" />
+                </radialGradient>
                 <linearGradient id="cruiserPlume" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="transparent" />
                   <stop offset="60%" stopColor="#f05423" />
                   <stop offset="100%" stopColor="#ffd23e" />
                 </linearGradient>
               </defs>
+              <ellipse cx="50" cy="27" rx="50" ry="26" fill="url(#cruiserAura)" />
               {/* Twin Thrusters */}
               <polygon points="14,19 2,17 0,19 2,21" fill="url(#cruiserPlume)" />
               <polygon points="14,35 2,33 0,35 2,37" fill="url(#cruiserPlume)" />
@@ -374,7 +397,7 @@ export function CosmicRoadmap({
               <circle cx="78" cy="19" r="1.8" fill="#f43f5e" />
               <circle cx="78" cy="35" r="1.8" fill="#f43f5e" />
             </svg>
-            <span className="block text-center font-display text-[8px] tracking-wider text-ember-400/90 drop-shadow-[0_0_6px_rgba(255,160,46,0.6)]">
+            <span className="block text-center font-display text-[8px] tracking-wider text-ember-400/90">
               VOID CRUISER V-II
             </span>
           </div>
@@ -384,8 +407,12 @@ export function CosmicRoadmap({
             className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
             style={{ left: "800px", top: "420px", animationDelay: "1.8s", animationDuration: "5.8s" }}
           >
-            <svg width="76" height="76" viewBox="0 0 76 76">
+            <svg width="90" height="90" viewBox="0 0 90 90" className="overflow-visible">
               <defs>
+                <radialGradient id="moonAtmosphere" cx="50%" cy="50%" r="50%">
+                  <stop offset="60%" stopColor="rgba(148,163,184,0.3)" />
+                  <stop offset="100%" stopColor="rgba(148,163,184,0)" />
+                </radialGradient>
                 <radialGradient id="moonGrad" cx="35%" cy="35%" r="65%">
                   <stop offset="0%" stopColor="#f8fafc" />
                   <stop offset="45%" stopColor="#94a3b8" />
@@ -393,13 +420,16 @@ export function CosmicRoadmap({
                   <stop offset="100%" stopColor="#0f172a" />
                 </radialGradient>
               </defs>
-              <circle cx="38" cy="38" r="28" fill="url(#moonGrad)" className="drop-shadow-[0_0_18px_rgba(148,163,184,0.45)]" />
+              {/* Pure SVG circular atmospheric glow - zero square clipping */}
+              <circle cx="45" cy="45" r="40" fill="url(#moonAtmosphere)" />
+              {/* Moon body */}
+              <circle cx="45" cy="45" r="28" fill="url(#moonGrad)" />
               {/* Craters */}
-              <ellipse cx="28" cy="28" rx="6" ry="4.5" fill="#475569" stroke="#1e293b" strokeWidth="1" opacity="0.85" />
-              <ellipse cx="48" cy="35" rx="7.5" ry="6" fill="#475569" stroke="#1e293b" strokeWidth="1" opacity="0.8" />
-              <ellipse cx="34" cy="48" rx="4.5" ry="3.5" fill="#475569" stroke="#1e293b" strokeWidth="0.8" opacity="0.75" />
-              <circle cx="24" cy="44" r="2.5" fill="#334155" opacity="0.6" />
-              <circle cx="46" cy="20" r="2.8" fill="#334155" opacity="0.6" />
+              <ellipse cx="35" cy="35" rx="6" ry="4.5" fill="#475569" stroke="#1e293b" strokeWidth="1" opacity="0.85" />
+              <ellipse cx="55" cy="42" rx="7.5" ry="6" fill="#475569" stroke="#1e293b" strokeWidth="1" opacity="0.8" />
+              <ellipse cx="41" cy="55" rx="4.5" ry="3.5" fill="#475569" stroke="#1e293b" strokeWidth="0.8" opacity="0.75" />
+              <circle cx="31" cy="51" r="2.5" fill="#334155" opacity="0.6" />
+              <circle cx="53" cy="27" r="2.8" fill="#334155" opacity="0.6" />
             </svg>
             <span className="block text-center font-display text-[8px] tracking-wider text-slate-400/80">
               LUNA PRIME
@@ -411,15 +441,24 @@ export function CosmicRoadmap({
             className="animate-float-slow pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
             style={{ left: "2480px", top: "115px", animationDelay: "0.5s", animationDuration: "7s" }}
           >
-            <svg width="130" height="130" viewBox="0 0 130 130" className="drop-shadow-[0_0_40px_rgba(255,122,26,0.9)]">
+            <svg width="140" height="140" viewBox="0 0 140 140" className="overflow-visible">
+              <defs>
+                <radialGradient id="vortexGlowGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="25%" stopColor="rgba(255,122,26,0.45)" />
+                  <stop offset="60%" stopColor="rgba(240,84,35,0.2)" />
+                  <stop offset="100%" stopColor="rgba(255,122,26,0)" />
+                </radialGradient>
+              </defs>
+              {/* Pure SVG circular accretion glow - zero square clipping */}
+              <circle cx="70" cy="70" r="68" fill="url(#vortexGlowGrad)" />
               {/* Swirling accretion disk rings */}
-              <ellipse cx="65" cy="65" rx="58" ry="25" fill="none" stroke="#ff7a1a" strokeWidth="4.5" transform="rotate(-25 65 65)" opacity="0.85" />
-              <ellipse cx="65" cy="65" rx="47" ry="17" fill="none" stroke="#ffd23e" strokeWidth="2.8" transform="rotate(-25 65 65)" opacity="0.9" />
+              <ellipse cx="70" cy="70" rx="58" ry="25" fill="none" stroke="#ff7a1a" strokeWidth="4.5" transform="rotate(-25 70 70)" opacity="0.85" />
+              <ellipse cx="70" cy="70" rx="47" ry="17" fill="none" stroke="#ffd23e" strokeWidth="2.8" transform="rotate(-25 70 70)" opacity="0.9" />
               {/* Event Horizon Dark Core */}
-              <circle cx="65" cy="65" r="24" fill="#000000" stroke="#ff4d6d" strokeWidth="2.4" />
-              <circle cx="65" cy="65" r="29" fill="none" stroke="#ffa02e" strokeWidth="1.2" opacity="0.6" />
+              <circle cx="70" cy="70" r="24" fill="#000000" stroke="#ff4d6d" strokeWidth="2.4" />
+              <circle cx="70" cy="70" r="29" fill="none" stroke="#ffa02e" strokeWidth="1.2" opacity="0.6" />
             </svg>
-            <span className="block text-center font-display text-[9px] font-bold tracking-widest text-ember-300 drop-shadow-[0_0_10px_rgba(255,160,46,0.9)]">
+            <span className="block text-center font-display text-[9px] font-bold tracking-widest text-ember-300">
               SINGULARITY CORE
             </span>
           </div>
@@ -427,7 +466,7 @@ export function CosmicRoadmap({
           {/* 7. Asteroid Clusters */}
           {/* Cluster A (Near Level 2-3) */}
           <div className="pointer-events-none absolute" style={{ left: "360px", top: "190px" }}>
-            <svg width="48" height="48" viewBox="0 0 48 48" className="opacity-80">
+            <svg width="48" height="48" viewBox="0 0 48 48" className="overflow-visible opacity-80">
               <polygon points="12,4 24,10 20,22 8,18 4,10" fill="#334155" stroke="#64748b" strokeWidth="1.2" />
               <polygon points="32,24 44,28 40,40 28,38 24,30" fill="#1e293b" stroke="#475569" strokeWidth="1" />
               <polygon points="10,34 18,36 16,44 8,42" fill="#475569" stroke="#64748b" strokeWidth="0.8" />
@@ -571,7 +610,7 @@ export function CosmicRoadmap({
                   <svg
                     viewBox="0 0 24 24"
                     className={cn(
-                      "h-7 w-7",
+                      "h-7 w-7 overflow-visible",
                       isGold
                         ? "text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]"
                         : "text-ice-400 drop-shadow-[0_0_12px_rgba(46,230,201,0.6)]",
