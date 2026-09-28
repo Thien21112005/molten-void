@@ -241,6 +241,7 @@ export class Engine {
   }
 
   destroy() {
+    sfx.setMusicMode("off");
     cancelAnimationFrame(this.raf);
     window.removeEventListener("keydown", this.onKeyDown);
     window.removeEventListener("keyup", this.onKeyUp);
@@ -264,6 +265,7 @@ export class Engine {
   startLevel(lvl: number) {
     sfx.ensure();
     sfx.click();
+    sfx.setMusicMode("battle");
     this.level = clamp(lvl, 1, TOTAL_LEVELS);
     this.levelScore = 0;
     this.pending = null;
@@ -294,6 +296,7 @@ export class Engine {
   openRoadmap() {
     sfx.ensure();
     sfx.click();
+    sfx.setMusicMode("ambient");
     this.screen = "roadmap";
     this.aimMode = "none";
     this.charging = false;
@@ -306,6 +309,7 @@ export class Engine {
     this.aimMode = "none";
     this.charging = false;
     sfx.click();
+    sfx.setMusicMode("ambient");
     this.pushUI();
   }
 
@@ -314,11 +318,13 @@ export class Engine {
     sfx.ensure();
     this.screen = "playing";
     sfx.click();
+    sfx.setMusicMode("battle");
     this.pushUI();
   }
 
   toMenu() {
     sfx.click();
+    sfx.setMusicMode("ambient");
     this.screen = "menu";
     this.orb = null;
     this.aimMode = "none";
@@ -966,6 +972,7 @@ export class Engine {
     }
 
     this.screen = "victory";
+    sfx.setMusicMode("ambient");
     this.pushUI();
   }
 
@@ -984,6 +991,7 @@ export class Engine {
       /* ignore */
     }
     this.screen = "gameover";
+    sfx.setMusicMode("ambient");
     sfx.gameOver();
     this.shake = Math.min(26, this.shake + 8);
     this.pushUI();
