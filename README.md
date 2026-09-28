@@ -45,13 +45,13 @@ Launch comet cores through deep space anomalies, bounce off cosmic barriers, sha
 
 ### Star Rating Criteria
 
-Each level challenges you to shatter all crystals while conserving your precious Comet Cores:
+Each level equips you with **4 to 6 Comet Cores** (plus strategic Gold Crystals that reward +1 bonus core). The star rating encourages clever ricochets without punishing exploratory shots:
 
 | Rating | Visual Display | Qualification Rule |
 | :--- | :--- | :--- |
-| **⭐⭐⭐ 3 Stars** | 3 Bright Glowing Stars | **Perfect Efficiency:** Clear all crystals while retaining high core reserves (e.g., using only 1 shot or keeping maximum par cores). |
-| **⭐⭐☆ 2 Stars** | 2 Bright Stars + 1 Dim Star | **Skilled Shot:** Clear all crystals with at least 1-2 spare cores remaining. |
-| **⭐☆☆ 1 Star** | 1 Bright Star + 2 Dim Stars | **Expedition Cleared:** Successfully shatter all crystals, using the last available comet core. |
+| **⭐⭐⭐ 3 Stars** | 3 Bright Glowing Stars | **Mastery:** Clear all crystals while retaining **at least 2 spare cores** upon victory (plenty of room for 1-3 skilled shots or collecting gold cores). |
+| **⭐⭐☆ 2 Stars** | 2 Bright Stars + 1 Dim Star | **Skilled Shot:** Clear all crystals with **at least 1 spare core** remaining in reserve. |
+| **⭐☆☆ 1 Star** | 1 Bright Star + 2 Dim Stars | **Expedition Cleared:** Successfully shatter all crystals using your **final comet core** (0 cores left). |
 
 *Unlocking Progression:* Earning at least 1 star on any expedition automatically unlocks the next stage on the Cosmic Roadmap.
 
@@ -171,13 +171,13 @@ Nhiệm vụ của người chơi là căn chỉnh góc bắn, kéo lực và ph
 
 ### Quy tắc tính Sao (Star Rating System)
 
-Mục tiêu cốt lõi của mỗi màn chơi là phá hủy toàn bộ tinh thể với số lần bắn ít nhất:
+Mỗi màn chơi cung cấp từ **4 đến 6 lõi sao chổi** (kèm các tinh thể vàng thưởng thêm +1 đạn). Hệ thống tính sao công bằng, khuyến khích tư duy chiến thuật và góc bắn nảy:
 
 | Đánh giá | Hiển thị thị giác | Điều kiện đạt được |
 | :--- | :--- | :--- |
-| **⭐⭐⭐ 3 Sao** | 3 Sao Vàng Rực Rỡ | **Xuất sắc (Tối ưu tuyệt đối):** Phá hủy tất cả tinh thể mà vẫn giữ lại phần lớn số lõi sao chổi dự trữ (chỉ dùng 1 lượt bắn hoặc bảo toàn tối đa số đạn). |
-| **⭐⭐☆ 2 Sao** | 2 Sao Sáng + 1 Sao Mờ | **Khá giỏi:** Phá sạch tinh thể và còn dư ít nhất 1-2 lõi đạn dự trữ. |
-| **⭐☆☆ 1 Sao** | 1 Sao Sáng + 2 Sao Mờ | **Hoàn thành:** Phá sạch tinh thể bằng viên đạn cuối cùng. |
+| **⭐⭐⭐ 3 Sao** | 3 Sao Vàng Rực Rỡ | **Xuất sắc:** Phá sạch tinh thể và **bảo toàn từ 2 lõi đạn trở lên** khi hoàn thành (thoải mái bắn 1-3 phát hoặc ăn tinh thể vàng để bù đạn). |
+| **⭐⭐☆ 2 Sao** | 2 Sao Sáng + 1 Sao Mờ | **Khá giỏi:** Phá sạch tinh thể và còn **dư 1 lõi đạn dự trữ**. |
+| **⭐☆☆ 1 Sao** | 1 Sao Sáng + 2 Sao Mờ | **Hoàn thành:** Phá sạch tinh thể bằng **viên đạn cuối cùng** (0 đạn dư). |
 
 *Mở khóa màn mới:* Đạt từ 1 sao trở lên ở màn hiện tại sẽ tự động mở khóa màn tiếp theo trên Bản đồ viễn chinh.
 
