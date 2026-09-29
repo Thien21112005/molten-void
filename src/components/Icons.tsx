@@ -465,3 +465,62 @@ export function IconStar({ className, size = 14, filled = true, ...props }: Icon
     </svg>
   );
 }
+
+/** Cosmic Spacesuit / Armor Icon (for Trang Phục / Skins) */
+export function IconSpacesuit({ className, size = 18, ...props }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      className={cn("shrink-0", className)}
+      {...props}
+    >
+      <defs>
+        <linearGradient id="suitVisorGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#2ee6c9" />
+          <stop offset="60%" stopColor="#0891b2" />
+          <stop offset="100%" stopColor="#0e7490" />
+        </linearGradient>
+      </defs>
+      {/* Outer Helmet Dome */}
+      <path
+        d="M4.5 11.5C4.5 6.8 7.8 3 12 3s7.5 3.8 7.5 8.5c0 3-1.4 5.2-2.8 6.5H7.3C5.9 16.7 4.5 14.5 4.5 11.5z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+        fill="currentColor"
+        fillOpacity="0.12"
+      />
+      {/* High-tech Visor with Gradient and Glare */}
+      <path
+        d="M7 10.5c0-2.6 2.2-4.5 5-4.5s5 1.9 5 4.5c0 2-2 3.5-5 3.5s-5-1.5-5-3.5z"
+        fill="url(#suitVisorGlow)"
+        stroke="#2ee6c9"
+        strokeWidth="1"
+      />
+      {/* Visor Sunlight Reflection */}
+      <path
+        d="M9.5 8.2c1-.4 2.2-.4 3.2-.2"
+        stroke="#ffffff"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        opacity="0.85"
+      />
+      {/* Side Comms Pods */}
+      <rect x="2.5" y="9.5" width="2" height="4" rx="1" fill="currentColor" stroke="currentColor" strokeWidth="0.8" />
+      <rect x="19.5" y="9.5" width="2" height="4" rx="1" fill="currentColor" stroke="currentColor" strokeWidth="0.8" />
+      {/* Armored Collar & Shoulders */}
+      <path
+        d="M6.5 18L3 21.5h18L17.5 18"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Chestplate Ion Core */}
+      <circle cx="12" cy="19.8" r="1.2" fill="#2ee6c9" />
+    </svg>
+  );
+}

@@ -8,7 +8,7 @@ import { CampaignIntel } from "./components/CampaignIntel";
 import { loadProgress, getTotalStars, MAX_POSSIBLE_STARS } from "./game/levels/progress";
 import { TRANSLATIONS, loadLanguage, type Language, type Translations } from "./game/i18n";
 import { audio } from "./game/audio";
-import { IconTacticalTarget, IconStar, IconSparkle } from "./components/Icons";
+import { IconTacticalTarget, IconStar, IconSparkle, IconSpacesuit } from "./components/Icons";
 import { VietnameseSpaceship } from "./components/VietnameseSpaceship";
 import { VietnameseAstronaut } from "./components/VietnameseAstronaut";
 import { CosmicDecorations } from "./components/CosmicDecorations";
@@ -533,7 +533,7 @@ export default function App() {
                     <ChunkBtn
                       onClick={() => setShowSkins(true)}
                       className="px-2 sm:px-3 gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-xs sm:text-sm font-bold tracking-normal sm:tracking-wider text-cyan-300 border-cyan-500/50 hover:border-cyan-400 bg-cyan-950/20 hover:bg-cyan-900/40"
-                      icon={<IconSparkle size={18} className="text-cyan-300 shrink-0" />}
+                      icon={<IconSpacesuit size={18} className="text-cyan-300 shrink-0" />}
                     >
                       {t.skins}
                     </ChunkBtn>
