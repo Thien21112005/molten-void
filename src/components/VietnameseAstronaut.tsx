@@ -68,22 +68,53 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
       )}
     >
       <style>{`
-        /* Authentic Multi-Axis Zero-G Weightless Floating Drift */
-        @keyframes vnWeightlessDrift {
+        /* Authentic Wandering 2D Zero-G Orbit Drift (Quỹ Đạo Lơ Lửng Bất Ổn - Không Bị Lên Xuống) */
+        @keyframes vnErraticOrbitDrift {
           0% {
-            transform: translate(0px, 0px) rotate(-1.5deg);
+            transform: translate3d(0px, 0px, 0) rotate(-1.5deg);
           }
-          24% {
-            transform: translate(3px, -11px) rotate(2deg);
+          16% {
+            transform: translate3d(9px, -3px, 0) rotate(1.8deg);
           }
-          50% {
-            transform: translate(-3px, -19px) rotate(-0.5deg);
+          32% {
+            transform: translate3d(14px, 3px, 0) rotate(3deg);
           }
-          74% {
-            transform: translate(-5px, -9px) rotate(-3.5deg);
+          48% {
+            transform: translate3d(4px, 6px, 0) rotate(0.8deg);
+          }
+          63% {
+            transform: translate3d(-7px, 3px, 0) rotate(-2deg);
+          }
+          77% {
+            transform: translate3d(-14px, -2px, 0) rotate(-4.2deg);
+          }
+          90% {
+            transform: translate3d(-6px, -5px, 0) rotate(-3deg);
           }
           100% {
-            transform: translate(0px, 0px) rotate(-1.5deg);
+            transform: translate3d(0px, 0px, 0) rotate(-1.5deg);
+          }
+        }
+        @keyframes vnLegsZeroG {
+          0%, 100% {
+            transform: rotate(0deg);
+          }
+          32% {
+            transform: rotate(-1.8deg);
+          }
+          77% {
+            transform: rotate(1.6deg);
+          }
+        }
+        @keyframes vnArmSway {
+          0%, 100% {
+            transform: rotate(0deg);
+          }
+          40% {
+            transform: rotate(2deg);
+          }
+          80% {
+            transform: rotate(-1.6deg);
           }
         }
         @keyframes vnFlagClothWave {
@@ -141,7 +172,15 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
           }
         }
         .vn-zero-g-float {
-          animation: vnWeightlessDrift 5.6s ease-in-out infinite;
+          animation: vnErraticOrbitDrift 9.6s ease-in-out infinite;
+        }
+        .vn-legs-sway {
+          transform-origin: 145px 141px;
+          animation: vnLegsZeroG 8.2s ease-in-out infinite;
+        }
+        .vn-arm-sway {
+          transform-origin: 158px 100px;
+          animation: vnArmSway 7.4s ease-in-out infinite;
         }
         .vn-flag-wave {
           transform-origin: 86px 55px;
@@ -301,50 +340,52 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
             <path d="M 170 131 C 173 154, 174 154, 177 131 Z" fill="url(#vnIonFlame)" className="vn-ion-flame" />
           </g>
 
-          {/* ================= ZERO-G WEIGHTLESS CURLED LEGS & FLOATING MOON BOOTS ================= */}
-          {/* Classic NASA Neutral Body Posture: knees softly bent, feet dangling freely in space! */}
-          <g id="vn-zero-g-legs">
-            {/* Left Fore-Leg (Curled up & forward in microgravity) */}
-            <path
-              d="M 132 140 C 122 152, 115 165, 120 178 C 122 184, 114 188, 110 193"
-              fill="none"
-              stroke="url(#vnPuffySuit)"
-              strokeWidth="12.5"
-              strokeLinecap="round"
-            />
-            {/* Left Knee Pad (Angled forward in zero-G) */}
-            <ellipse cx="118" cy="172" rx="6.5" ry="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" transform="rotate(-15 118 172)" />
-            {/* Left Moon Boot (Dangling weightlessly) */}
-            <path
-              d="M 104 186 C 100 193, 96 197, 99 203 C 103 207, 117 205, 119 200 C 120 195, 113 187, 110 185 Z"
-              fill="#475569"
-              stroke="#334155"
-              strokeWidth="1.1"
-              transform="rotate(12 110 195)"
-            />
-            {/* Left Boot Micro-Thruster Pulse */}
-            <path d="M 98 203 C 104 207, 114 206, 118 201" stroke="#2ee6c9" strokeWidth="2.2" strokeLinecap="round" fill="none" transform="rotate(12 110 195)" />
+          {/* ================= ZERO-G WEIGHTLESS LEGS & FLOATING MOON BOOTS ================= */}
+          {/* Authentic proportional spacesuit legs with knee armor guards, cuffs, and floating moon boots */}
+          <g id="vn-zero-g-legs" className="vn-legs-sway" transform="rotate(-5 145 120)">
+            {/* Left Leg (Floating relaxed at subtle forward angle) */}
+            <g id="vn-leg-left" transform="rotate(2 135 141)">
+              {/* Thigh */}
+              <rect x="129" y="141" width="13" height="23" rx="5.5" fill="url(#vnPuffySuit)" stroke="#cbd5e1" strokeWidth="1.2" />
+              {/* Knee Armor Guard */}
+              <rect x="127" y="161" width="17" height="7.5" rx="3.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.1" />
+              <line x1="130" y1="164.5" x2="140" y2="164.5" stroke="#2ee6c9" strokeWidth="1" strokeLinecap="round" opacity="0.85" />
+              {/* Calf */}
+              <rect x="128.5" y="166" width="13.5" height="21" rx="5.5" fill="url(#vnPuffySuit)" stroke="#cbd5e1" strokeWidth="1.2" />
+              {/* Ankle Cuff */}
+              <rect x="126.5" y="184.5" width="17" height="5" rx="2.5" fill="#475569" stroke="#334155" strokeWidth="0.9" />
+              {/* Left Moon Boot (Dangling weightlessly) */}
+              <path
+                d="M 124 187 C 120 193, 117 198, 119 202 C 122 204, 133 204, 139 202 C 142 200, 142 194, 140 187 Z"
+                fill="#334155"
+                stroke="#1e293b"
+                strokeWidth="1.1"
+              />
+              {/* Glowing Micro-Thruster Sole */}
+              <path d="M 120 202 C 125 204, 134 203, 138 201" stroke="#2ee6c9" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+            </g>
 
-            {/* Right Aft-Leg (Tucked gracefully behind in zero-G) */}
-            <path
-              d="M 152 140 C 158 152, 160 166, 154 182 C 150 188, 146 195, 144 202"
-              fill="none"
-              stroke="url(#vnPuffySuit)"
-              strokeWidth="12.5"
-              strokeLinecap="round"
-            />
-            {/* Right Knee Pad */}
-            <ellipse cx="157" cy="172" rx="6.5" ry="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" transform="rotate(10 157 172)" />
-            {/* Right Moon Boot (Floating softly behind) */}
-            <path
-              d="M 139 198 C 137 206, 134 210, 137 215 C 141 218, 154 217, 156 212 C 157 207, 150 199, 147 197 Z"
-              fill="#475569"
-              stroke="#334155"
-              strokeWidth="1.1"
-              transform="rotate(-8 146 208)"
-            />
-            {/* Right Boot Micro-Thruster Pulse */}
-            <path d="M 136 215 C 142 218, 151 217, 156 212" stroke="#2ee6c9" strokeWidth="2.2" strokeLinecap="round" fill="none" transform="rotate(-8 146 208)" />
+            {/* Right Leg (Floating slightly behind with depth) */}
+            <g id="vn-leg-right" transform="rotate(-3 153 141)">
+              {/* Thigh */}
+              <rect x="147" y="141" width="13" height="24" rx="5.5" fill="url(#vnPuffySuit)" stroke="#cbd5e1" strokeWidth="1.2" />
+              {/* Knee Armor Guard */}
+              <rect x="145" y="162" width="17" height="7.5" rx="3.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.1" />
+              <line x1="148" y1="165.5" x2="158" y2="165.5" stroke="#2ee6c9" strokeWidth="1" strokeLinecap="round" opacity="0.85" />
+              {/* Calf */}
+              <rect x="146.5" y="167" width="13.5" height="21" rx="5.5" fill="url(#vnPuffySuit)" stroke="#cbd5e1" strokeWidth="1.2" />
+              {/* Ankle Cuff */}
+              <rect x="144.5" y="185.5" width="17" height="5" rx="2.5" fill="#475569" stroke="#334155" strokeWidth="0.9" />
+              {/* Right Moon Boot (Floating weightlessly) */}
+              <path
+                d="M 147 188 C 146 195, 147 201, 150 204 C 154 206, 164 205, 170 202 C 172 199, 171 194, 167 188 Z"
+                fill="#334155"
+                stroke="#1e293b"
+                strokeWidth="1.1"
+              />
+              {/* Glowing Micro-Thruster Sole */}
+              <path d="M 151 204 C 157 205, 165 204, 169 202" stroke="#2ee6c9" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+            </g>
           </g>
 
           {/* ================= PUFFY SPACESUIT TORSO (WEIGHTLESS ANGLE) ================= */}
@@ -395,7 +436,7 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
           </g>
 
           {/* ================= RIGHT ARM (RELAXED WEIGHTLESS FLOAT) ================= */}
-          <g id="vn-right-arm">
+          <g id="vn-right-arm" className="vn-arm-sway">
             {/* Soft Puffy Arm Floating Gently in Zero-G */}
             <path
               d="M 158 100 C 172 105, 178 114, 172 126"
