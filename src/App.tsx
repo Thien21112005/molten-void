@@ -7,6 +7,7 @@ import { SettingsModal } from "./components/SettingsModal";
 import { CampaignIntel } from "./components/CampaignIntel";
 import { loadProgress, getTotalStars, MAX_POSSIBLE_STARS } from "./game/levels/progress";
 import { TRANSLATIONS, loadLanguage, type Language, type Translations } from "./game/i18n";
+import { audio } from "./game/audio";
 
 const initialUI: UIState = {
   screen: "menu",
@@ -141,6 +142,8 @@ function ChunkBtn({
     <button
       onClick={(e) => {
         e.currentTarget.blur();
+        audio.ensure();
+        audio.click();
         onClick();
       }}
       className={cn(
@@ -305,7 +308,11 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => setShowSettings(true)}
+                onClick={() => {
+                  audio.ensure();
+                  audio.click();
+                  setShowSettings(true);
+                }}
                 aria-label={t.settings}
                 className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl border border-void-700/80 bg-void-950/90 text-white/80 shadow-md backdrop-blur-md transition hover:border-ice-400/60 hover:text-ice-300 hover:scale-105 active:scale-95 cursor-pointer"
               >
@@ -359,7 +366,11 @@ export default function App() {
           </button>
 
           <button
-            onClick={() => setShowSettings(true)}
+            onClick={() => {
+              audio.ensure();
+              audio.click();
+              setShowSettings(true);
+            }}
             aria-label={t.settings}
             className="flex h-10 w-10 items-center justify-center rounded-lg border border-void-700/80 bg-void-900/85 text-white/80 transition hover:border-ice-400/60 hover:text-ice-300 active:translate-y-0.5"
           >
@@ -423,7 +434,7 @@ export default function App() {
                 </div>
 
                 {/* Primary Launch Actions */}
-                <div className="flex flex-col gap-2.5">
+                <div className="flex flex-col gap-3.5 sm:gap-4 pt-1">
                   <ChunkBtn
                     primary
                     onClick={() => eng()?.play()}
@@ -433,7 +444,7 @@ export default function App() {
                     {t.playCampaign}
                   </ChunkBtn>
 
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
                     <ChunkBtn
                       onClick={() => eng()?.openRoadmap()}
                       className="py-2.5 sm:py-3 text-xs sm:text-sm"

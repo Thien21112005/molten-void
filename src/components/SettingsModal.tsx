@@ -5,7 +5,7 @@ import {
   loadSettings,
   applySettings,
 } from "../game/settings";
-import { audio } from "../game/audio";
+import { audio, type TrackPreviewId } from "../game/audio";
 import { cn } from "../utils/cn";
 
 export interface SettingsModalProps {
@@ -22,19 +22,19 @@ export function SettingsModal({
   const [settings, setSettings] = useState<GameSettings>(() => loadSettings());
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
-  const [isBattlePreviewing, setIsBattlePreviewing] = useState(false);
+  const [activePreview, setActivePreview] = useState<TrackPreviewId | null>(null);
 
   useEffect(() => {
     return () => {
-      audio.stopBattlePreview();
+      audio.stopPreview();
     };
   }, []);
 
   const t = TRANSLATIONS[settings.language];
 
-  const handleToggleBattlePreview = () => {
-    audio.toggleBattlePreview((playing) => {
-      setIsBattlePreviewing(playing);
+  const handleTogglePreview = (trackId: TrackPreviewId) => {
+    audio.previewTrack(trackId, (active) => {
+      setActivePreview(active);
     });
   };
 
@@ -187,96 +187,58 @@ export function SettingsModal({
                 className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-void-950 accent-ember-400 disabled:opacity-40"
               />
 
-              {/* BGM Track Selection: Separated into Menu BGM & Battle BGM */}
+              {/* BGM Soundtracks: 3 Dedicated Themes with Independent Previews */}
               <div className="mt-3.5 space-y-3">
-                {/* 1. Menu & Exploration BGM */}
-                <div>
-                  <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-wider text-ice-400 uppercase">
-                    <span className="flex items-center gap-1.5">
-                      <span>🎵</span> {t.menuBgmLabel}
+                {/* 1. Main Menu BGM: Armageddon */}
+                <div className="rounded-xl border border-void-700/80 bg-void-950/70 p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold tracking-wider text-amber-300 uppercase flex items-center gap-1.5">
+                      <span>🏰</span> {t.menuBgmLabel}
                     </span>
-                    <span className="text-[10px] text-white/40">2 BẢN NHẠC NỀN</span>
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePreview("armageddon")}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition active:scale-95 cursor-pointer",
+                        activePreview === "armageddon"
+                          ? "border-amber-400 bg-amber-950/80 text-amber-300 shadow-[0_0_12px_rgba(255,180,40,0.4)]"
+                          : "border-void-700 bg-void-800 text-white/80 hover:border-void-600 hover:text-white",
+                      )}
+                    >
+                      <span>{activePreview === "armageddon" ? t.previewStop : t.previewPlay}</span>
+                    </button>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {/* Track 1: Cosmic Odyssey */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        audio.ensure();
-                        audio.click();
-                        updateSetting("musicTrack", "odyssey");
-                      }}
-                      className={cn(
-                        "relative flex flex-col items-start rounded-xl border p-3 text-left transition active:scale-98 cursor-pointer",
-                        settings.musicTrack === "odyssey" || settings.musicTrack === "armageddon" /* fallback */
-                          ? "border-ember-400 bg-ember-500/20 text-white shadow-[0_0_16px_rgba(255,122,26,0.3)] ring-1 ring-ember-400/50"
-                          : "border-void-700 bg-void-800/70 text-white/70 hover:border-void-600 hover:bg-void-800 hover:text-white",
-                      )}
-                    >
-                      <div className="flex w-full items-center justify-between">
-                        <span className="text-xs font-bold leading-tight flex items-center gap-1.5 text-ember-300">
-                          🌌 {t.menuTrackCosmic}
-                        </span>
-                        {(settings.musicTrack === "odyssey" || settings.musicTrack === "armageddon") && (
-                          <span className="flex h-2 w-2 rounded-full bg-ember-400 animate-pulse shadow-[0_0_8px_rgba(255,160,46,0.9)]" />
-                        )}
-                      </div>
-                      <span className="mt-1 text-[10px] leading-tight text-white/50">
-                        {t.menuTrackCosmicDesc}
-                      </span>
-                    </button>
-
-                    {/* Track 2: Cyber Pulse */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        audio.ensure();
-                        audio.click();
-                        updateSetting("musicTrack", "cyber");
-                      }}
-                      className={cn(
-                        "relative flex flex-col items-start rounded-xl border p-3 text-left transition active:scale-98 cursor-pointer",
-                        settings.musicTrack === "cyber"
-                          ? "border-cyan-400 bg-cyan-500/20 text-white shadow-[0_0_16px_rgba(46,230,201,0.3)] ring-1 ring-cyan-400/50"
-                          : "border-void-700 bg-void-800/70 text-white/70 hover:border-void-600 hover:bg-void-800 hover:text-white",
-                      )}
-                    >
-                      <div className="flex w-full items-center justify-between">
-                        <span className="text-xs font-bold leading-tight flex items-center gap-1.5 text-cyan-300">
-                          ⚡ {t.menuTrackCyber}
-                        </span>
-                        {settings.musicTrack === "cyber" && (
-                          <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(46,230,201,0.9)]" />
-                        )}
-                      </div>
-                      <span className="mt-1 text-[10px] leading-tight text-white/50">
-                        {t.menuTrackCyberDesc}
-                      </span>
-                    </button>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                        {t.musicTrackArmageddon}
+                      </h4>
+                      <p className="text-[10px] text-white/50 mt-0.5">
+                        {t.menuTrackArmageddonDesc}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* 2. In-Game Battle Music */}
+                {/* 2. In-Game Battle Music: Cyber Pulse */}
                 <div className="rounded-xl border border-void-700/80 bg-void-950/70 p-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold tracking-wider text-rose-300 uppercase flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold tracking-wider text-cyan-300 uppercase flex items-center gap-1.5">
                       <span>⚔️</span> {t.battleBgmLabel}
                     </span>
                     <button
                       type="button"
-                      onClick={handleToggleBattlePreview}
+                      onClick={() => handleTogglePreview("cyber")}
                       className={cn(
                         "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition active:scale-95 cursor-pointer",
-                        isBattlePreviewing
-                          ? "border-rose-alert bg-rose-950/80 text-rose-alert shadow-[0_0_12px_rgba(255,77,109,0.4)]"
+                        activePreview === "cyber"
+                          ? "border-cyan-400 bg-cyan-950/80 text-cyan-300 shadow-[0_0_12px_rgba(46,230,201,0.4)]"
                           : "border-void-700 bg-void-800 text-white/80 hover:border-void-600 hover:text-white",
                       )}
                     >
-                      <span>{isBattlePreviewing ? "⏹ Dừng" : "▶ Nghe Thử"}</span>
+                      <span>{activePreview === "cyber" ? t.previewStop : t.previewPlay}</span>
                     </button>
                   </div>
-
                   <div className="mt-2 flex items-center justify-between">
                     <div>
                       <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
@@ -284,6 +246,37 @@ export function SettingsModal({
                       </h4>
                       <p className="text-[10px] text-white/50 mt-0.5">
                         {t.battleTrackDesc}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Cosmic Roadmap Music: Cosmic Odyssey */}
+                <div className="rounded-xl border border-void-700/80 bg-void-950/70 p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold tracking-wider text-purple-300 uppercase flex items-center gap-1.5">
+                      <span>🗺️</span> {t.roadmapBgmLabel}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePreview("odyssey")}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition active:scale-95 cursor-pointer",
+                        activePreview === "odyssey"
+                          ? "border-purple-400 bg-purple-950/80 text-purple-300 shadow-[0_0_12px_rgba(192,132,252,0.4)]"
+                          : "border-void-700 bg-void-800 text-white/80 hover:border-void-600 hover:text-white",
+                      )}
+                    >
+                      <span>{activePreview === "odyssey" ? t.previewStop : t.previewPlay}</span>
+                    </button>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                        {t.roadmapTrackName}
+                      </h4>
+                      <p className="text-[10px] text-white/50 mt-0.5">
+                        {t.roadmapTrackDesc}
                       </p>
                     </div>
                   </div>

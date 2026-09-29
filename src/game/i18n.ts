@@ -66,6 +66,7 @@ export interface Translations {
   nowPlayingArmageddon: string;
   pauseAutoMuteDesc: string;
   menuBgmLabel: string;
+  menuTrackArmageddonDesc: string;
   menuTrackCosmic: string;
   menuTrackCosmicDesc: string;
   menuTrackCyber: string;
@@ -73,6 +74,11 @@ export interface Translations {
   battleBgmLabel: string;
   battleTrackName: string;
   battleTrackDesc: string;
+  roadmapBgmLabel: string;
+  roadmapTrackName: string;
+  roadmapTrackDesc: string;
+  previewPlay: string;
+  previewStop: string;
   sfxVolume: string;
   gameplayCategory: string;
   screenShake: string;
@@ -164,14 +170,20 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     musicTrackSynth: "Procedural Synth",
     nowPlayingArmageddon: "Đang phát: Epic Battle: Armageddon — Alibi Music",
     pauseAutoMuteDesc: "Tự động tắt nhạc chiến đấu khi vào màn hình Tạm Dừng (Pause)",
-    menuBgmLabel: "Nhạc Nền Menu & Khám Phá",
+    menuBgmLabel: "Nhạc Nền Menu Chính",
+    menuTrackArmageddonDesc: "Hào hùng, hoành tráng phong cách điện ảnh (Alibi Music)",
     menuTrackCosmic: "Vũ Trụ Huyền Bí",
     menuTrackCosmicDesc: "Giai điệu thư thái, phiêu bồng không gian sâu",
     menuTrackCyber: "Nhịp Xung Điện Tử",
     menuTrackCyberDesc: "Synthwave điện tử 118 BPM nhịp nhàng hiện đại",
-    battleBgmLabel: "Nhạc Chiến Đấu Khi Vào Trận",
-    battleTrackName: "Armageddon (Alibi Music)",
-    battleTrackDesc: "Hào hùng dồn dập • Tự động dừng khi Tạm dừng",
+    battleBgmLabel: "Nhạc Chiến Đấu Trong Màn",
+    battleTrackName: "Nhịp Xung Điện Tử (Cyber Pulse)",
+    battleTrackDesc: "118 BPM Synthwave dồn dập • Tự động dừng khi Tạm dừng",
+    roadmapBgmLabel: "Nhạc Bản Đồ Tinh Hệ",
+    roadmapTrackName: "Vũ Trụ Huyền Bí (Cosmic Odyssey)",
+    roadmapTrackDesc: "Du dương, êm dịu khi mở Bản Đồ Viễn Chinh",
+    previewPlay: "▶ Nghe Thử",
+    previewStop: "⏹ Dừng",
     sfxVolume: "Hiệu Ứng Âm Thanh (SFX)",
     gameplayCategory: "Hình Ảnh & Hiệu Năng",
     screenShake: "Rung Chấn Màn Hình (Screen Shake)",
@@ -260,14 +272,20 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     musicTrackSynth: "Procedural Synth",
     nowPlayingArmageddon: "Now Playing: Epic Battle: Armageddon — Alibi Music",
     pauseAutoMuteDesc: "Automatically pauses battle music when the game is paused",
-    menuBgmLabel: "Menu & Exploration BGM",
+    menuBgmLabel: "Main Menu BGM",
+    menuTrackArmageddonDesc: "Heroic, cinematic hybrid orchestral theme (Alibi Music)",
     menuTrackCosmic: "Cosmic Odyssey",
     menuTrackCosmicDesc: "Ethereal, relaxing deep space ambient synth",
     menuTrackCyber: "Cyber Pulse",
     menuTrackCyberDesc: "Rhythmic 118 BPM synthwave retro groove",
-    battleBgmLabel: "In-Game Battle Music",
-    battleTrackName: "Armageddon (Alibi Music)",
-    battleTrackDesc: "Intense orchestral battle • Auto-pauses on pause",
+    battleBgmLabel: "In-Game Battle Combat",
+    battleTrackName: "Cyber Pulse (Synthwave)",
+    battleTrackDesc: "Driving 118 BPM synthwave • Auto-pauses on pause",
+    roadmapBgmLabel: "Cosmic Roadmap Starmap",
+    roadmapTrackName: "Cosmic Odyssey (Ambient)",
+    roadmapTrackDesc: "Ethereal, relaxing deep space exploration chimes",
+    previewPlay: "▶ Preview",
+    previewStop: "⏹ Stop",
     sfxVolume: "Sound Effects (SFX)",
     gameplayCategory: "Graphics & Performance",
     screenShake: "Screen Shake",

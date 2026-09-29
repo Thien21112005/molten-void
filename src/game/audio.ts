@@ -2,9 +2,10 @@
 
 type OscType = OscillatorType;
 
-export type MusicMode = "ambient" | "battle" | "paused" | "off";
+export type MusicMode = "menu" | "battle" | "roadmap" | "paused" | "off" | "ambient";
 export type MenuTrack = "odyssey" | "cyber";
 export type MusicTrack = "odyssey" | "cyber" | "armageddon" | "synth";
+export type TrackPreviewId = "armageddon" | "cyber" | "odyssey";
 
 function getAudioUrl(filename: string): string {
   const meta = import.meta as unknown as { env?: { BASE_URL?: string } };
@@ -77,10 +78,10 @@ export class SoundEngine {
   // Native HTML5 background audio (Armageddon - Alibi Music)
   private bgmAudio: HTMLAudioElement | null = null;
   private previewTimer: number | null = null;
-  isPreviewingBattle = false;
+  activePreview: TrackPreviewId | null = null;
 
-  // Music sequencer state (procedural synth backup)
-  private musicMode: MusicMode = "ambient";
+  // Music sequencer state
+  private musicMode: MusicMode = "menu";
   private isSequencerRunning = false;
   private timerId: number | null = null;
   private nextStepTime = 0;
@@ -196,10 +197,15 @@ export class SoundEngine {
 
   setMusicMode(mode: MusicMode) {
     const prev = this.musicMode;
-    this.musicMode = mode;
+    this.musicMode = mode === "ambient" ? "menu" : mode;
 
-    // When ending a battle run and returning to ambient menus, rewind battle track to start
-    if (mode === "ambient" && prev === "battle" && this.bgmAudio) {
+    // Stop any active preview when navigating
+    if (this.activePreview) {
+      this.stopPreview();
+    }
+
+    // Rewind Armageddon if entering menu from another mode
+    if (this.musicMode === "menu" && prev !== "menu" && this.bgmAudio) {
       try {
         this.bgmAudio.currentTime = 0;
       } catch {
@@ -207,67 +213,47 @@ export class SoundEngine {
       }
     }
 
-    this.updateMusicPlayback();
-  }
-
-  setMusicTrack(track: MusicTrack) {
-    if (track === "odyssey" || track === "cyber") {
-      this.setMenuTrack(track);
-    } else {
-      this.musicTrack = track;
-      this.updateMusicPlayback();
-    }
-  }
-
-  setMenuTrack(theme: MenuTrack) {
-    this.menuTrack = theme;
-    this.musicTrack = theme;
-    try {
-      localStorage.setItem("mv_menu_track", theme);
-      localStorage.setItem("mv_music_track", theme);
-    } catch {
-      /* ignore */
-    }
-
-    // Real-time musical transition: switch chords & rhythm instantly!
-    if (this.ctx && this.musicMode === "ambient") {
+    // Reset sequencer clock for battle or roadmap
+    if ((this.musicMode === "battle" || this.musicMode === "roadmap") && this.ctx) {
       this.currentStep = 0;
-      this.nextStepTime = this.ctx.currentTime + 0.02;
-      // Immediate audible preview tone
-      if (theme === "odyssey") {
-        this.playPadChord([174.61, 220.0, 261.63], this.ctx.currentTime + 0.01, 1.8, 0.16);
-        this.playArpNote(523.25, this.ctx.currentTime + 0.04, 0.06, 0.4);
-      } else {
-        this.playCyberBass(73.42, this.ctx.currentTime + 0.01, 0.18, 0.2);
-        this.playHeartbeatKick(this.ctx.currentTime + 0.01, 0.28);
-        this.playArpNote(587.33, this.ctx.currentTime + 0.05, 0.08, 0.2);
-      }
+      this.nextStepTime = this.ctx.currentTime + 0.03;
     }
+
     this.updateMusicPlayback();
   }
 
-  toggleBattlePreview(onStateChange?: (isPlaying: boolean) => void) {
-    if (this.isPreviewingBattle) {
-      this.stopBattlePreview(onStateChange);
-    } else {
-      this.startBattlePreview(onStateChange);
-    }
-  }
-
-  startBattlePreview(onStateChange?: (isPlaying: boolean) => void) {
+  // Previews any of the 3 soundtracks inside Settings Modal
+  previewTrack(trackId: TrackPreviewId, onStateChange?: (active: TrackPreviewId | null) => void) {
     this.ensure();
-    this.initBgmAudio();
-    this.isPreviewingBattle = true;
-    onStateChange?.(true);
 
-    if (this.bgmAudio) {
-      try {
-        this.bgmAudio.currentTime = 0;
-        this.bgmAudio.volume = Math.max(0, Math.min(1, this.musicVolume * 0.75));
-        this.bgmAudio.muted = this.muted;
-        void this.bgmAudio.play().catch(() => {});
-      } catch {
-        /* ignore */
+    if (this.activePreview === trackId) {
+      this.stopPreview(onStateChange);
+      return;
+    }
+
+    this.stopPreview();
+    this.activePreview = trackId;
+    onStateChange?.(trackId);
+
+    if (trackId === "armageddon") {
+      this.initBgmAudio();
+      if (this.bgmAudio) {
+        try {
+          this.bgmAudio.currentTime = 0;
+          this.bgmAudio.volume = Math.max(0, Math.min(1, this.musicVolume * 0.75));
+          this.bgmAudio.muted = this.muted;
+          void this.bgmAudio.play().catch(() => {});
+        } catch {
+          /* ignore */
+        }
+      }
+    } else {
+      if (this.bgmAudio && !this.bgmAudio.paused) {
+        this.bgmAudio.pause();
+      }
+      this.currentStep = 0;
+      if (this.ctx) {
+        this.nextStepTime = this.ctx.currentTime + 0.02;
       }
     }
 
@@ -275,18 +261,18 @@ export class SoundEngine {
       window.clearTimeout(this.previewTimer);
     }
     this.previewTimer = window.setTimeout(() => {
-      this.stopBattlePreview(onStateChange);
-    }, 7000);
+      this.stopPreview(onStateChange);
+    }, 8500);
   }
 
-  stopBattlePreview(onStateChange?: (isPlaying: boolean) => void) {
-    this.isPreviewingBattle = false;
-    onStateChange?.(false);
+  stopPreview(onStateChange?: (active: TrackPreviewId | null) => void) {
+    this.activePreview = null;
+    onStateChange?.(null);
     if (this.previewTimer !== null) {
       window.clearTimeout(this.previewTimer);
       this.previewTimer = null;
     }
-    if (this.bgmAudio && this.musicMode !== "battle") {
+    if (this.bgmAudio && (this.musicMode !== "menu" && this.musicMode !== "ambient")) {
       this.bgmAudio.pause();
       try {
         this.bgmAudio.currentTime = 0;
@@ -294,6 +280,7 @@ export class SoundEngine {
         /* ignore */
       }
     }
+    this.updateMusicPlayback();
   }
 
   /* ================= NATIVE BGM TRACK MANAGEMENT ================= */
@@ -315,7 +302,10 @@ export class SoundEngine {
     audioEl.addEventListener("error", () => {
       if (!audioEl.src.endsWith(fallbackFile)) {
         audioEl.src = getAudioUrl(fallbackFile);
-        if (this.musicMode === "battle" && !this.muted) {
+        const shouldPlay =
+          this.activePreview === "armageddon" ||
+          (!this.activePreview && (this.musicMode === "menu" || this.musicMode === "ambient"));
+        if (shouldPlay && !this.muted) {
           void audioEl.play().catch(() => {});
         }
       }
@@ -327,7 +317,11 @@ export class SoundEngine {
   }
 
   private getCalculatedBgmVolume(): number {
-    if (this.muted || (this.musicMode !== "battle" && !this.isPreviewingBattle)) return 0;
+    if (this.muted) return 0;
+    const isPlayingArmageddon =
+      this.activePreview === "armageddon" ||
+      (!this.activePreview && (this.musicMode === "menu" || this.musicMode === "ambient"));
+    if (!isPlayingArmageddon) return 0;
     // Epic battle intensity: 75%
     return Math.max(0, Math.min(1, this.musicVolume * 0.75));
   }
@@ -335,32 +329,32 @@ export class SoundEngine {
   updateMusicPlayback() {
     this.initBgmAudio();
 
-    // 1. If muted, music turned off, or game PAUSED: Stop battle music immediately!
-    if (this.muted || this.musicMode === "off" || this.musicMode === "paused" || this.musicVolume <= 0.001) {
-      if (this.bgmAudio && !this.bgmAudio.paused && !this.isPreviewingBattle) {
+    // 1. If muted or volume 0, silence
+    if (this.muted || this.musicVolume <= 0.001) {
+      if (this.bgmAudio && !this.bgmAudio.paused && !this.activePreview) {
         this.bgmAudio.pause();
       }
       return;
     }
 
-    // 2. Battle Mode: Armageddon plays full force!
-    if (this.musicMode === "battle") {
+    // 2. Armageddon plays for Main Menu BGM or active Armageddon preview
+    const isPlayingArmageddon =
+      this.activePreview === "armageddon" ||
+      (!this.activePreview && (this.musicMode === "menu" || this.musicMode === "ambient"));
+
+    if (isPlayingArmageddon) {
       if (this.bgmAudio) {
         this.bgmAudio.muted = false;
         this.bgmAudio.volume = this.getCalculatedBgmVolume();
         if (this.bgmAudio.paused) {
           const p = this.bgmAudio.play();
           if (p !== undefined) {
-            p.catch(() => {
-              // Browser autoplay policy requires user interaction before playback
-            });
+            p.catch(() => {});
           }
         }
       }
-    } else if (this.musicMode === "ambient") {
-      // 3. Ambient Mode (Menu / Roadmap / Victory / Game Over):
-      // Pause Armageddon so it is strictly reserved for in-game battles (unless previewing)
-      if (this.bgmAudio && !this.bgmAudio.paused && !this.isPreviewingBattle) {
+    } else {
+      if (this.bgmAudio && !this.bgmAudio.paused) {
         this.bgmAudio.pause();
       }
     }
@@ -400,24 +394,30 @@ export class SoundEngine {
   }
 
   private onSequencerTick() {
-    // When muted, off, paused, or volume 0, silence the sequencer
+    // When muted, volume 0, or inactive, silence the sequencer
     if (
       !this.ctx ||
       !this.isSequencerRunning ||
-      this.musicMode === "off" ||
-      this.musicMode === "paused" ||
       this.muted ||
       this.musicVolume <= 0.001
     ) {
       return;
     }
 
-    // In battle mode, Armageddon plays from HTMLAudioElement; sequencer rests
-    if (this.musicMode === "battle" && this.bgmAudio && !this.bgmAudio.paused) {
+    // If Armageddon is playing (Menu mode or Armageddon preview), sequencer is silent
+    const isArmageddonActive =
+      this.activePreview === "armageddon" ||
+      (!this.activePreview && (this.musicMode === "menu" || this.musicMode === "ambient"));
+
+    if (isArmageddonActive) {
       return;
     }
 
-    // In ambient mode (Menu / Roadmap / Victory / Gameover), procedural synth plays the selected menu theme!
+    // In paused or off mode without preview, sequencer is silent
+    if (!this.activePreview && (this.musicMode === "paused" || this.musicMode === "off")) {
+      return;
+    }
+
     while (this.nextStepTime < this.ctx.currentTime + this.scheduleLookahead) {
       this.scheduleMusicStep(this.currentStep, this.nextStepTime);
       this.nextStepTime += this.secondsPerStep;
@@ -428,50 +428,34 @@ export class SoundEngine {
   private scheduleMusicStep(step: number, time: number) {
     if (!this.ctx || !this.musicGain) return;
 
-    const bar = Math.floor(step / 16) % 8;
-    const stepInBar = step % 16;
-    const isBattle = this.musicMode === "battle";
-    const isOdyssey = !isBattle && this.menuTrack === "odyssey";
-    const isCyber = !isBattle && this.menuTrack === "cyber";
+    let theme: "cyber" | "odyssey" | null = null;
 
-    const progression = isOdyssey
-      ? COSMIC_ODYSSEY_PROGRESSION
-      : CYBER_PULSE_PROGRESSION;
-
-    const chord = progression[bar];
-
-    if (isBattle) {
-      // Procedural battle fallback if HTML5 audio is unavailable
-      if (stepInBar === 0) {
-        this.playPadChord(chord.pad, time, 1.8, 0.09);
+    if (this.activePreview === "cyber") {
+      theme = "cyber";
+    } else if (this.activePreview === "odyssey") {
+      theme = "odyssey";
+    } else if (!this.activePreview) {
+      if (this.musicMode === "battle") {
+        theme = "cyber"; // Battle is Cyber Pulse!
+      } else if (this.musicMode === "roadmap") {
+        theme = "odyssey"; // Roadmap is Cosmic Odyssey!
       }
-      if (stepInBar % 2 === 0) {
-        this.playCyberBass(chord.root, time, 0.14);
-      }
-      if (stepInBar === 0 || stepInBar === 8 || stepInBar === 12) {
-        this.playHeartbeatKick(time, 0.32);
-      }
-      if (stepInBar % 2 === 1) {
-        this.playCosmicHiHat(time, 0.06);
-      }
-      const noteIdx = (stepInBar + bar * 2) % chord.arp.length;
-      this.playArpNote(chord.arp[noteIdx], time, 0.05);
-      return;
     }
 
-    if (isOdyssey) {
-      // THEME 1: COSMIC ODYSSEY (Lush, Floating, Deep Space Ambient)
-      // 1. Slow warm atmospheric pad on beat 0
+    if (!theme) return;
+
+    const bar = Math.floor(step / 16) % 8;
+    const stepInBar = step % 16;
+
+    if (theme === "odyssey") {
+      // THEME: COSMIC ODYSSEY (Lush, Floating, Deep Space Ambient for Roadmap)
+      const chord = COSMIC_ODYSSEY_PROGRESSION[bar];
       if (stepInBar === 0) {
         this.playPadChord(chord.pad, time, 2.2, 0.16);
       }
-
-      // 2. Gentle deep sub-bass drone on beat 0 and beat 8
       if (stepInBar === 0 || stepInBar === 8) {
         this.playCyberBass(chord.root, time, 0.08, 0.45);
       }
-
-      // 3. Sparkling stardust chime every 4 steps
       if (stepInBar % 4 === 0) {
         const noteIdx = (stepInBar / 4 + bar) % chord.arp.length;
         this.playArpNote(chord.arp[noteIdx], time, 0.045, 0.35);
@@ -479,30 +463,22 @@ export class SoundEngine {
       return;
     }
 
-    if (isCyber) {
-      // THEME 2: CYBER PULSE (118 BPM Punchy Retro Synthwave Groove)
-      // 1. Synth pad
+    if (theme === "cyber") {
+      // THEME: CYBER PULSE (118 BPM Punchy Retro Synthwave Groove for Battle)
+      const chord = CYBER_PULSE_PROGRESSION[bar];
       if (stepInBar === 0) {
         this.playPadChord(chord.pad, time, 1.4, 0.12);
       }
-
-      // 2. Driving 8th-note plucked cyber bassline
       if (stepInBar % 2 === 0) {
         const isAccent = stepInBar === 0 || stepInBar === 6 || stepInBar === 10;
         this.playCyberBass(chord.root, time, isAccent ? 0.18 : 0.12, 0.11);
       }
-
-      // 3. Heartbeat kick on beats 1 and 3 (step 0 and 8), plus syncopation on step 12
       if (stepInBar === 0 || stepInBar === 8 || stepInBar === 12) {
         this.playHeartbeatKick(time, stepInBar === 0 ? 0.28 : 0.2);
       }
-
-      // 4. Electronic hi-hat on off-beats
       if (stepInBar % 2 === 1) {
         this.playCosmicHiHat(time, stepInBar === 7 || stepInBar === 15 ? 0.07 : 0.035);
       }
-
-      // 5. Retro 16th note synth arpeggios
       const noteIdx = (stepInBar + bar * 2) % chord.arp.length;
       this.playArpNote(chord.arp[noteIdx], time, 0.045, 0.10);
     }

@@ -237,6 +237,7 @@ export class Engine {
     }
     this.resize();
     this.buildLevel(1);
+    sfx.setMusicMode("menu");
     this.pushUI();
     this.raf = requestAnimationFrame(this.loop);
   }
@@ -297,7 +298,7 @@ export class Engine {
   openRoadmap() {
     sfx.ensure();
     sfx.click();
-    sfx.setMusicMode("ambient");
+    sfx.setMusicMode("roadmap");
     this.screen = "roadmap";
     this.aimMode = "none";
     this.charging = false;
@@ -325,7 +326,7 @@ export class Engine {
 
   toMenu() {
     sfx.click();
-    sfx.setMusicMode("ambient");
+    sfx.setMusicMode("menu");
     this.screen = "menu";
     this.orb = null;
     this.aimMode = "none";
@@ -976,7 +977,7 @@ export class Engine {
     }
 
     this.screen = "victory";
-    sfx.setMusicMode("ambient");
+    sfx.setMusicMode("menu");
     this.pushUI();
   }
 
@@ -995,7 +996,7 @@ export class Engine {
       /* ignore */
     }
     this.screen = "gameover";
-    sfx.setMusicMode("ambient");
+    sfx.setMusicMode("menu");
     sfx.gameOver();
     this.shake = Math.min(26, this.shake + 8);
     this.pushUI();
