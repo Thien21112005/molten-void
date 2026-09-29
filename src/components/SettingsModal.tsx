@@ -6,6 +6,16 @@ import {
   applySettings,
 } from "../game/settings";
 import { audio, type TrackPreviewId } from "../game/audio";
+import {
+  IconFlagVN,
+  IconFlagUK,
+  IconThemeArmageddon,
+  IconThemeCyber,
+  IconThemeOdyssey,
+  IconAutoPause,
+  IconSaveDisk,
+  IconAlertTriangle,
+} from "./Icons";
 import { cn } from "../utils/cn";
 
 export interface SettingsModalProps {
@@ -131,24 +141,26 @@ export function SettingsModal({
             <button
               onClick={() => updateSetting("language", "vi")}
               className={cn(
-                "flex items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-bold tracking-wide transition active:scale-95",
+                "flex items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-bold tracking-wide transition active:scale-95 cursor-pointer",
                 settings.language === "vi"
                   ? "border-ember-400 bg-ember-500/20 text-ember-300 shadow-[0_0_16px_rgba(255,122,26,0.3)] ring-1 ring-ember-400/40"
                   : "border-void-700 bg-void-800/80 text-white/60 hover:bg-void-800 hover:text-white",
               )}
             >
-              <span>🇻🇳</span> Tiếng Việt
+              <IconFlagVN size={14} />
+              <span>Tiếng Việt</span>
             </button>
             <button
               onClick={() => updateSetting("language", "en")}
               className={cn(
-                "flex items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-bold tracking-wide transition active:scale-95",
+                "flex items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-bold tracking-wide transition active:scale-95 cursor-pointer",
                 settings.language === "en"
                   ? "border-ember-400 bg-ember-500/20 text-ember-300 shadow-[0_0_16px_rgba(255,122,26,0.3)] ring-1 ring-ember-400/40"
                   : "border-void-700 bg-void-800/80 text-white/60 hover:bg-void-800 hover:text-white",
               )}
             >
-              <span>🇬🇧</span> English
+              <IconFlagUK size={14} />
+              <span>English</span>
             </button>
           </div>
         </div>
@@ -205,7 +217,8 @@ export function SettingsModal({
                 <div className="rounded-xl border border-void-700/80 bg-void-950/70 p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold tracking-wider text-amber-300 uppercase flex items-center gap-1.5">
-                      <span>🏰</span> {t.menuBgmLabel}
+                      <IconThemeArmageddon size={16} />
+                      <span>{t.menuBgmLabel}</span>
                     </span>
                     <button
                       type="button"
@@ -236,7 +249,8 @@ export function SettingsModal({
                 <div className="rounded-xl border border-void-700/80 bg-void-950/70 p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold tracking-wider text-cyan-300 uppercase flex items-center gap-1.5">
-                      <span>⚔️</span> {t.battleBgmLabel}
+                      <IconThemeCyber size={16} />
+                      <span>{t.battleBgmLabel}</span>
                     </span>
                     <button
                       type="button"
@@ -267,7 +281,8 @@ export function SettingsModal({
                 <div className="rounded-xl border border-void-700/80 bg-void-950/70 p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold tracking-wider text-purple-300 uppercase flex items-center gap-1.5">
-                      <span>🗺️</span> {t.roadmapBgmLabel}
+                      <IconThemeOdyssey size={16} />
+                      <span>{t.roadmapBgmLabel}</span>
                     </span>
                     <button
                       type="button"
@@ -296,7 +311,7 @@ export function SettingsModal({
 
                 {/* Auto Mute Notice */}
                 <div className="flex items-center gap-2 rounded-xl border border-void-800 bg-void-950/50 px-2.5 py-1.5 text-[11px] font-medium text-white/50">
-                  <span className="text-ice-400 flex-shrink-0">⏸️</span>
+                  <IconAutoPause size={15} />
                   <span className="leading-tight">{t.pauseAutoMuteDesc}</span>
                 </div>
               </div>
@@ -443,8 +458,9 @@ export function SettingsModal({
             </div>
           ) : showResetConfirm ? (
             <div className="rounded-xl border border-rose-alert/50 bg-rose-950/50 p-3.5 space-y-3">
-              <p className="font-display text-xs tracking-wider text-rose-alert">
-                ⚠️ {t.resetConfirmTitle}
+              <p className="font-display text-xs tracking-wider text-rose-alert flex items-center gap-1.5">
+                <IconAlertTriangle size={15} />
+                <span>{t.resetConfirmTitle}</span>
               </p>
               <p className="text-[11px] leading-relaxed text-white/70">
                 {t.resetConfirmMsg}
@@ -512,7 +528,7 @@ export function SettingsModal({
             onClick={handleSaveAndApply}
             className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-ember-400 to-amber-400 px-4 sm:px-5 py-2 text-xs font-black uppercase tracking-wider text-void-950 shadow-[0_3px_0_#8f2f0c,0_0_16px_rgba(255,122,26,0.35)] transition hover:brightness-110 active:scale-95 cursor-pointer"
           >
-            <span>💾</span>
+            <IconSaveDisk size={14} />
             <span>{t.saveAndApply}</span>
           </button>
         </div>

@@ -8,6 +8,7 @@ import { CampaignIntel } from "./components/CampaignIntel";
 import { loadProgress, getTotalStars, MAX_POSSIBLE_STARS } from "./game/levels/progress";
 import { TRANSLATIONS, loadLanguage, type Language, type Translations } from "./game/i18n";
 import { audio } from "./game/audio";
+import { IconTacticalTarget, IconStar } from "./components/Icons";
 
 const initialUI: UIState = {
   screen: "menu",
@@ -415,8 +416,10 @@ export default function App() {
                 <div className="grid grid-cols-3 gap-2 rounded-2xl border border-void-700/80 bg-void-900/80 p-3 shadow-inner">
                   <div className="flex flex-col items-center text-center">
                     <span className="text-[10px] font-bold tracking-wider text-white/40">{t.campaignStars}</span>
-                    <span className="font-display text-sm sm:text-base text-amber-300">
-                      ★ {totalCampaignStars} <span className="text-[10px] text-white/40">/ {MAX_POSSIBLE_STARS}</span>
+                    <span className="flex items-center justify-center gap-1 font-display text-sm sm:text-base text-amber-300">
+                      <IconStar size={12} className="text-amber-300" />
+                      <span>{totalCampaignStars}</span>
+                      <span className="text-[10px] text-white/40">/ {MAX_POSSIBLE_STARS}</span>
                     </span>
                   </div>
                   <div className="flex flex-col items-center border-x border-void-800 text-center">
@@ -578,7 +581,7 @@ export default function App() {
             {/* Tactical Level Debrief Card */}
             <div className="mt-4 w-full rounded-2xl border border-void-700/80 bg-void-950/80 p-3.5 text-center shadow-inner">
               <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-amber-300">
-                <span>🎯</span>
+                <IconTacticalTarget size={15} className="text-amber-300" />
                 <span className="uppercase tracking-wider">{t.levelTarget} {ui.level}</span>
               </div>
               <p className="mt-1 text-xs text-white/70">

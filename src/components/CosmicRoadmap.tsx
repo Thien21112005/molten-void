@@ -9,6 +9,7 @@ import {
 import { StarRating } from "./StarRating";
 import type { Translations } from "../game/i18n";
 import { audio } from "../game/audio";
+import { IconFlagStart, IconApexCrown } from "./Icons";
 import { cn } from "../utils/cn";
 
 export interface CosmicRoadmapProps {
@@ -653,8 +654,9 @@ export function CosmicRoadmap({
                 {/* START FLAG (Level 1) */}
                 {isStart && (
                   <div className="animate-bounce-subtle pointer-events-none absolute -top-11 left-1/2 flex -translate-x-1/2 flex-col items-center">
-                    <span className="flex items-center gap-1 whitespace-nowrap rounded-full border border-emerald-400/80 bg-emerald-500/95 px-2.5 py-0.5 font-display text-[9px] font-bold tracking-widest text-void-950 shadow-[0_0_14px_rgba(52,211,153,0.8)]">
-                      🚩 {t?.startNode ?? "START"}
+                    <span className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-400/80 bg-emerald-500/95 px-2.5 py-0.5 font-display text-[9px] font-bold tracking-widest text-void-950 shadow-[0_0_14px_rgba(52,211,153,0.8)]">
+                      <IconFlagStart size={11} className="text-void-950" />
+                      <span>{t?.startNode ?? "START"}</span>
                     </span>
                     <div className="h-2.5 w-0.5 bg-emerald-400" />
                   </div>
@@ -663,8 +665,9 @@ export function CosmicRoadmap({
                 {/* APEX FINISH CROWN (Level 15) */}
                 {isApex && (
                   <div className="animate-float-slow pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center">
-                    <span className="flex items-center gap-1 whitespace-nowrap rounded-full border-2 border-amber-300 bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-0.5 font-display text-[10px] font-bold tracking-widest text-void-950 shadow-[0_0_22px_rgba(255,200,50,0.9)]">
-                      🏆 {t?.apexNode ?? "APEX"}
+                    <span className="flex items-center gap-1.5 whitespace-nowrap rounded-full border-2 border-amber-300 bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-0.5 font-display text-[10px] font-bold tracking-widest text-void-950 shadow-[0_0_22px_rgba(255,200,50,0.9)]">
+                      <IconApexCrown size={12} className="text-void-950" />
+                      <span>{t?.apexNode ?? "APEX"}</span>
                     </span>
                     <div className="h-2.5 w-0.5 bg-amber-400" />
                   </div>

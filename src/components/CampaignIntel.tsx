@@ -2,6 +2,13 @@ import React from "react";
 import type { PlayerProgress } from "../game/levels/types";
 import { getTotalStars, MAX_POSSIBLE_STARS } from "../game/levels/progress";
 import type { Translations } from "../game/i18n";
+import {
+  IconSectorAsteroid,
+  IconSectorPlasma,
+  IconSectorVoid,
+  IconSparkle,
+  IconStar,
+} from "./Icons";
 import { cn } from "../utils/cn";
 
 export interface CampaignIntelProps {
@@ -14,7 +21,7 @@ export interface CampaignIntelProps {
 interface SectorInfo {
   id: number;
   name: string;
-  icon: string;
+  icon: React.ReactNode;
   startLevel: number;
   endLevel: number;
   colorBorder: string;
@@ -35,7 +42,7 @@ export function CampaignIntel({
     {
       id: 1,
       name: t.sector1Name,
-      icon: "🪐",
+      icon: <IconSectorAsteroid size={22} />,
       startLevel: 1,
       endLevel: 5,
       colorBorder: "border-amber-500/40",
@@ -45,7 +52,7 @@ export function CampaignIntel({
     {
       id: 2,
       name: t.sector2Name,
-      icon: "⚡",
+      icon: <IconSectorPlasma size={22} />,
       startLevel: 6,
       endLevel: 10,
       colorBorder: "border-cyan-500/40",
@@ -55,7 +62,7 @@ export function CampaignIntel({
     {
       id: 3,
       name: t.sector3Name,
-      icon: "🌀",
+      icon: <IconSectorVoid size={22} />,
       startLevel: 11,
       endLevel: 15,
       colorBorder: "border-purple-500/40",
@@ -69,15 +76,16 @@ export function CampaignIntel({
       {/* Header */}
       <div className="flex items-center justify-between border-b border-void-800/80 pb-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-5 w-5 items-center justify-center rounded-lg border border-ice-500/40 bg-ice-500/15 text-[10px] text-ice-300 shadow-[0_0_8px_rgba(46,230,201,0.3)]">
-            ✦
+          <span className="flex h-5 w-5 items-center justify-center rounded-lg border border-ice-500/40 bg-ice-500/15 shadow-[0_0_8px_rgba(46,230,201,0.3)]">
+            <IconSparkle size={12} />
           </span>
           <span className="font-display text-xs sm:text-sm font-bold tracking-wider text-ice-300 uppercase">
             {t.campaignIntel}
           </span>
         </div>
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-extrabold text-amber-300 shadow-sm">
-          <span>★ {totalStars}</span>
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-300 shadow-sm">
+          <IconStar size={11} className="text-amber-300" />
+          <span>{totalStars}</span>
           <span className="text-[9px] text-white/40">/ {MAX_POSSIBLE_STARS}</span>
         </div>
       </div>
@@ -143,8 +151,9 @@ export function CampaignIntel({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-display font-bold text-amber-300">
-                    ★ {sectorStars}
+                  <span className="flex items-center gap-1 text-xs font-display font-bold text-amber-300">
+                    <IconStar size={10} className="text-amber-300" />
+                    <span>{sectorStars}</span>
                     <span className="text-[10px] text-white/40 font-normal">/15</span>
                   </span>
                   <span
