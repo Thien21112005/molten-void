@@ -186,21 +186,26 @@ export function CosmicDecorations() {
           100% { transform: rotate(360deg); }
         }
 
-        @keyframes magmaPulse {
+        /* Vector Corona Pulses (Thay thế filter drop-shadow bằng vector để chống vỡ hình) */
+        @keyframes magmaCoronaPulse {
           0%, 100% {
-            filter: drop-shadow(0 0 12px rgba(255, 90, 20, 0.45)) drop-shadow(0 0 25px rgba(255, 60, 0, 0.2));
+            transform: scale(1);
+            opacity: 0.7;
           }
           50% {
-            filter: drop-shadow(0 0 22px rgba(255, 120, 30, 0.75)) drop-shadow(0 0 45px rgba(255, 80, 0, 0.35));
+            transform: scale(1.08);
+            opacity: 1;
           }
         }
 
-        @keyframes iceGlowPulse {
+        @keyframes iceCoronaPulse {
           0%, 100% {
-            filter: drop-shadow(0 0 14px rgba(46, 230, 201, 0.4)) drop-shadow(0 0 28px rgba(20, 180, 160, 0.2));
+            transform: scale(1);
+            opacity: 0.75;
           }
           50% {
-            filter: drop-shadow(0 0 24px rgba(77, 252, 231, 0.7)) drop-shadow(0 0 40px rgba(46, 230, 201, 0.35));
+            transform: scale(1.09);
+            opacity: 1;
           }
         }
 
@@ -567,40 +572,65 @@ ${ORBIT_KEYFRAMES_CSS}
         style={{
           left: "50%",
           top: "50%",
-          animation: "orbitMagma 75s linear infinite, magmaPulse 4s ease-in-out infinite",
+          animation: "orbitMagma 75s linear infinite",
         }}
       >
-        <svg viewBox="0 0 100 100" className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 overflow-visible">
+        <svg viewBox="0 0 100 100" className="h-18 w-18 sm:h-22 sm:w-22 md:h-26 md:w-26 overflow-visible filter drop-shadow-[0_0_18px_rgba(255,122,26,0.5)]">
           <defs>
-            <radialGradient id="magmaCore" cx="40%" cy="40%" r="60%">
-              <stop offset="0%" stopColor="#ffd23e" />
-              <stop offset="35%" stopColor="#ff7a1a" />
-              <stop offset="70%" stopColor="#dc2626" />
+            <radialGradient id="magmaCore" cx="38%" cy="38%" r="62%">
+              <stop offset="0%" stopColor="#fff275" />
+              <stop offset="25%" stopColor="#ffd23e" />
+              <stop offset="50%" stopColor="#ff7a1a" />
+              <stop offset="78%" stopColor="#dc2626" />
               <stop offset="95%" stopColor="#450a0a" />
               <stop offset="100%" stopColor="#180303" />
             </radialGradient>
+            <radialGradient id="magmaCorona" cx="50%" cy="50%" r="50%">
+              <stop offset="60%" stopColor="#ffd23e" stopOpacity="0" />
+              <stop offset="74%" stopColor="#ff7a1a" stopOpacity="0.8" />
+              <stop offset="88%" stopColor="#f05423" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#dc2626" stopOpacity="0" />
+            </radialGradient>
+            <radialGradient id="magmaGloss" cx="35%" cy="35%" r="45%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.45" />
+              <stop offset="55%" stopColor="#ffffff" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+            </radialGradient>
             <clipPath id="magmaClip">
-              <circle cx="50" cy="50" r="30" />
+              <circle cx="50" cy="50" r="32" />
             </clipPath>
           </defs>
 
-          {/* Outer Magma Heat Flare */}
-          <circle cx="50" cy="50" r="33" fill="none" stroke="#ff7a1a" strokeWidth="2.5" opacity="0.8" />
-          <circle cx="50" cy="50" r="30" fill="url(#magmaCore)" />
+          {/* Luminous Pulsing Solar Corona (Vector radial gradient - 0 pixelation!) */}
+          <circle
+            cx="50"
+            cy="50"
+            r="46"
+            fill="url(#magmaCorona)"
+            style={{ transformOrigin: "50px 50px", animation: "magmaCoronaPulse 3.5s ease-in-out infinite" }}
+          />
+
+          {/* Concentric Heat Flare Rings */}
+          <circle cx="50" cy="50" r="35" fill="none" stroke="#ff7a1a" strokeWidth="1.6" opacity="0.85" />
+          <circle cx="50" cy="50" r="32.5" fill="none" stroke="#ffd23e" strokeWidth="1" opacity="0.9" />
+
+          {/* Magma Molten Core Sphere */}
+          <circle cx="50" cy="50" r="32" fill="url(#magmaCore)" />
 
           {/* Molten Surface Fissures with Swirling Crust */}
           <g clipPath="url(#magmaClip)">
             <g style={{ transformOrigin: "50px 50px", animation: "magmaCrustSpin 28s linear infinite" }}>
-              <circle cx="32" cy="42" r="12" fill="#1c0707" opacity="0.8" />
-              <circle cx="64" cy="36" r="15" fill="#1c0707" opacity="0.8" />
-              <circle cx="52" cy="68" r="14" fill="#1c0707" opacity="0.85" />
-              <path d="M 20 50 Q 40 45 50 35 Q 60 25 80 30" stroke="#ffd23e" strokeWidth="2" fill="none" opacity="0.95" />
-              <path d="M 45 35 Q 55 55 45 75 Q 40 85 30 80" stroke="#ff7a1a" strokeWidth="2" fill="none" opacity="0.9" />
-              <path d="M 55 55 Q 75 60 85 70" stroke="#ffd23e" strokeWidth="1.5" fill="none" opacity="0.85" />
+              <circle cx="32" cy="42" r="13" fill="#1c0707" opacity="0.85" />
+              <circle cx="65" cy="35" r="16" fill="#1c0707" opacity="0.85" />
+              <circle cx="52" cy="68" r="15" fill="#1c0707" opacity="0.88" />
+              <path d="M 18 50 Q 38 45 48 35 Q 58 25 82 30" stroke="#ffd23e" strokeWidth="2.2" fill="none" opacity="0.95" strokeLinecap="round" />
+              <path d="M 45 33 Q 55 55 45 75 Q 40 85 28 80" stroke="#ff7a1a" strokeWidth="2.2" fill="none" opacity="0.9" strokeLinecap="round" />
+              <path d="M 52 55 Q 72 60 85 70" stroke="#ffd23e" strokeWidth="1.8" fill="none" opacity="0.85" strokeLinecap="round" />
             </g>
-          </g>
 
-          <circle cx="40" cy="40" r="12" fill="#fff" opacity="0.2" />
+            {/* Smooth 3D Globe Specular Glare (Inside sphere!) */}
+            <circle cx="38" cy="38" r="22" fill="url(#magmaGloss)" />
+          </g>
         </svg>
       </div>
 
@@ -610,10 +640,10 @@ ${ORBIT_KEYFRAMES_CSS}
         style={{
           left: "50%",
           top: "50%",
-          animation: "orbitIce 175s linear infinite, iceGlowPulse 4.5s ease-in-out infinite",
+          animation: "orbitIce 175s linear infinite",
         }}
       >
-        <svg viewBox="0 0 100 100" className="h-14 w-14 sm:h-18 sm:w-18 md:h-22 md:w-22 overflow-visible">
+        <svg viewBox="0 0 100 100" className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 overflow-visible filter drop-shadow-[0_0_18px_rgba(46,230,201,0.5)]">
           <defs>
             <radialGradient id="iceCore" cx="35%" cy="35%" r="65%">
               <stop offset="0%" stopColor="#e0f2fe" />
@@ -621,20 +651,35 @@ ${ORBIT_KEYFRAMES_CSS}
               <stop offset="70%" stopColor="#0891b2" />
               <stop offset="100%" stopColor="#0c4a6e" />
             </radialGradient>
+            <radialGradient id="iceCorona" cx="50%" cy="50%" r="50%">
+              <stop offset="65%" stopColor="#7dfce7" stopOpacity="0" />
+              <stop offset="80%" stopColor="#7dfce7" stopOpacity="0.75" />
+              <stop offset="92%" stopColor="#0891b2" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#0c4a6e" stopOpacity="0" />
+            </radialGradient>
             <clipPath id="iceClip">
-              <circle cx="50" cy="50" r="26" />
+              <circle cx="50" cy="50" r="28" />
             </clipPath>
           </defs>
 
+          {/* Luminous Pulsing Ice Corona (Vector radial gradient - 0 pixelation!) */}
+          <circle
+            cx="50"
+            cy="50"
+            r="42"
+            fill="url(#iceCorona)"
+            style={{ transformOrigin: "50px 50px", animation: "iceCoronaPulse 4s ease-in-out infinite" }}
+          />
+
           {/* Ice Aura Ring */}
-          <circle cx="50" cy="50" r="29" fill="none" stroke="#7dfce7" strokeWidth="1.8" opacity="0.8" />
+          <circle cx="50" cy="50" r="31" fill="none" stroke="#7dfce7" strokeWidth="1.8" opacity="0.85" />
           {/* Concentric Planet Core Sphere */}
-          <circle cx="50" cy="50" r="26" fill="url(#iceCore)" />
+          <circle cx="50" cy="50" r="28" fill="url(#iceCore)" />
           {/* Specular 3D Glare */}
-          <circle cx="42" cy="42" r="10" fill="#ffffff" opacity="0.22" />
+          <circle cx="42" cy="42" r="10" fill="#ffffff" opacity="0.25" />
 
           {/* Glacial Ridges with Rotating Crystalline Facets */}
-          <g clipPath="url(#iceClip)" opacity="0.7">
+          <g clipPath="url(#iceClip)" opacity="0.75">
             <g style={{ transformOrigin: "50px 50px", animation: "icePlanetSpin 24s linear infinite" }}>
               <polygon points="40 28 55 35 48 48 35 42" fill="#ffffff" opacity="0.8" />
               <polygon points="52 45 68 40 65 60 50 56" fill="#a5f3fc" opacity="0.7" />
@@ -644,10 +689,10 @@ ${ORBIT_KEYFRAMES_CSS}
 
           {/* Miniature orbiting asteroid specks revolving around the planet */}
           <g style={{ transformOrigin: "50px 50px", animation: "asteroidRingSpin 14s linear infinite" }}>
-            <circle cx="16" cy="46" r="1.6" fill="#7dfce7" />
-            <circle cx="84" cy="54" r="1.8" fill="#bae6fd" />
-            <circle cx="50" cy="82" r="1.5" fill="#ffffff" />
-            <circle cx="50" cy="18" r="1.3" fill="#2ee6c9" />
+            <circle cx="14" cy="46" r="1.6" fill="#7dfce7" />
+            <circle cx="86" cy="54" r="1.8" fill="#bae6fd" />
+            <circle cx="50" cy="84" r="1.5" fill="#ffffff" />
+            <circle cx="50" cy="16" r="1.3" fill="#2ee6c9" />
           </g>
         </svg>
       </div>
