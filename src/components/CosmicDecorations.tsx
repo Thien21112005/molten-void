@@ -55,54 +55,56 @@ export function CosmicDecorations() {
         }
 
         /* Streaking Comets (Sao chổi bay) across the cosmos */
+        /* Comet 1: Streaking from Top-Left to Bottom-Right (Head leads at 46deg, tail trails behind) */
         @keyframes cometStreak1 {
           0% {
-            transform: translate(-15vw, -10vh) rotate(28deg);
+            transform: translate(-15vw, -10vh) rotate(46deg);
             opacity: 0;
           }
-          5% {
+          4% {
             opacity: 1;
           }
-          30% {
-            transform: translate(115vw, 65vh) rotate(28deg);
+          28% {
+            transform: translate(115vw, 68vh) rotate(46deg);
             opacity: 1;
           }
-          35%, 100% {
-            transform: translate(115vw, 65vh) rotate(28deg);
+          32%, 100% {
+            transform: translate(115vw, 68vh) rotate(46deg);
             opacity: 0;
           }
         }
 
+        /* Comet 2: Streaking from Top-Right to Bottom-Left (Head leads at 132deg, tail trails up-right) */
         @keyframes cometStreak2 {
-          0%, 45% {
-            transform: translate(110vw, 15vh) rotate(-145deg);
+          0%, 42% {
+            transform: translate(115vw, -10vh) rotate(132deg);
             opacity: 0;
           }
-          50% {
+          46% {
             opacity: 1;
           }
-          75% {
-            transform: translate(-20vw, 85vh) rotate(-145deg);
+          72% {
+            transform: translate(-20vw, 75vh) rotate(132deg);
             opacity: 1;
           }
-          80%, 100% {
-            transform: translate(-20vw, 85vh) rotate(-145deg);
+          76%, 100% {
+            transform: translate(-20vw, 75vh) rotate(132deg);
             opacity: 0;
           }
         }
 
-        /* Quick Shooting Stars (Sao băng) */
+        /* Quick Shooting Star (Sao băng vụt sáng chớp nhoáng) */
         @keyframes shootingStar1 {
           0%, 65% {
-            transform: translate(25vw, -5vh) rotate(40deg) scaleX(0);
+            transform: translate(15vw, -5vh) rotate(57deg) scaleX(0);
             opacity: 0;
           }
-          68% {
-            transform: translate(45vw, 15vh) rotate(40deg) scaleX(1);
+          67% {
+            transform: translate(35vw, 15vh) rotate(57deg) scaleX(1);
             opacity: 1;
           }
-          72%, 100% {
-            transform: translate(65vw, 35vh) rotate(40deg) scaleX(0.2);
+          70%, 100% {
+            transform: translate(55vw, 35vh) rotate(57deg) scaleX(0.2);
             opacity: 0;
           }
         }
@@ -125,7 +127,10 @@ export function CosmicDecorations() {
       {/* Comet 1: Cyan Ice Comet streaking from Top-Left to Bottom-Right */}
       <div
         className="absolute top-0 left-0 pointer-events-none z-15"
-        style={{ animation: "cometStreak1 12s cubic-bezier(0.25, 0.1, 0.25, 1) infinite" }}
+        style={{
+          transformOrigin: "90% 50%",
+          animation: "cometStreak1 13s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
+        }}
       >
         <svg viewBox="0 0 200 40" className="w-48 sm:w-64 h-auto overflow-visible">
           <defs>
@@ -154,10 +159,13 @@ export function CosmicDecorations() {
         </svg>
       </div>
 
-      {/* Comet 2: Amber Magma Comet streaking across the lower cosmos */}
+      {/* Comet 2: Amber Magma Comet streaking from Top-Right to Bottom-Left */}
       <div
         className="absolute top-0 left-0 pointer-events-none z-15"
-        style={{ animation: "cometStreak2 16s cubic-bezier(0.22, 0.1, 0.25, 1) infinite" }}
+        style={{
+          transformOrigin: "90% 50%",
+          animation: "cometStreak2 16s cubic-bezier(0.22, 0.1, 0.25, 1) infinite",
+        }}
       >
         <svg viewBox="0 0 200 40" className="w-44 sm:w-56 h-auto overflow-visible">
           <defs>
