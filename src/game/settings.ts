@@ -36,7 +36,7 @@ export function loadSettings(): GameSettings {
       muted: typeof data.muted === "boolean" ? data.muted : def.muted,
       musicVolume: typeof data.musicVolume === "number" ? data.musicVolume : def.musicVolume,
       sfxVolume: typeof data.sfxVolume === "number" ? data.sfxVolume : def.sfxVolume,
-      musicTrack: data.musicTrack === "synth" ? "synth" : "armageddon",
+      musicTrack: data.musicTrack === "cyber" ? "cyber" : "odyssey",
       screenShake: typeof data.screenShake === "boolean" ? data.screenShake : def.screenShake,
       particleDensity: data.particleDensity === "reduced" ? "reduced" : "full",
       trajectoryGuide: data.trajectoryGuide === "minimal" ? "minimal" : "full",

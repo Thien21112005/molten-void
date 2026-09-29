@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TRANSLATIONS, type Language } from "../game/i18n";
 import {
   type GameSettings,
@@ -22,8 +22,21 @@ export function SettingsModal({
   const [settings, setSettings] = useState<GameSettings>(() => loadSettings());
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
+  const [isBattlePreviewing, setIsBattlePreviewing] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      audio.stopBattlePreview();
+    };
+  }, []);
 
   const t = TRANSLATIONS[settings.language];
+
+  const handleToggleBattlePreview = () => {
+    audio.toggleBattlePreview((playing) => {
+      setIsBattlePreviewing(playing);
+    });
+  };
 
   const updateSetting = <K extends keyof GameSettings>(
     key: K,
@@ -174,64 +187,110 @@ export function SettingsModal({
                 className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-void-950 accent-ember-400 disabled:opacity-40"
               />
 
-              {/* BGM Track Selection */}
-              <div className="mt-3">
-                <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-wider text-ice-400/80 uppercase">
-                  <span>{t.musicTrackLabel}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      audio.ensure();
-                      audio.click();
-                      updateSetting("musicTrack", "armageddon");
-                    }}
-                    className={cn(
-                      "flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition active:scale-95 cursor-pointer",
-                      settings.musicTrack === "armageddon"
-                        ? "border-ember-400 bg-ember-500/20 text-ember-300 shadow-[0_0_14px_rgba(255,122,26,0.3)] ring-1 ring-ember-400/40"
-                        : "border-void-700 bg-void-800/70 text-white/60 hover:bg-void-800 hover:text-white",
-                    )}
-                  >
-                    <span className="text-xs font-bold leading-tight flex items-center gap-1.5">
-                      ⚔️ {t.musicTrackArmageddon}
+              {/* BGM Track Selection: Separated into Menu BGM & Battle BGM */}
+              <div className="mt-3.5 space-y-3">
+                {/* 1. Menu & Exploration BGM */}
+                <div>
+                  <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-wider text-ice-400 uppercase">
+                    <span className="flex items-center gap-1.5">
+                      <span>🎵</span> {t.menuBgmLabel}
                     </span>
-                    <span className="text-[10px] text-white/50 mt-1">Alibi Music &bull; Epic Battle</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      audio.ensure();
-                      audio.click();
-                      updateSetting("musicTrack", "synth");
-                    }}
-                    className={cn(
-                      "flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition active:scale-95 cursor-pointer",
-                      settings.musicTrack === "synth"
-                        ? "border-ember-400 bg-ember-500/20 text-ember-300 shadow-[0_0_14px_rgba(255,122,26,0.3)] ring-1 ring-ember-400/40"
-                        : "border-void-700 bg-void-800/70 text-white/60 hover:bg-void-800 hover:text-white",
-                    )}
-                  >
-                    <span className="text-xs font-bold leading-tight flex items-center gap-1.5">
-                      🌌 {t.musicTrackSynth}
-                    </span>
-                    <span className="text-[10px] text-white/50 mt-1">WebAudio Synth &bull; 122 BPM</span>
-                  </button>
-                </div>
-
-                {settings.musicTrack === "armageddon" && !settings.muted && (
-                  <div className="mt-2.5 flex items-center gap-2 rounded-xl border border-ember-500/30 bg-ember-500/10 px-3 py-2 text-[11px] font-semibold text-ember-300 shadow-inner">
-                    <span className="relative flex h-2 w-2 flex-shrink-0">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ember-400 opacity-75"></span>
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-ember-500"></span>
-                    </span>
-                    <span className="truncate">{t.nowPlayingArmageddon}</span>
+                    <span className="text-[10px] text-white/40">2 BẢN NHẠC NỀN</span>
                   </div>
-                )}
 
-                <div className="mt-2 flex items-center gap-2 rounded-xl border border-void-800 bg-void-950/70 px-2.5 py-1.5 text-[11px] font-medium text-white/50">
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {/* Track 1: Cosmic Odyssey */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        audio.ensure();
+                        audio.click();
+                        updateSetting("musicTrack", "odyssey");
+                      }}
+                      className={cn(
+                        "relative flex flex-col items-start rounded-xl border p-3 text-left transition active:scale-98 cursor-pointer",
+                        settings.musicTrack === "odyssey" || settings.musicTrack === "armageddon" /* fallback */
+                          ? "border-ember-400 bg-ember-500/20 text-white shadow-[0_0_16px_rgba(255,122,26,0.3)] ring-1 ring-ember-400/50"
+                          : "border-void-700 bg-void-800/70 text-white/70 hover:border-void-600 hover:bg-void-800 hover:text-white",
+                      )}
+                    >
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-xs font-bold leading-tight flex items-center gap-1.5 text-ember-300">
+                          🌌 {t.menuTrackCosmic}
+                        </span>
+                        {(settings.musicTrack === "odyssey" || settings.musicTrack === "armageddon") && (
+                          <span className="flex h-2 w-2 rounded-full bg-ember-400 animate-pulse shadow-[0_0_8px_rgba(255,160,46,0.9)]" />
+                        )}
+                      </div>
+                      <span className="mt-1 text-[10px] leading-tight text-white/50">
+                        {t.menuTrackCosmicDesc}
+                      </span>
+                    </button>
+
+                    {/* Track 2: Cyber Pulse */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        audio.ensure();
+                        audio.click();
+                        updateSetting("musicTrack", "cyber");
+                      }}
+                      className={cn(
+                        "relative flex flex-col items-start rounded-xl border p-3 text-left transition active:scale-98 cursor-pointer",
+                        settings.musicTrack === "cyber"
+                          ? "border-cyan-400 bg-cyan-500/20 text-white shadow-[0_0_16px_rgba(46,230,201,0.3)] ring-1 ring-cyan-400/50"
+                          : "border-void-700 bg-void-800/70 text-white/70 hover:border-void-600 hover:bg-void-800 hover:text-white",
+                      )}
+                    >
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-xs font-bold leading-tight flex items-center gap-1.5 text-cyan-300">
+                          ⚡ {t.menuTrackCyber}
+                        </span>
+                        {settings.musicTrack === "cyber" && (
+                          <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(46,230,201,0.9)]" />
+                        )}
+                      </div>
+                      <span className="mt-1 text-[10px] leading-tight text-white/50">
+                        {t.menuTrackCyberDesc}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. In-Game Battle Music */}
+                <div className="rounded-xl border border-void-700/80 bg-void-950/70 p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold tracking-wider text-rose-300 uppercase flex items-center gap-1.5">
+                      <span>⚔️</span> {t.battleBgmLabel}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleToggleBattlePreview}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition active:scale-95 cursor-pointer",
+                        isBattlePreviewing
+                          ? "border-rose-alert bg-rose-950/80 text-rose-alert shadow-[0_0_12px_rgba(255,77,109,0.4)]"
+                          : "border-void-700 bg-void-800 text-white/80 hover:border-void-600 hover:text-white",
+                      )}
+                    >
+                      <span>{isBattlePreviewing ? "⏹ Dừng" : "▶ Nghe Thử"}</span>
+                    </button>
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                        {t.battleTrackName}
+                      </h4>
+                      <p className="text-[10px] text-white/50 mt-0.5">
+                        {t.battleTrackDesc}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Auto Mute Notice */}
+                <div className="flex items-center gap-2 rounded-xl border border-void-800 bg-void-950/50 px-2.5 py-1.5 text-[11px] font-medium text-white/50">
                   <span className="text-ice-400 flex-shrink-0">⏸️</span>
                   <span className="leading-tight">{t.pauseAutoMuteDesc}</span>
                 </div>

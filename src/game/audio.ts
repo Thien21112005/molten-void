@@ -3,7 +3,8 @@
 type OscType = OscillatorType;
 
 export type MusicMode = "ambient" | "battle" | "paused" | "off";
-export type MusicTrack = "armageddon" | "synth";
+export type MenuTrack = "odyssey" | "cyber";
+export type MusicTrack = "odyssey" | "cyber" | "armageddon" | "synth";
 
 function getAudioUrl(filename: string): string {
   const meta = import.meta as unknown as { env?: { BASE_URL?: string } };
@@ -12,30 +13,51 @@ function getAudioUrl(filename: string): string {
   return `${cleanBase}audio/${filename}`;
 }
 
-// Chord definitions in Hz for 8-bar Dark Heroic progression (D minor root)
+// Chord definitions in Hz for procedural synth engines
 interface ChordHarmonics {
   root: number;      // Deep bass
   pad: number[];     // Triad chord frequencies
   arp: number[];     // High arpeggio notes
 }
 
-const D_MINOR_PROGRESSION: ChordHarmonics[] = [
-  // Bar 1: Dm (D2=73.42, Pad: D3=146.83, F3=174.61, A3=220, Arp: D4..D5)
+// THEME 1: COSMIC ODYSSEY — Floating, Dreamy, Deep Space Lydian Ambient (Fmaj7 -> G -> Em7 -> Am7...)
+const COSMIC_ODYSSEY_PROGRESSION: ChordHarmonics[] = [
+  // Bar 1: Fmaj7 (F2=87.31, Pad: F3, A3, C4, Arp: E4..C5)
+  { root: 87.31, pad: [174.61, 220.0, 261.63], arp: [329.63, 392.0, 440.0, 523.25] },
+  // Bar 2: G (G2=98.0, Pad: G3, B3, D4, Arp: D4..D5)
+  { root: 98.00, pad: [196.0, 246.94, 293.66], arp: [293.66, 392.0, 493.88, 587.33] },
+  // Bar 3: Em7 (E2=82.41, Pad: E3, G3, B3, Arp: E4..E5)
+  { root: 82.41, pad: [164.81, 196.0, 246.94], arp: [329.63, 392.0, 493.88, 659.25] },
+  // Bar 4: Am7 (A1=55.0, Pad: A3, C4, E4, Arp: C4..C5)
+  { root: 55.00, pad: [220.0, 261.63, 329.63], arp: [261.63, 329.63, 440.0, 523.25] },
+  // Bar 5: Dm7 (D2=73.42, Pad: D3, F3, A3, Arp: F4..D5)
+  { root: 73.42, pad: [146.83, 174.61, 220.0], arp: [349.23, 440.0, 523.25, 587.33] },
+  // Bar 6: G7 (G2=98.0, Pad: G3, B3, F4, Arp: D4..B4)
+  { root: 98.00, pad: [196.0, 246.94, 349.23], arp: [293.66, 349.23, 392.0, 493.88] },
+  // Bar 7: Cmaj7 (C2=65.41, Pad: C3, E3, G3, Arp: E4..C5)
+  { root: 65.41, pad: [130.81, 164.81, 196.0], arp: [329.63, 392.0, 493.88, 523.25] },
+  // Bar 8: A7 (A1=55.0, Pad: A3, C#4, E4, Arp: E4..C#5)
+  { root: 55.00, pad: [220.0, 277.18, 329.63], arp: [329.63, 392.0, 440.0, 554.37] },
+];
+
+// THEME 2: CYBER PULSE — 118 BPM Driving Retro Synthwave in D Minor (Dm -> F -> C -> Bb -> Dm -> Gm -> Bb -> C)
+const CYBER_PULSE_PROGRESSION: ChordHarmonics[] = [
+  // Bar 1: Dm
   { root: 73.42, pad: [146.83, 174.61, 220.0], arp: [293.66, 349.23, 440.0, 587.33] },
-  // Bar 2: Dm
-  { root: 73.42, pad: [146.83, 174.61, 220.0], arp: [349.23, 440.0, 587.33, 523.25] },
-  // Bar 3: Bb (Bb1=58.27, Pad: Bb2=116.54, D3=146.83, F3=174.61)
-  { root: 58.27, pad: [116.54, 146.83, 174.61], arp: [233.08, 293.66, 349.23, 466.16] },
+  // Bar 2: F
+  { root: 87.31, pad: [174.61, 220.0, 261.63], arp: [349.23, 440.0, 523.25, 698.46] },
+  // Bar 3: C
+  { root: 65.41, pad: [130.81, 164.81, 196.0], arp: [261.63, 329.63, 392.0, 523.25] },
   // Bar 4: Bb
-  { root: 58.27, pad: [116.54, 146.83, 174.61], arp: [293.66, 349.23, 466.16, 587.33] },
-  // Bar 5: Gm (G1=49.0, Pad: G2=98.0, Bb2=116.54, D3=146.83)
-  { root: 49.00, pad: [98.00, 116.54, 146.83], arp: [196.00, 233.08, 293.66, 392.00] },
-  // Bar 6: F (F1=43.65, Pad: F2=87.31, A2=110.0, C3=130.81)
-  { root: 87.31, pad: [174.61, 220.00, 261.63], arp: [261.63, 329.63, 392.00, 523.25] },
-  // Bar 7: C (C2=65.41, Pad: C3=130.81, E3=164.81, G3=196.0)
-  { root: 65.41, pad: [130.81, 164.81, 196.00], arp: [261.63, 329.63, 392.00, 523.25] },
-  // Bar 8: A7 (A1=55.0, Pad: A2=110.0, C#3=138.59, E3=164.81)
-  { root: 55.00, pad: [110.00, 138.59, 164.81], arp: [220.00, 277.18, 329.63, 440.00] },
+  { root: 58.27, pad: [116.54, 146.83, 174.61], arp: [233.08, 293.66, 349.23, 466.16] },
+  // Bar 5: Dm
+  { root: 73.42, pad: [146.83, 174.61, 220.0], arp: [440.0, 349.23, 293.66, 220.0] },
+  // Bar 6: Gm
+  { root: 49.00, pad: [98.0, 116.54, 146.83], arp: [196.0, 233.08, 293.66, 392.0] },
+  // Bar 7: Bb
+  { root: 58.27, pad: [116.54, 146.83, 174.61], arp: [349.23, 293.66, 233.08, 293.66] },
+  // Bar 8: C
+  { root: 65.41, pad: [130.81, 164.81, 196.0], arp: [329.63, 392.0, 523.25, 659.25] },
 ];
 
 export class SoundEngine {
@@ -49,10 +71,13 @@ export class SoundEngine {
   muted = false;
   sfxVolume = 0.8;
   musicVolume = 0.6;
-  musicTrack: MusicTrack = "armageddon";
+  menuTrack: MenuTrack = "odyssey";
+  musicTrack: MusicTrack = "odyssey";
 
   // Native HTML5 background audio (Armageddon - Alibi Music)
   private bgmAudio: HTMLAudioElement | null = null;
+  private previewTimer: number | null = null;
+  isPreviewingBattle = false;
 
   // Music sequencer state (procedural synth backup)
   private musicMode: MusicMode = "ambient";
@@ -60,7 +85,7 @@ export class SoundEngine {
   private timerId: number | null = null;
   private nextStepTime = 0;
   private currentStep = 0; // 0 to 127 (16 steps * 8 bars)
-  private readonly secondsPerStep = 60 / (122 * 4); // 16th note ~0.123s at 122 BPM
+  private readonly secondsPerStep = 60 / (118 * 4); // 16th note ~0.127s at 118 BPM
   private readonly scheduleLookahead = 0.15; // Schedule 150ms ahead
 
   constructor() {
@@ -70,9 +95,10 @@ export class SoundEngine {
       if (savedSfx !== null) this.sfxVolume = Math.max(0, Math.min(1, parseFloat(savedSfx)));
       const savedMusic = localStorage.getItem("mv_music_vol");
       if (savedMusic !== null) this.musicVolume = Math.max(0, Math.min(1, parseFloat(savedMusic)));
-      const savedTrack = localStorage.getItem("mv_music_track") as MusicTrack | null;
-      if (savedTrack === "armageddon" || savedTrack === "synth") {
-        this.musicTrack = savedTrack;
+      const savedTheme = localStorage.getItem("mv_menu_track") as MenuTrack | null;
+      if (savedTheme === "odyssey" || savedTheme === "cyber") {
+        this.menuTrack = savedTheme;
+        this.musicTrack = savedTheme;
       }
     } catch {
       /* ignore storage errors */
@@ -185,13 +211,89 @@ export class SoundEngine {
   }
 
   setMusicTrack(track: MusicTrack) {
-    this.musicTrack = track;
+    if (track === "odyssey" || track === "cyber") {
+      this.setMenuTrack(track);
+    } else {
+      this.musicTrack = track;
+      this.updateMusicPlayback();
+    }
+  }
+
+  setMenuTrack(theme: MenuTrack) {
+    this.menuTrack = theme;
+    this.musicTrack = theme;
     try {
-      localStorage.setItem("mv_music_track", track);
+      localStorage.setItem("mv_menu_track", theme);
+      localStorage.setItem("mv_music_track", theme);
     } catch {
       /* ignore */
     }
+
+    // Real-time musical transition: switch chords & rhythm instantly!
+    if (this.ctx && this.musicMode === "ambient") {
+      this.currentStep = 0;
+      this.nextStepTime = this.ctx.currentTime + 0.02;
+      // Immediate audible preview tone
+      if (theme === "odyssey") {
+        this.playPadChord([174.61, 220.0, 261.63], this.ctx.currentTime + 0.01, 1.8, 0.16);
+        this.playArpNote(523.25, this.ctx.currentTime + 0.04, 0.06, 0.4);
+      } else {
+        this.playCyberBass(73.42, this.ctx.currentTime + 0.01, 0.18, 0.2);
+        this.playHeartbeatKick(this.ctx.currentTime + 0.01, 0.28);
+        this.playArpNote(587.33, this.ctx.currentTime + 0.05, 0.08, 0.2);
+      }
+    }
     this.updateMusicPlayback();
+  }
+
+  toggleBattlePreview(onStateChange?: (isPlaying: boolean) => void) {
+    if (this.isPreviewingBattle) {
+      this.stopBattlePreview(onStateChange);
+    } else {
+      this.startBattlePreview(onStateChange);
+    }
+  }
+
+  startBattlePreview(onStateChange?: (isPlaying: boolean) => void) {
+    this.ensure();
+    this.initBgmAudio();
+    this.isPreviewingBattle = true;
+    onStateChange?.(true);
+
+    if (this.bgmAudio) {
+      try {
+        this.bgmAudio.currentTime = 0;
+        this.bgmAudio.volume = Math.max(0, Math.min(1, this.musicVolume * 0.75));
+        this.bgmAudio.muted = this.muted;
+        void this.bgmAudio.play().catch(() => {});
+      } catch {
+        /* ignore */
+      }
+    }
+
+    if (this.previewTimer !== null) {
+      window.clearTimeout(this.previewTimer);
+    }
+    this.previewTimer = window.setTimeout(() => {
+      this.stopBattlePreview(onStateChange);
+    }, 7000);
+  }
+
+  stopBattlePreview(onStateChange?: (isPlaying: boolean) => void) {
+    this.isPreviewingBattle = false;
+    onStateChange?.(false);
+    if (this.previewTimer !== null) {
+      window.clearTimeout(this.previewTimer);
+      this.previewTimer = null;
+    }
+    if (this.bgmAudio && this.musicMode !== "battle") {
+      this.bgmAudio.pause();
+      try {
+        this.bgmAudio.currentTime = 0;
+      } catch {
+        /* ignore */
+      }
+    }
   }
 
   /* ================= NATIVE BGM TRACK MANAGEMENT ================= */
@@ -213,7 +315,7 @@ export class SoundEngine {
     audioEl.addEventListener("error", () => {
       if (!audioEl.src.endsWith(fallbackFile)) {
         audioEl.src = getAudioUrl(fallbackFile);
-        if (this.musicMode === "battle" && !this.muted && this.musicTrack === "armageddon") {
+        if (this.musicMode === "battle" && !this.muted) {
           void audioEl.play().catch(() => {});
         }
       }
@@ -225,7 +327,7 @@ export class SoundEngine {
   }
 
   private getCalculatedBgmVolume(): number {
-    if (this.muted || this.musicMode !== "battle") return 0;
+    if (this.muted || (this.musicMode !== "battle" && !this.isPreviewingBattle)) return 0;
     // Epic battle intensity: 75%
     return Math.max(0, Math.min(1, this.musicVolume * 0.75));
   }
@@ -235,7 +337,7 @@ export class SoundEngine {
 
     // 1. If muted, music turned off, or game PAUSED: Stop battle music immediately!
     if (this.muted || this.musicMode === "off" || this.musicMode === "paused" || this.musicVolume <= 0.001) {
-      if (this.bgmAudio && !this.bgmAudio.paused) {
+      if (this.bgmAudio && !this.bgmAudio.paused && !this.isPreviewingBattle) {
         this.bgmAudio.pause();
       }
       return;
@@ -243,29 +345,22 @@ export class SoundEngine {
 
     // 2. Battle Mode: Armageddon plays full force!
     if (this.musicMode === "battle") {
-      if (this.musicTrack === "armageddon") {
-        if (this.bgmAudio) {
-          this.bgmAudio.muted = false;
-          this.bgmAudio.volume = this.getCalculatedBgmVolume();
-          if (this.bgmAudio.paused) {
-            const p = this.bgmAudio.play();
-            if (p !== undefined) {
-              p.catch(() => {
-                // Browser autoplay policy requires user interaction before playback
-              });
-            }
+      if (this.bgmAudio) {
+        this.bgmAudio.muted = false;
+        this.bgmAudio.volume = this.getCalculatedBgmVolume();
+        if (this.bgmAudio.paused) {
+          const p = this.bgmAudio.play();
+          if (p !== undefined) {
+            p.catch(() => {
+              // Browser autoplay policy requires user interaction before playback
+            });
           }
-        }
-      } else {
-        // Synth selected for battle
-        if (this.bgmAudio && !this.bgmAudio.paused) {
-          this.bgmAudio.pause();
         }
       }
     } else if (this.musicMode === "ambient") {
       // 3. Ambient Mode (Menu / Roadmap / Victory / Game Over):
-      // Pause Armageddon so it is strictly reserved for in-game battles
-      if (this.bgmAudio && !this.bgmAudio.paused) {
+      // Pause Armageddon so it is strictly reserved for in-game battles (unless previewing)
+      if (this.bgmAudio && !this.bgmAudio.paused && !this.isPreviewingBattle) {
         this.bgmAudio.pause();
       }
     }
@@ -317,12 +412,12 @@ export class SoundEngine {
       return;
     }
 
-    // In battle mode, procedural synth only runs if user explicitly picked "synth" (otherwise Armageddon plays)
-    if (this.musicMode === "battle" && this.musicTrack !== "synth") {
+    // In battle mode, Armageddon plays from HTMLAudioElement; sequencer rests
+    if (this.musicMode === "battle" && this.bgmAudio && !this.bgmAudio.paused) {
       return;
     }
 
-    // In ambient mode (Menu / Roadmap / Victory / Gameover), procedural synth provides the relaxing cosmic atmosphere!
+    // In ambient mode (Menu / Roadmap / Victory / Gameover), procedural synth plays the selected menu theme!
     while (this.nextStepTime < this.ctx.currentTime + this.scheduleLookahead) {
       this.scheduleMusicStep(this.currentStep, this.nextStepTime);
       this.nextStepTime += this.secondsPerStep;
@@ -335,53 +430,81 @@ export class SoundEngine {
 
     const bar = Math.floor(step / 16) % 8;
     const stepInBar = step % 16;
-    const chord = D_MINOR_PROGRESSION[bar];
     const isBattle = this.musicMode === "battle";
+    const isOdyssey = !isBattle && this.menuTrack === "odyssey";
+    const isCyber = !isBattle && this.menuTrack === "cyber";
 
-    // 1. Cinematic Atmosphere Pad (Trig on beat 0 of each bar)
-    if (stepInBar === 0) {
-      this.playPadChord(chord.pad, time, 1.9, isBattle ? 0.09 : 0.14);
+    const progression = isOdyssey
+      ? COSMIC_ODYSSEY_PROGRESSION
+      : CYBER_PULSE_PROGRESSION;
+
+    const chord = progression[bar];
+
+    if (isBattle) {
+      // Procedural battle fallback if HTML5 audio is unavailable
+      if (stepInBar === 0) {
+        this.playPadChord(chord.pad, time, 1.8, 0.09);
+      }
+      if (stepInBar % 2 === 0) {
+        this.playCyberBass(chord.root, time, 0.14);
+      }
+      if (stepInBar === 0 || stepInBar === 8 || stepInBar === 12) {
+        this.playHeartbeatKick(time, 0.32);
+      }
+      if (stepInBar % 2 === 1) {
+        this.playCosmicHiHat(time, 0.06);
+      }
+      const noteIdx = (stepInBar + bar * 2) % chord.arp.length;
+      this.playArpNote(chord.arp[noteIdx], time, 0.05);
+      return;
     }
 
-    // 2. Cosmic Sub Bass Pulse
-    if (isBattle) {
-      // Driving 8th note bassline (every even step)
-      if (stepInBar % 2 === 0) {
-        const isAccent = stepInBar === 0 || stepInBar === 6 || stepInBar === 10;
-        this.playCyberBass(chord.root, time, isAccent ? 0.16 : 0.10);
+    if (isOdyssey) {
+      // THEME 1: COSMIC ODYSSEY (Lush, Floating, Deep Space Ambient)
+      // 1. Slow warm atmospheric pad on beat 0
+      if (stepInBar === 0) {
+        this.playPadChord(chord.pad, time, 2.2, 0.16);
       }
-    } else {
-      // Ambient Mode: slow deep drone on beat 0 and beat 8
+
+      // 2. Gentle deep sub-bass drone on beat 0 and beat 8
       if (stepInBar === 0 || stepInBar === 8) {
         this.playCyberBass(chord.root, time, 0.08, 0.45);
       }
-    }
 
-    // 3. Percussion / Heartbeat Kick & Cosmic Noise Hats
-    if (isBattle) {
-      // Epic battle kick on beats 1 and 3 (step 0 and 8), plus syncopation on step 12
-      if (stepInBar === 0 || stepInBar === 8 || stepInBar === 12) {
-        this.playHeartbeatKick(time, stepInBar === 0 ? 0.32 : 0.24);
-      }
-
-      // Space Shaker / Hi-Hat on 16th notes (off-beats)
-      if (stepInBar % 2 === 1) {
-        this.playCosmicHiHat(time, stepInBar === 7 || stepInBar === 15 ? 0.08 : 0.04);
-      }
-    }
-
-    // 4. Stardust Arpeggio Chimes
-    if (isBattle) {
-      // Rhythmic sparkling arpeggios on every 16th note
-      const noteIdx = (stepInBar + bar * 2) % chord.arp.length;
-      const freq = chord.arp[noteIdx];
-      this.playArpNote(freq, time, 0.05);
-    } else {
-      // Ambient mode: gentle chime every 4 steps
+      // 3. Sparkling stardust chime every 4 steps
       if (stepInBar % 4 === 0) {
-        const noteIdx = (stepInBar / 4) % chord.arp.length;
-        this.playArpNote(chord.arp[noteIdx], time, 0.035, 0.35);
+        const noteIdx = (stepInBar / 4 + bar) % chord.arp.length;
+        this.playArpNote(chord.arp[noteIdx], time, 0.045, 0.35);
       }
+      return;
+    }
+
+    if (isCyber) {
+      // THEME 2: CYBER PULSE (118 BPM Punchy Retro Synthwave Groove)
+      // 1. Synth pad
+      if (stepInBar === 0) {
+        this.playPadChord(chord.pad, time, 1.4, 0.12);
+      }
+
+      // 2. Driving 8th-note plucked cyber bassline
+      if (stepInBar % 2 === 0) {
+        const isAccent = stepInBar === 0 || stepInBar === 6 || stepInBar === 10;
+        this.playCyberBass(chord.root, time, isAccent ? 0.18 : 0.12, 0.11);
+      }
+
+      // 3. Heartbeat kick on beats 1 and 3 (step 0 and 8), plus syncopation on step 12
+      if (stepInBar === 0 || stepInBar === 8 || stepInBar === 12) {
+        this.playHeartbeatKick(time, stepInBar === 0 ? 0.28 : 0.2);
+      }
+
+      // 4. Electronic hi-hat on off-beats
+      if (stepInBar % 2 === 1) {
+        this.playCosmicHiHat(time, stepInBar === 7 || stepInBar === 15 ? 0.07 : 0.035);
+      }
+
+      // 5. Retro 16th note synth arpeggios
+      const noteIdx = (stepInBar + bar * 2) % chord.arp.length;
+      this.playArpNote(chord.arp[noteIdx], time, 0.045, 0.10);
     }
   }
 
