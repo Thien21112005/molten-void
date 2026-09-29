@@ -446,23 +446,23 @@ ${ORBIT_KEYFRAMES_CSS}
               </linearGradient>
 
               <clipPath id="saturnBackClip">
-                <rect x="0" y="0" width="180" height="90" />
+                <rect x="-40" y="-20" width="260" height="110" transform="rotate(-25 90 90)" />
               </clipPath>
               <clipPath id="saturnFrontClip">
-                <rect x="0" y="90" width="180" height="90" />
+                <rect x="-40" y="90" width="260" height="110" transform="rotate(-25 90 90)" />
               </clipPath>
               <clipPath id="saturnSphereClip">
                 <circle cx="90" cy="90" r="38" />
               </clipPath>
             </defs>
 
-            {/* Back half of the ring (behind the planet) */}
+            {/* Back half of the ring (behind the planet, clipped along axial tilt) */}
             <g clipPath="url(#saturnBackClip)">
               <ellipse cx="90" cy="90" rx="82" ry="24" fill="none" stroke="url(#ringGrad)" strokeWidth="14" transform="rotate(-25 90 90)" opacity="0.65" />
               <ellipse cx="90" cy="90" rx="88" ry="26" fill="none" stroke="#7dfce7" strokeWidth="1.8" transform="rotate(-25 90 90)" opacity="0.8" />
             </g>
 
-            {/* Planet Sphere with Rotating Gas Storm Bands */}
+            {/* Planet Sphere with Rotating Gas Storm Bands and 3D Specular Highlight */}
             <g clipPath="url(#saturnSphereClip)">
               <circle cx="90" cy="90" r="38" fill="url(#saturnBody)" />
               {/* Seamless horizontally drifting cloud bands */}
@@ -478,13 +478,14 @@ ${ORBIT_KEYFRAMES_CSS}
                   <ellipse cx="90" cy="106" rx="40" ry="5" fill="#f43f5e" />
                 </g>
               </g>
+              {/* 3D Sunlight Specular Crest (Strictly contained inside sphere clip!) */}
+              <ellipse cx="78" cy="78" rx="30" ry="30" fill="#ffffff" opacity="0.15" />
             </g>
 
-            {/* Specular 3D Lighting */}
-            <ellipse cx="76" cy="76" rx="34" ry="34" fill="#ffffff" opacity="0.1" />
+            {/* Atmosphere Rim Glow */}
             <circle cx="90" cy="90" r="38" fill="none" stroke="rgba(255,210,62,0.4)" strokeWidth="1" />
 
-            {/* Front half of the ring (in front of the planet) */}
+            {/* Front half of the ring (in front of the planet, clipped along axial tilt) */}
             <g clipPath="url(#saturnFrontClip)">
               <ellipse cx="90" cy="90" rx="82" ry="24" fill="none" stroke="url(#ringGrad)" strokeWidth="14" transform="rotate(-25 90 90)" />
               <ellipse cx="90" cy="90" rx="88" ry="26" fill="none" stroke="#7dfce7" strokeWidth="2.2" transform="rotate(-25 90 90)" opacity="0.9" />
