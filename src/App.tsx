@@ -519,35 +519,35 @@ export default function App() {
                     {t.playCampaign}
                   </ChunkBtn>
 
-                  <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <ChunkBtn
                       onClick={() => eng()?.openRoadmap()}
-                      className="py-2.5 sm:py-3 text-xs sm:text-sm font-bold"
-                      icon={<IconMap className="h-4.5 w-4.5" />}
+                      className="px-2 sm:px-3 gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-xs sm:text-sm font-bold tracking-normal sm:tracking-wider"
+                      icon={<IconMap className="h-4.5 w-4.5 shrink-0" />}
                     >
                       {t.roadmap}
                     </ChunkBtn>
 
                     <ChunkBtn
                       onClick={() => setShowSkins(true)}
-                      className="py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-cyan-300 border-cyan-500/50 hover:border-cyan-400 bg-cyan-950/20 hover:bg-cyan-900/40"
-                      icon={<IconSparkle size={18} className="text-cyan-300" />}
+                      className="px-2 sm:px-3 gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-xs sm:text-sm font-bold tracking-normal sm:tracking-wider text-cyan-300 border-cyan-500/50 hover:border-cyan-400 bg-cyan-950/20 hover:bg-cyan-900/40"
+                      icon={<IconSparkle size={18} className="text-cyan-300 shrink-0" />}
                     >
                       {t.skins}
                     </ChunkBtn>
 
                     <ChunkBtn
                       onClick={() => setShowAchievements(true)}
-                      className="py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-amber-300 border-amber-500/50 hover:border-amber-400 bg-amber-950/20 hover:bg-amber-900/40"
-                      icon={<IconMedal className="h-4.5 w-4.5 text-amber-300" />}
+                      className="px-2 sm:px-3 gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-xs sm:text-sm font-bold tracking-normal sm:tracking-wider text-amber-300 border-amber-500/50 hover:border-amber-400 bg-amber-950/20 hover:bg-amber-900/40"
+                      icon={<IconMedal className="h-4.5 w-4.5 text-amber-300 shrink-0" />}
                     >
                       {t.achievements}
                     </ChunkBtn>
 
                     <ChunkBtn
                       onClick={() => setShowSettings(true)}
-                      className="py-2.5 sm:py-3 text-xs sm:text-sm font-bold"
-                      icon={<IconGear className="h-4.5 w-4.5" />}
+                      className="px-2 sm:px-3 gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-xs sm:text-sm font-bold tracking-normal sm:tracking-wider"
+                      icon={<IconGear className="h-4.5 w-4.5 shrink-0" />}
                     >
                       {t.settings}
                     </ChunkBtn>

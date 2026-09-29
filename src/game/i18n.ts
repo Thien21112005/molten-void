@@ -138,11 +138,13 @@ export interface Translations {
   startNode: string;
   apexNode: string;
   achievements: string;
+  achievementsTitle: string;
   achievementsUnlocked: string;
   achievementUnlockedToast: string;
   allBadgesCollected: string;
   lockedBadge: string;
   skins: string;
+  skinsTitle: string;
   equip: string;
   equipped: string;
   unlockAtStars: string;
@@ -282,12 +284,14 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     starmapExploreHint: "↔ Kéo ngang để khám phá • Chạm để chọn màn",
     startNode: "XUẤT PHÁT",
     apexNode: "ĐỈNH CAO",
-    achievements: "Danh Hiệu & Huy Hiệu",
+    achievements: "Thành Tựu",
+    achievementsTitle: "Danh Hiệu & Huy Hiệu",
     achievementsUnlocked: "Đã mở khóa",
     achievementUnlockedToast: "THÀNH TỰU MỚI MỞ KHÓA!",
     allBadgesCollected: "Đại Sư Vũ Trụ",
     lockedBadge: "Chưa mở khóa",
-    skins: "Trang Phục Sao Chổi",
+    skins: "Trang Phục",
+    skinsTitle: "Trang Phục Sao Chổi",
     equip: "Trang Bị",
     equipped: "Đang Dùng",
     unlockAtStars: "Cần {stars}⭐",
@@ -425,12 +429,14 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     starmapExploreHint: "↔ Drag horizontally to explore • Tap to sling",
     startNode: "START",
     apexNode: "APEX",
-    achievements: "Achievements & Badges",
+    achievements: "Badges",
+    achievementsTitle: "Achievements & Badges",
     achievementsUnlocked: "Unlocked",
     achievementUnlockedToast: "NEW ACHIEVEMENT UNLOCKED!",
     allBadgesCollected: "Cosmic Grandmaster",
     lockedBadge: "Locked",
-    skins: "Comet Skins",
+    skins: "Skins",
+    skinsTitle: "Comet Skins & Trails",
     equip: "Equip",
     equipped: "Equipped",
     unlockAtStars: "Requires {stars}⭐",

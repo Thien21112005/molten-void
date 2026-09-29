@@ -35,7 +35,7 @@ export function AchievementsModal({ onClose, lang = "vi", t }: AchievementsModal
             </div>
             <div>
               <h2 className="font-display text-2xl sm:text-3xl text-white tracking-wide">
-                {t?.achievements ?? "Danh Hiệu & Huy Hiệu"}
+                {t?.achievementsTitle ?? t?.achievements ?? "Danh Hiệu & Huy Hiệu"}
               </h2>
               <p className="text-xs text-white/50">
                 {unlockedCount}/{totalCount} {t?.achievementsUnlocked ?? "đã mở khóa"} ({progressPercent}%)

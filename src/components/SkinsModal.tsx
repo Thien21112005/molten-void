@@ -53,7 +53,7 @@ export function SkinsModal({
             </div>
             <div>
               <h2 className="font-display text-2xl sm:text-3xl text-white tracking-wide">
-                {t?.skins ?? "Trang Phục Sao Chổi"}
+                {t?.skinsTitle ?? t?.skins ?? "Trang Phục Sao Chổi"}
               </h2>
               <div className="flex items-center gap-1.5 text-xs text-white/50">
                 <span>{t?.stardustTrails ?? "Vệt Bụi Sao & Hiệu Ứng Hào Quang"}</span>
