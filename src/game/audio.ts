@@ -675,14 +675,23 @@ export class SoundEngine {
   }
 
   shatter(combo: number, gold: boolean) {
-    const c = Math.min(combo, 8);
-    const base = (gold ? 700 : 520) * Math.pow(1.075, c);
-    this.tone(base, 0.16, "square", 0.1);
-    this.tone(base * 1.5, 0.14, "square", 0.08, 0.01);
-    this.tone(base * 2.02, 0.22, "triangle", 0.1, 0.02);
-    this.noise(0.16, 0.16, 2600, 5200, 0, 0.6);
+    // Melodic Major Pentatonic Scale: C5, D5, E5, G5, A5, C6, D6, E6, G6, A6
+    const PENTATONIC = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51, 1567.98, 1760.0];
+    const index = Math.min(Math.max(0, combo - 1), PENTATONIC.length - 1);
+    const baseFreq = PENTATONIC[index] * (gold ? 1.25 : 1.0); // Transpose gold crystal to bright harmonic
+
+    // Pure crystal bell fundamental & harmonics
+    this.tone(baseFreq, 0.22, "sine", 0.16);
+    this.tone(baseFreq * 2, 0.18, "triangle", 0.1, 0.01);
+    this.tone(baseFreq * 2.76, 0.14, "sine", 0.08, 0.02); // Celestial bell overtone
+
+    // Stardust glass shatter noise
+    this.noise(0.18, 0.14, 3000, 6000, 0, 0.55);
+
     if (gold) {
-      this.tone(base * 1.25, 0.3, "sine", 0.12, 0.06, base * 2.5);
+      // Golden celestial fanfare chime
+      this.tone(baseFreq * 1.5, 0.28, "sine", 0.14, 0.04);
+      this.tone(baseFreq * 3.0, 0.2, "sine", 0.09, 0.08);
     }
   }
 

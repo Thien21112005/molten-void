@@ -857,15 +857,26 @@ export class Engine {
     }
 
     const size = clamp(Math.min(this.W, this.H) * 0.045, 17, 30);
+    const comboTitle =
+      this.combo >= 5
+        ? `x${this.combo} COSMIC CHAIN!`
+        : this.combo >= 4
+          ? `x${this.combo} ULTRA COMBO!`
+          : this.combo >= 3
+            ? `x${this.combo} MEGA COMBO!`
+            : this.combo === 2
+              ? `COMBO x2!`
+              : undefined;
+
     this.texts.push({
       x: g.x,
       y: g.y - g.r - 6,
       t: 0,
-      life: 0.9,
+      life: 0.9 + Math.min(this.combo * 0.1, 0.4),
       str: `+${pts}`,
-      size,
-      col: gold ? "#ffd23e" : "#7dfce7",
-      sub: this.combo > 1 ? `COMBO x${this.combo}` : undefined,
+      size: size * (this.combo > 2 ? 1.15 : 1.0),
+      col: gold ? "#ffd23e" : this.combo > 2 ? "#fde047" : "#7dfce7",
+      sub: comboTitle,
     });
     if (gold) {
       this.texts.push({
