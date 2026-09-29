@@ -48,6 +48,206 @@ const LEVEL_NODES: NodeCoord[] = [
 const MAP_WIDTH = 2560;
 const MAP_HEIGHT = 520;
 
+interface RoadmapStar {
+  x: number;
+  y: number;
+  type: "sparkle" | "sparkleSm" | "medium" | "dot";
+  color: string;
+  dur: string;
+  delay: string;
+  size?: number;
+  opacity?: number;
+}
+
+const ROADMAP_STARS: RoadmapStar[] = [
+  // Section 1: x: 40 - 640 (Start / Levels 1-4)
+  { x: 70, y: 80, type: "sparkle", color: "#ffd23e", dur: "3.2s", delay: "0.2s" },
+  { x: 190, y: 50, type: "sparkleSm", color: "#7dfce7", dur: "2.8s", delay: "1.4s" },
+  { x: 270, y: 140, type: "sparkle", color: "#ffffff", dur: "3.5s", delay: "0.8s" },
+  { x: 380, y: 65, type: "sparkleSm", color: "#c084fc", dur: "3.0s", delay: "2.1s" },
+  { x: 490, y: 110, type: "sparkle", color: "#38bdf8", dur: "3.4s", delay: "1.2s" },
+  { x: 120, y: 440, type: "sparkleSm", color: "#ffd23e", dur: "2.9s", delay: "0.5s" },
+  { x: 340, y: 470, type: "sparkle", color: "#7dfce7", dur: "3.6s", delay: "2.3s" },
+  { x: 580, y: 460, type: "sparkleSm", color: "#ffffff", dur: "3.1s", delay: "1.7s" },
+  { x: 50, y: 160, type: "medium", color: "#38bdf8", dur: "2.6s", delay: "0.3s", size: 2.5 },
+  { x: 130, y: 40, type: "medium", color: "#ffd23e", dur: "3.0s", delay: "1.8s", size: 2.2 },
+  { x: 230, y: 190, type: "medium", color: "#ffffff", dur: "2.5s", delay: "0.9s", size: 2 },
+  { x: 320, y: 80, type: "medium", color: "#7dfce7", dur: "3.3s", delay: "2.4s", size: 2.8 },
+  { x: 440, y: 160, type: "medium", color: "#c084fc", dur: "2.8s", delay: "0.7s", size: 2.2 },
+  { x: 540, y: 40, type: "medium", color: "#fde047", dur: "3.1s", delay: "1.5s", size: 2.5 },
+  { x: 200, y: 470, type: "medium", color: "#38bdf8", dur: "2.7s", delay: "1.1s", size: 2.2 },
+  { x: 420, y: 490, type: "medium", color: "#ffffff", dur: "3.2s", delay: "0.4s", size: 2.6 },
+  { x: 520, y: 420, type: "medium", color: "#7dfce7", dur: "2.9s", delay: "2.0s", size: 2 },
+  { x: 90, y: 110, type: "dot", color: "#ffffff", dur: "4s", delay: "0.2s", size: 1.5, opacity: 0.6 },
+  { x: 160, y: 130, type: "dot", color: "#7dfce7", dur: "4.5s", delay: "1.2s", size: 1.2, opacity: 0.5 },
+  { x: 250, y: 40, type: "dot", color: "#ffd23e", dur: "3.8s", delay: "0.6s", size: 1.6, opacity: 0.7 },
+  { x: 360, y: 120, type: "dot", color: "#ffffff", dur: "4.2s", delay: "2.0s", size: 1.4, opacity: 0.5 },
+  { x: 460, y: 70, type: "dot", color: "#38bdf8", dur: "3.9s", delay: "1.4s", size: 1.5, opacity: 0.6 },
+  { x: 80, y: 470, type: "dot", color: "#c084fc", dur: "4.1s", delay: "0.8s", size: 1.2, opacity: 0.5 },
+  { x: 260, y: 440, type: "dot", color: "#ffffff", dur: "4.4s", delay: "1.9s", size: 1.5, opacity: 0.6 },
+  { x: 480, y: 480, type: "dot", color: "#7dfce7", dur: "3.7s", delay: "0.4s", size: 1.4, opacity: 0.7 },
+  { x: 610, y: 420, type: "dot", color: "#ffd23e", dur: "4.3s", delay: "1.6s", size: 1.2, opacity: 0.5 },
+
+  // Section 2: x: 640 - 1280 (Aethon Gas Giant & Peaks / Levels 5-8)
+  { x: 680, y: 60, type: "sparkle", color: "#ffd23e", dur: "3.4s", delay: "0.5s" },
+  { x: 740, y: 110, type: "sparkleSm", color: "#7dfce7", dur: "2.9s", delay: "1.7s" },
+  { x: 840, y: 45, type: "sparkle", color: "#ffffff", dur: "3.6s", delay: "2.2s" },
+  { x: 920, y: 75, type: "sparkleSm", color: "#c084fc", dur: "3.1s", delay: "0.8s" },
+  { x: 1020, y: 55, type: "sparkle", color: "#38bdf8", dur: "3.3s", delay: "1.9s" },
+  { x: 1160, y: 100, type: "sparkleSm", color: "#ffd23e", dur: "2.8s", delay: "0.3s" },
+  { x: 1240, y: 50, type: "sparkle", color: "#ffffff", dur: "3.5s", delay: "2.6s" },
+  { x: 710, y: 460, type: "sparkleSm", color: "#7dfce7", dur: "3.0s", delay: "1.1s" },
+  { x: 900, y: 480, type: "sparkle", color: "#ffd23e", dur: "3.7s", delay: "0.4s" },
+  { x: 1050, y: 430, type: "sparkleSm", color: "#ffffff", dur: "2.7s", delay: "1.6s" },
+  { x: 1200, y: 470, type: "sparkle", color: "#c084fc", dur: "3.4s", delay: "2.4s" },
+  { x: 660, y: 120, type: "medium", color: "#38bdf8", dur: "2.7s", delay: "1.0s", size: 2.5 },
+  { x: 790, y: 35, type: "medium", color: "#ffffff", dur: "3.1s", delay: "0.6s", size: 2.2 },
+  { x: 880, y: 110, type: "medium", color: "#ffd23e", dur: "2.8s", delay: "2.1s", size: 2.6 },
+  { x: 970, y: 40, type: "medium", color: "#7dfce7", dur: "3.4s", delay: "1.3s", size: 2 },
+  { x: 1080, y: 130, type: "medium", color: "#c084fc", dur: "2.5s", delay: "0.2s", size: 2.4 },
+  { x: 1190, y: 45, type: "medium", color: "#fde047", dur: "3.2s", delay: "2.5s", size: 2.2 },
+  { x: 670, y: 370, type: "medium", color: "#ffffff", dur: "2.9s", delay: "1.4s", size: 2.5 },
+  { x: 860, y: 390, type: "medium", color: "#38bdf8", dur: "3.3s", delay: "0.7s", size: 2.2 },
+  { x: 990, y: 470, type: "medium", color: "#ffd23e", dur: "2.6s", delay: "2.0s", size: 2.8 },
+  { x: 1140, y: 420, type: "medium", color: "#7dfce7", dur: "3.0s", delay: "1.5s", size: 2 },
+  { x: 720, y: 80, type: "dot", color: "#ffffff", dur: "4.3s", delay: "0.9s", size: 1.5, opacity: 0.6 },
+  { x: 810, y: 70, type: "dot", color: "#7dfce7", dur: "3.9s", delay: "1.8s", size: 1.2, opacity: 0.5 },
+  { x: 940, y: 50, type: "dot", color: "#ffd23e", dur: "4.1s", delay: "0.3s", size: 1.6, opacity: 0.7 },
+  { x: 1040, y: 90, type: "dot", color: "#ffffff", dur: "4.5s", delay: "2.2s", size: 1.4, opacity: 0.5 },
+  { x: 1130, y: 60, type: "dot", color: "#38bdf8", dur: "3.7s", delay: "1.1s", size: 1.5, opacity: 0.6 },
+  { x: 760, y: 460, type: "dot", color: "#c084fc", dur: "4.0s", delay: "0.5s", size: 1.2, opacity: 0.5 },
+  { x: 920, y: 440, type: "dot", color: "#ffffff", dur: "4.4s", delay: "1.7s", size: 1.5, opacity: 0.6 },
+  { x: 1070, y: 490, type: "dot", color: "#7dfce7", dur: "3.8s", delay: "0.8s", size: 1.4, opacity: 0.7 },
+  { x: 1210, y: 440, type: "dot", color: "#ffd23e", dur: "4.2s", delay: "2.3s", size: 1.2, opacity: 0.5 },
+
+  // Section 3: x: 1280 - 1920 (Cruiser & High Summit / Levels 8-12)
+  { x: 1320, y: 70, type: "sparkle", color: "#ffd23e", dur: "3.3s", delay: "0.4s" },
+  { x: 1380, y: 120, type: "sparkleSm", color: "#7dfce7", dur: "2.8s", delay: "1.5s" },
+  { x: 1470, y: 55, type: "sparkle", color: "#ffffff", dur: "3.7s", delay: "2.0s" },
+  { x: 1540, y: 90, type: "sparkleSm", color: "#c084fc", dur: "3.0s", delay: "0.7s" },
+  { x: 1640, y: 45, type: "sparkle", color: "#38bdf8", dur: "3.5s", delay: "1.8s" },
+  { x: 1760, y: 95, type: "sparkleSm", color: "#ffd23e", dur: "2.9s", delay: "0.2s" },
+  { x: 1850, y: 50, type: "sparkle", color: "#ffffff", dur: "3.6s", delay: "2.4s" },
+  { x: 1330, y: 450, type: "sparkleSm", color: "#7dfce7", dur: "3.1s", delay: "1.2s" },
+  { x: 1510, y: 480, type: "sparkle", color: "#ffd23e", dur: "3.8s", delay: "0.6s" },
+  { x: 1680, y: 440, type: "sparkleSm", color: "#ffffff", dur: "2.8s", delay: "1.9s" },
+  { x: 1820, y: 470, type: "sparkle", color: "#c084fc", dur: "3.4s", delay: "2.1s" },
+  { x: 1300, y: 140, type: "medium", color: "#38bdf8", dur: "2.8s", delay: "0.8s", size: 2.5 },
+  { x: 1410, y: 40, type: "medium", color: "#ffffff", dur: "3.2s", delay: "1.6s", size: 2.2 },
+  { x: 1500, y: 130, type: "medium", color: "#ffd23e", dur: "2.7s", delay: "0.3s", size: 2.6 },
+  { x: 1590, y: 50, type: "medium", color: "#7dfce7", dur: "3.5s", delay: "2.2s", size: 2 },
+  { x: 1700, y: 140, type: "medium", color: "#c084fc", dur: "2.6s", delay: "1.1s", size: 2.4 },
+  { x: 1810, y: 35, type: "medium", color: "#fde047", dur: "3.3s", delay: "1.7s", size: 2.2 },
+  { x: 1360, y: 480, type: "medium", color: "#ffffff", dur: "2.9s", delay: "0.5s", size: 2.5 },
+  { x: 1480, y: 420, type: "medium", color: "#38bdf8", dur: "3.4s", delay: "2.3s", size: 2.2 },
+  { x: 1620, y: 470, type: "medium", color: "#ffd23e", dur: "2.7s", delay: "1.4s", size: 2.8 },
+  { x: 1780, y: 420, type: "medium", color: "#7dfce7", dur: "3.1s", delay: "0.9s", size: 2 },
+  { x: 1350, y: 80, type: "dot", color: "#ffffff", dur: "4.2s", delay: "1.0s", size: 1.5, opacity: 0.6 },
+  { x: 1440, y: 90, type: "dot", color: "#7dfce7", dur: "3.8s", delay: "1.7s", size: 1.2, opacity: 0.5 },
+  { x: 1560, y: 60, type: "dot", color: "#ffd23e", dur: "4.3s", delay: "0.4s", size: 1.6, opacity: 0.7 },
+  { x: 1660, y: 100, type: "dot", color: "#ffffff", dur: "4.6s", delay: "2.1s", size: 1.4, opacity: 0.5 },
+  { x: 1750, y: 55, type: "dot", color: "#38bdf8", dur: "3.9s", delay: "1.3s", size: 1.5, opacity: 0.6 },
+  { x: 1420, y: 460, type: "dot", color: "#c084fc", dur: "4.1s", delay: "0.7s", size: 1.2, opacity: 0.5 },
+  { x: 1580, y: 450, type: "dot", color: "#ffffff", dur: "4.5s", delay: "1.8s", size: 1.5, opacity: 0.6 },
+  { x: 1720, y: 490, type: "dot", color: "#7dfce7", dur: "3.7s", delay: "0.6s", size: 1.4, opacity: 0.7 },
+  { x: 1860, y: 430, type: "dot", color: "#ffd23e", dur: "4.3s", delay: "2.0s", size: 1.2, opacity: 0.5 },
+
+  // Section 4: x: 1920 - 2560 (Approach to Singularity / Levels 12-15)
+  { x: 1960, y: 65, type: "sparkle", color: "#ffd23e", dur: "3.2s", delay: "0.3s" },
+  { x: 2020, y: 110, type: "sparkleSm", color: "#7dfce7", dur: "2.9s", delay: "1.6s" },
+  { x: 2110, y: 45, type: "sparkle", color: "#ffffff", dur: "3.6s", delay: "2.1s" },
+  { x: 2190, y: 85, type: "sparkleSm", color: "#c084fc", dur: "3.0s", delay: "0.8s" },
+  { x: 2280, y: 50, type: "sparkle", color: "#38bdf8", dur: "3.4s", delay: "1.7s" },
+  { x: 2370, y: 105, type: "sparkleSm", color: "#ffd23e", dur: "2.8s", delay: "0.4s" },
+  { x: 2450, y: 55, type: "sparkle", color: "#ffffff", dur: "3.5s", delay: "2.5s" },
+  { x: 2520, y: 90, type: "sparkleSm", color: "#7dfce7", dur: "3.1s", delay: "1.0s" },
+  { x: 1970, y: 460, type: "sparkle", color: "#ffd23e", dur: "3.7s", delay: "0.5s" },
+  { x: 2120, y: 440, type: "sparkleSm", color: "#ffffff", dur: "2.8s", delay: "1.8s" },
+  { x: 2310, y: 470, type: "sparkle", color: "#c084fc", dur: "3.4s", delay: "2.2s" },
+  { x: 2470, y: 450, type: "sparkleSm", color: "#7dfce7", dur: "3.0s", delay: "0.7s" },
+  { x: 1940, y: 130, type: "medium", color: "#38bdf8", dur: "2.7s", delay: "0.9s", size: 2.5 },
+  { x: 2050, y: 35, type: "medium", color: "#ffffff", dur: "3.1s", delay: "1.5s", size: 2.2 },
+  { x: 2150, y: 125, type: "medium", color: "#ffd23e", dur: "2.8s", delay: "0.2s", size: 2.6 },
+  { x: 2240, y: 40, type: "medium", color: "#7dfce7", dur: "3.4s", delay: "2.3s", size: 2 },
+  { x: 2330, y: 135, type: "medium", color: "#c084fc", dur: "2.6s", delay: "1.2s", size: 2.4 },
+  { x: 2420, y: 35, type: "medium", color: "#fde047", dur: "3.2s", delay: "1.8s", size: 2.2 },
+  { x: 2510, y: 120, type: "medium", color: "#38bdf8", dur: "2.8s", delay: "0.4s", size: 2.5 },
+  { x: 2040, y: 480, type: "medium", color: "#ffffff", dur: "3.0s", delay: "0.6s", size: 2.5 },
+  { x: 2180, y: 420, type: "medium", color: "#38bdf8", dur: "3.3s", delay: "2.4s", size: 2.2 },
+  { x: 2360, y: 480, type: "medium", color: "#ffd23e", dur: "2.7s", delay: "1.3s", size: 2.8 },
+  { x: 2490, y: 410, type: "medium", color: "#7dfce7", dur: "3.1s", delay: "0.8s", size: 2 },
+  { x: 1990, y: 85, type: "dot", color: "#ffffff", dur: "4.3s", delay: "1.1s", size: 1.5, opacity: 0.6 },
+  { x: 2080, y: 75, type: "dot", color: "#7dfce7", dur: "3.9s", delay: "1.6s", size: 1.2, opacity: 0.5 },
+  { x: 2210, y: 65, type: "dot", color: "#ffd23e", dur: "4.2s", delay: "0.5s", size: 1.6, opacity: 0.7 },
+  { x: 2300, y: 95, type: "dot", color: "#ffffff", dur: "4.5s", delay: "2.0s", size: 1.4, opacity: 0.5 },
+  { x: 2400, y: 60, type: "dot", color: "#38bdf8", dur: "3.8s", delay: "1.4s", size: 1.5, opacity: 0.6 },
+  { x: 2490, y: 80, type: "dot", color: "#ffffff", dur: "4.4s", delay: "0.9s", size: 1.4, opacity: 0.6 },
+  { x: 2070, y: 450, type: "dot", color: "#c084fc", dur: "4.0s", delay: "0.6s", size: 1.2, opacity: 0.5 },
+  { x: 2240, y: 460, type: "dot", color: "#ffffff", dur: "4.6s", delay: "1.9s", size: 1.5, opacity: 0.6 },
+  { x: 2390, y: 440, type: "dot", color: "#7dfce7", dur: "3.7s", delay: "0.7s", size: 1.4, opacity: 0.7 },
+  { x: 2530, y: 470, type: "dot", color: "#ffd23e", dur: "4.1s", delay: "2.1s", size: 1.2, opacity: 0.5 },
+];
+
+const ROADMAP_CONSTELLATIONS = [
+  // 1. Explorer's Bow (Near Level 1-2)
+  {
+    lines: [
+      { x1: 90, y1: 70, x2: 170, y2: 45 },
+      { x1: 170, y1: 45, x2: 250, y2: 80 },
+      { x1: 250, y1: 80, x2: 310, y2: 50 },
+    ],
+    stars: [
+      { x: 90, y: 70, color: "#7dfce7" },
+      { x: 170, y: 45, color: "#ffd23e" },
+      { x: 250, y: 80, color: "#ffffff" },
+      { x: 310, y: 50, color: "#7dfce7" },
+    ],
+  },
+  // 2. Crown of Aethon (Above Summit Level 5-6)
+  {
+    lines: [
+      { x1: 690, y1: 50, x2: 760, y2: 25 },
+      { x1: 760, y1: 25, x2: 830, y2: 40 },
+      { x1: 830, y1: 40, x2: 900, y2: 25 },
+      { x1: 900, y1: 25, x2: 960, y2: 55 },
+    ],
+    stars: [
+      { x: 690, y: 50, color: "#c084fc" },
+      { x: 760, y: 25, color: "#ffd23e" },
+      { x: 830, y: 40, color: "#ffffff" },
+      { x: 900, y: 25, color: "#ffd23e" },
+      { x: 960, y: 55, color: "#7dfce7" },
+    ],
+  },
+  // 3. Stellar Cross (Above Level 9-11)
+  {
+    lines: [
+      { x1: 1440, y1: 75, x2: 1580, y2: 75 },
+      { x1: 1510, y1: 30, x2: 1510, y2: 120 },
+    ],
+    stars: [
+      { x: 1440, y: 75, color: "#38bdf8" },
+      { x: 1580, y: 75, color: "#38bdf8" },
+      { x: 1510, y: 30, color: "#ffd23e" },
+      { x: 1510, y: 120, color: "#ffffff" },
+      { x: 1510, y: 75, color: "#ffd23e" },
+    ],
+  },
+  // 4. Apex Triangle (Near Final Station Level 14-15)
+  {
+    lines: [
+      { x1: 2210, y1: 60, x2: 2280, y2: 25 },
+      { x1: 2280, y1: 25, x2: 2350, y2: 70 },
+      { x1: 2350, y1: 70, x2: 2210, y2: 60 },
+    ],
+    stars: [
+      { x: 2210, y: 60, color: "#ffd23e" },
+      { x: 2280, y: 25, color: "#ffffff" },
+      { x: 2350, y: 70, color: "#7dfce7" },
+    ],
+  },
+];
+
 export function CosmicRoadmap({
   onSelectLevel,
   onBackToMenu,
@@ -253,6 +453,211 @@ export function CosmicRoadmap({
             <div className="absolute top-[38%] left-[38%] h-80 w-96 rounded-full bg-cyan-500/15 blur-3xl" />
             <div className="absolute top-[14%] left-[68%] h-72 w-96 rounded-full bg-violet-600/15 blur-3xl" />
             <div className="absolute top-[28%] left-[88%] h-80 w-80 rounded-full bg-rose-600/15 blur-3xl" />
+          </div>
+
+          {/* ================= RICH COSMIC STARFIELD & CONSTELLATIONS ================= */}
+          <style>{`
+            @keyframes roadmapStarTwinkle {
+              0%, 100% {
+                opacity: 0.25;
+                transform: scale(0.75);
+              }
+              50% {
+                opacity: 1;
+                transform: scale(1.25);
+              }
+            }
+            @keyframes roadmapSparkleSpin {
+              0%, 100% {
+                opacity: 0.35;
+                transform: scale(0.7) rotate(0deg);
+              }
+              50% {
+                opacity: 1;
+                transform: scale(1.3) rotate(45deg);
+              }
+            }
+            @keyframes roadmapCometStreak1 {
+              0% {
+                transform: translate(0, 0);
+                opacity: 0;
+              }
+              10% {
+                opacity: 0.95;
+              }
+              28% {
+                transform: translate(160px, 90px);
+                opacity: 0;
+              }
+              100% {
+                transform: translate(160px, 90px);
+                opacity: 0;
+              }
+            }
+            @keyframes roadmapCometStreak2 {
+              0% {
+                transform: translate(0, 0);
+                opacity: 0;
+              }
+              10% {
+                opacity: 0.95;
+              }
+              28% {
+                transform: translate(180px, 100px);
+                opacity: 0;
+              }
+              100% {
+                transform: translate(180px, 100px);
+                opacity: 0;
+              }
+            }
+          `}</style>
+
+          {/* Starlight Constellations */}
+          <svg className="pointer-events-none absolute inset-0" width={MAP_WIDTH} height={MAP_HEIGHT}>
+            {ROADMAP_CONSTELLATIONS.map((c, cIdx) => (
+              <g key={`const-${cIdx}`} opacity="0.6">
+                {c.lines.map((l, lIdx) => (
+                  <line
+                    key={`line-${lIdx}`}
+                    x1={l.x1}
+                    y1={l.y1}
+                    x2={l.x2}
+                    y2={l.y2}
+                    stroke="rgba(125,252,231,0.3)"
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                  />
+                ))}
+                {c.stars.map((s, sIdx) => (
+                  <circle
+                    key={`star-${sIdx}`}
+                    cx={s.x}
+                    cy={s.y}
+                    r="2.5"
+                    fill={s.color}
+                    className="animate-pulse"
+                  />
+                ))}
+              </g>
+            ))}
+          </svg>
+
+          {/* Shooting Stars / Cosmic Comets */}
+          <div className="pointer-events-none absolute" style={{ left: "200px", top: "35px" }}>
+            <svg width="180" height="80" className="overflow-visible" style={{ animation: "roadmapCometStreak1 8s ease-in-out infinite" }}>
+              <defs>
+                <linearGradient id="cometRoad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#7dfce7" stopOpacity="0" />
+                  <stop offset="80%" stopColor="#7dfce7" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="0" x2="80" y2="45" stroke="url(#cometRoad1)" strokeWidth="2.2" strokeLinecap="round" />
+              <circle cx="80" cy="45" r="2.8" fill="#ffffff" />
+            </svg>
+          </div>
+
+          <div className="pointer-events-none absolute" style={{ left: "1150px", top: "25px" }}>
+            <svg width="180" height="80" className="overflow-visible" style={{ animation: "roadmapCometStreak2 9s ease-in-out infinite 3.5s" }}>
+              <defs>
+                <linearGradient id="cometRoad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffd23e" stopOpacity="0" />
+                  <stop offset="80%" stopColor="#ffd23e" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="0" x2="85" y2="48" stroke="url(#cometRoad2)" strokeWidth="2.2" strokeLinecap="round" />
+              <circle cx="85" cy="48" r="2.8" fill="#ffffff" />
+            </svg>
+          </div>
+
+          <div className="pointer-events-none absolute" style={{ left: "2050px", top: "35px" }}>
+            <svg width="180" height="80" className="overflow-visible" style={{ animation: "roadmapCometStreak1 8.5s ease-in-out infinite 1.8s" }}>
+              <defs>
+                <linearGradient id="cometRoad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#c084fc" stopOpacity="0" />
+                  <stop offset="80%" stopColor="#c084fc" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="0" x2="80" y2="45" stroke="url(#cometRoad3)" strokeWidth="2.2" strokeLinecap="round" />
+              <circle cx="80" cy="45" r="2.8" fill="#ffffff" />
+            </svg>
+          </div>
+
+          {/* Cosmic Sparkling Starfield (140+ Stars across the 2560px Map) */}
+          <div className="pointer-events-none absolute inset-0">
+            {ROADMAP_STARS.map((star, idx) => {
+              if (star.type === "sparkle") {
+                return (
+                  <div
+                    key={`star-${idx}`}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none will-change-transform"
+                    style={{
+                      left: `${star.x}px`,
+                      top: `${star.y}px`,
+                      animation: `roadmapSparkleSpin ${star.dur} ease-in-out infinite ${star.delay}`,
+                    }}
+                  >
+                    <svg viewBox="-8 -8 16 16" className="w-3.5 h-3.5 sm:w-4 sm:h-4 overflow-visible" style={{ filter: `drop-shadow(0 0 4px ${star.color})` }}>
+                      <path d="M 0 -8 Q 0 0 8 0 Q 0 0 0 8 Q 0 0 -8 0 Q 0 0 0 -8 Z" fill={star.color} />
+                      <circle cx="0" cy="0" r="1.5" fill="#ffffff" />
+                    </svg>
+                  </div>
+                );
+              }
+              if (star.type === "sparkleSm") {
+                return (
+                  <div
+                    key={`star-${idx}`}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none will-change-transform"
+                    style={{
+                      left: `${star.x}px`,
+                      top: `${star.y}px`,
+                      animation: `roadmapSparkleSpin ${star.dur} ease-in-out infinite ${star.delay}`,
+                    }}
+                  >
+                    <svg viewBox="-6 -6 12 12" className="w-2.5 h-2.5 sm:w-3 sm:h-3 overflow-visible" style={{ filter: `drop-shadow(0 0 3px ${star.color})` }}>
+                      <path d="M 0 -5 Q 0 0 5 0 Q 0 0 0 5 Q 0 0 -5 0 Q 0 0 0 -5 Z" fill={star.color} />
+                      <circle cx="0" cy="0" r="1" fill="#ffffff" />
+                    </svg>
+                  </div>
+                );
+              }
+              if (star.type === "medium") {
+                return (
+                  <div
+                    key={`star-${idx}`}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none rounded-full will-change-transform"
+                    style={{
+                      left: `${star.x}px`,
+                      top: `${star.y}px`,
+                      width: `${star.size || 2.5}px`,
+                      height: `${star.size || 2.5}px`,
+                      backgroundColor: star.color,
+                      boxShadow: `0 0 6px ${star.color}`,
+                      animation: `roadmapStarTwinkle ${star.dur} ease-in-out infinite ${star.delay}`,
+                    }}
+                  />
+                );
+              }
+              return (
+                <div
+                  key={`star-${idx}`}
+                  className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none rounded-full"
+                  style={{
+                    left: `${star.x}px`,
+                    top: `${star.y}px`,
+                    width: `${star.size || 1.5}px`,
+                    height: `${star.size || 1.5}px`,
+                    backgroundColor: star.color,
+                    opacity: star.opacity || 0.6,
+                    animation: `roadmapStarTwinkle ${star.dur} ease-in-out infinite ${star.delay}`,
+                  }}
+                />
+              );
+            })}
           </div>
 
           {/* ================= RICH COSMIC DECORATIONS ================= */}
