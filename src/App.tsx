@@ -524,33 +524,72 @@ export default function App() {
       {/* ---- PAUSED ---- */}
       {ui.screen === "paused" && (
         <Overlay>
-          <div className="animate-pop-in m-auto flex w-[min(94vw,25rem)] flex-col items-center rounded-3xl border-2 border-void-700/90 bg-void-950/95 p-6 sm:p-7 shadow-[0_0_60px_rgba(0,0,0,0.85)] backdrop-blur-2xl">
-            <h2 className="font-display text-2xl sm:text-3xl text-ice-400 [text-shadow:0_0_24px_rgba(46,230,201,0.5)]">{t.paused}</h2>
-            <p className="mt-1 text-xs font-bold tracking-[0.28em] text-white/50">
-              {t.score} {ui.score.toLocaleString("en-US")} &middot; LV {ui.level}
-            </p>
-            <div className="mt-5 flex w-full flex-col gap-2.5">
-              <ChunkBtn primary onClick={() => eng()?.resume()} className="py-3 text-sm sm:text-base font-bold" icon={<IconPlay className="h-4.5 w-4.5" />}>
+          <div className="animate-pop-in m-auto flex w-[min(94vw,28rem)] flex-col items-center rounded-3xl border-2 border-void-700/90 bg-void-950/95 p-6 sm:p-8 shadow-[0_0_70px_rgba(0,0,0,0.88)] backdrop-blur-2xl">
+            <h2 className="font-display text-3xl sm:text-4xl text-ice-400 [text-shadow:0_0_26px_rgba(46,230,201,0.55)] tracking-wide">
+              {t.paused}
+            </h2>
+            
+            {/* Mission Stats Badge */}
+            <div className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-void-700/80 bg-void-900/90 px-4 py-1.5 text-xs font-bold tracking-wider shadow-inner">
+              <span className="text-ember-400 font-display">{t.score} {ui.score.toLocaleString("en-US")}</span>
+              <span className="text-white/30">•</span>
+              <span className="text-ice-300 font-display">LV {ui.level}</span>
+            </div>
+
+            {/* Action Command Launchpad */}
+            <div className="mt-6 sm:mt-7 flex w-full flex-col gap-3 sm:gap-3.5">
+              {/* Primary Resume Action */}
+              <ChunkBtn
+                primary
+                onClick={() => eng()?.resume()}
+                className="w-full py-3.5 sm:py-4 text-base sm:text-lg font-black shadow-[0_5px_0_#8f2f0c,0_10px_22px_rgba(255,110,30,0.38)]"
+                icon={<IconPlay className="h-5 w-5" />}
+              >
                 {t.resume}
               </ChunkBtn>
-              <div className="grid grid-cols-2 gap-2.5">
-                <ChunkBtn onClick={() => eng()?.restart()} className="py-2.5 text-xs sm:text-sm font-bold" icon={<IconRestart className="h-4 w-4" />}>
+
+              {/* 2x2 Tactical Navigation Grid */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-3.5 pt-0.5">
+                <ChunkBtn
+                  onClick={() => eng()?.restart()}
+                  className="py-3 sm:py-3.5 text-xs sm:text-sm font-bold tracking-wider"
+                  icon={<IconRestart className="h-4.5 w-4.5" />}
+                >
                   {t.restart}
                 </ChunkBtn>
-                <ChunkBtn onClick={() => eng()?.openRoadmap()} className="py-2.5 text-xs sm:text-sm font-bold" icon={<IconMap className="h-4 w-4" />}>
+
+                <ChunkBtn
+                  onClick={() => eng()?.openRoadmap()}
+                  className="py-3 sm:py-3.5 text-xs sm:text-sm font-bold tracking-wider"
+                  icon={<IconMap className="h-4.5 w-4.5" />}
+                >
                   {t.roadmap}
                 </ChunkBtn>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                <ChunkBtn onClick={() => setShowSettings(true)} className="py-2.5 text-xs sm:text-sm font-bold" icon={<IconGear className="h-4 w-4" />}>
+
+                <ChunkBtn
+                  onClick={() => setShowSettings(true)}
+                  className="py-3 sm:py-3.5 text-xs sm:text-sm font-bold tracking-wider"
+                  icon={<IconGear className="h-4.5 w-4.5" />}
+                >
                   {t.settings}
                 </ChunkBtn>
-                <ChunkBtn onClick={() => eng()?.toMenu()} className="py-2.5 text-xs sm:text-sm font-bold" icon={<IconHome className="h-4 w-4" />}>
+
+                <ChunkBtn
+                  onClick={() => eng()?.toMenu()}
+                  className="py-3 sm:py-3.5 text-xs sm:text-sm font-bold tracking-wider"
+                  icon={<IconHome className="h-4.5 w-4.5" />}
+                >
                   {t.menu}
                 </ChunkBtn>
               </div>
             </div>
-            <div className="mt-5 w-full">
+
+            {/* Flight & Slingshot Tactical Controls Card */}
+            <div className="mt-6 w-full rounded-2xl border border-void-700/80 bg-void-900/60 p-3.5 sm:p-4 shadow-inner backdrop-blur-sm">
+              <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-[0.22em] text-ice-400/90 uppercase">
+                <span>{t.controlsTitle}</span>
+                <span className="text-white/40">{t.tactical}</span>
+              </div>
               <Controls compact t={t} />
             </div>
           </div>
@@ -560,7 +599,7 @@ export default function App() {
       {/* ---- GAME OVER ---- */}
       {ui.screen === "gameover" && (
         <Overlay>
-          <div className="animate-pop-in m-auto flex w-[min(94vw,26rem)] flex-col items-center rounded-2xl border-2 border-void-700 bg-void-900/95 p-6 shadow-[0_10px_0_rgba(0,0,0,0.45)]">
+          <div className="animate-pop-in m-auto flex w-[min(94vw,28rem)] flex-col items-center rounded-3xl border-2 border-void-700 bg-void-950/95 p-6 sm:p-8 shadow-[0_0_70px_rgba(0,0,0,0.88)] backdrop-blur-2xl">
             <p className="text-[11px] font-bold tracking-[0.4em] text-rose-alert">{t.coresDepleted}</p>
             <h2 className="mt-1 font-display text-4xl text-ember-400 [text-shadow:0_0_28px_rgba(255,122,26,0.6)]">{t.gameOver}</h2>
 
@@ -583,7 +622,7 @@ export default function App() {
             </div>
 
             {/* Tactical Level Debrief Card */}
-            <div className="mt-4 w-full rounded-2xl border border-void-700/80 bg-void-950/80 p-3.5 text-center shadow-inner">
+            <div className="mt-5 w-full rounded-2xl border border-void-700/80 bg-void-900/60 p-3.5 text-center shadow-inner">
               <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-amber-300">
                 <IconTacticalTarget size={15} className="text-amber-300" />
                 <span className="uppercase tracking-wider">{t.levelTarget} {ui.level}</span>
@@ -598,20 +637,24 @@ export default function App() {
               </div>
             </div>
 
-            <div className="mt-5 flex w-full flex-col gap-2.5">
-              <ChunkBtn primary onClick={() => eng()?.restart()} className="w-full text-lg" icon={<IconRestart className="h-5 w-5" />}>
+            {/* Action Command Launchpad */}
+            <div className="mt-6 flex w-full flex-col gap-3 sm:gap-3.5">
+              <ChunkBtn primary onClick={() => eng()?.restart()} className="w-full py-3.5 sm:py-4 text-base sm:text-lg font-bold" icon={<IconRestart className="h-5 w-5" />}>
                 {t.restart}
               </ChunkBtn>
-              <div className="grid grid-cols-2 gap-2.5">
-                <ChunkBtn onClick={() => eng()?.openRoadmap()} icon={<IconMap className="h-4 w-4" />}>
+              <div className="grid grid-cols-2 gap-3 sm:gap-3.5">
+                <ChunkBtn onClick={() => eng()?.openRoadmap()} className="py-3 sm:py-3.5 text-xs sm:text-sm font-bold" icon={<IconMap className="h-4.5 w-4.5" />}>
                   {t.roadmap}
                 </ChunkBtn>
-                <ChunkBtn onClick={() => eng()?.toMenu()} icon={<IconHome className="h-4 w-4" />}>
-                  {t.menu}
+                <ChunkBtn onClick={() => setShowSettings(true)} className="py-3 sm:py-3.5 text-xs sm:text-sm font-bold" icon={<IconGear className="h-4.5 w-4.5" />}>
+                  {t.settings}
                 </ChunkBtn>
               </div>
+              <ChunkBtn onClick={() => eng()?.toMenu()} className="w-full py-3 sm:py-3.5 text-xs sm:text-sm font-bold" icon={<IconHome className="h-4.5 w-4.5" />}>
+                {t.menu}
+              </ChunkBtn>
             </div>
-            <p className="mt-3 text-[11px] font-semibold tracking-[0.2em] text-white/40">
+            <p className="mt-4 text-[11px] font-semibold tracking-[0.2em] text-white/40">
               {t.instantRestartHint}
             </p>
           </div>
