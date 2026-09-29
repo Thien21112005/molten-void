@@ -37,6 +37,117 @@ const ORBIT_KEYFRAMES_CSS = [
   generateOrbitKeyframes("orbitIce", 60, 55, 315),
 ].join("\n");
 
+interface CosmicStar {
+  x: string;
+  y: string;
+  type: "sparkle" | "sparkleSm" | "medium" | "dot";
+  color: string;
+  dur: string;
+  delay: string;
+  size?: number;
+  opacity?: number;
+}
+
+const COSMIC_STARS: CosmicStar[] = [
+  // --- 1. Large 4-Point Sparkling Diamond Stars (20 stars) ---
+  { x: "5%", y: "7%", type: "sparkle", color: "#7dfce7", dur: "3.2s", delay: "0.2s" },
+  { x: "16%", y: "12%", type: "sparkleSm", color: "#ffd23e", dur: "2.8s", delay: "1.4s" },
+  { x: "28%", y: "6%", type: "sparkle", color: "#ffffff", dur: "3.6s", delay: "2.5s" },
+  { x: "45%", y: "8%", type: "sparkleSm", color: "#c084fc", dur: "3.0s", delay: "0.9s" },
+  { x: "63%", y: "5%", type: "sparkle", color: "#7dfce7", dur: "3.4s", delay: "1.8s" },
+  { x: "78%", y: "11%", type: "sparkleSm", color: "#ffd23e", dur: "2.9s", delay: "0.4s" },
+  { x: "88%", y: "7%", type: "sparkle", color: "#ffffff", dur: "3.5s", delay: "2.1s" },
+  { x: "95%", y: "15%", type: "sparkleSm", color: "#7dfce7", dur: "3.1s", delay: "1.1s" },
+  { x: "96%", y: "38%", type: "sparkle", color: "#ffd23e", dur: "3.8s", delay: "0.7s" },
+  { x: "93%", y: "62%", type: "sparkleSm", color: "#c084fc", dur: "2.7s", delay: "2.3s" },
+  { x: "95%", y: "84%", type: "sparkle", color: "#7dfce7", dur: "3.3s", delay: "1.5s" },
+  { x: "82%", y: "93%", type: "sparkleSm", color: "#ffffff", dur: "3.0s", delay: "0.5s" },
+  { x: "65%", y: "95%", type: "sparkle", color: "#ffd23e", dur: "3.7s", delay: "2.8s" },
+  { x: "48%", y: "93%", type: "sparkleSm", color: "#7dfce7", dur: "2.9s", delay: "1.2s" },
+  { x: "32%", y: "96%", type: "sparkle", color: "#ffffff", dur: "3.4s", delay: "0.3s" },
+  { x: "18%", y: "92%", type: "sparkleSm", color: "#c084fc", dur: "3.1s", delay: "2.0s" },
+  { x: "6%", y: "86%", type: "sparkle", color: "#ffd23e", dur: "3.6s", delay: "1.6s" },
+  { x: "4%", y: "60%", type: "sparkleSm", color: "#7dfce7", dur: "2.8s", delay: "0.8s" },
+  { x: "3%", y: "35%", type: "sparkle", color: "#ffffff", dur: "3.5s", delay: "2.4s" },
+  { x: "9%", y: "24%", type: "sparkleSm", color: "#ffd23e", dur: "3.0s", delay: "1.0s" },
+
+  // --- 2. Medium Glowing Star Orbs (30 stars) ---
+  { x: "8%", y: "15%", type: "medium", color: "#38bdf8", dur: "2.6s", delay: "0.4s", size: 2.5 },
+  { x: "12%", y: "5%", type: "medium", color: "#ffffff", dur: "3.2s", delay: "1.8s", size: 2.2 },
+  { x: "22%", y: "10%", type: "medium", color: "#fde047", dur: "2.9s", delay: "0.8s", size: 2.5 },
+  { x: "35%", y: "5%", type: "medium", color: "#7dfce7", dur: "3.5s", delay: "2.2s", size: 2 },
+  { x: "40%", y: "13%", type: "medium", color: "#ffffff", dur: "2.4s", delay: "1.1s", size: 2.8 },
+  { x: "53%", y: "7%", type: "medium", color: "#c084fc", dur: "3.1s", delay: "0.6s", size: 2.2 },
+  { x: "58%", y: "14%", type: "medium", color: "#38bdf8", dur: "2.7s", delay: "2.5s", size: 2.5 },
+  { x: "70%", y: "7%", type: "medium", color: "#ffffff", dur: "3.3s", delay: "1.3s", size: 2 },
+  { x: "83%", y: "5%", type: "medium", color: "#ffd23e", dur: "2.8s", delay: "0.2s", size: 2.5 },
+  { x: "91%", y: "11%", type: "medium", color: "#7dfce7", dur: "3.0s", delay: "2.7s", size: 2.2 },
+
+  { x: "89%", y: "22%", type: "medium", color: "#ffffff", dur: "2.5s", delay: "1.5s", size: 2.5 },
+  { x: "97%", y: "27%", type: "medium", color: "#fde047", dur: "3.4s", delay: "0.9s", size: 2 },
+  { x: "87%", y: "45%", type: "medium", color: "#c084fc", dur: "2.9s", delay: "2.1s", size: 2.5 },
+  { x: "94%", y: "50%", type: "medium", color: "#38bdf8", dur: "3.2s", delay: "0.5s", size: 2.2 },
+  { x: "90%", y: "68%", type: "medium", color: "#ffffff", dur: "2.7s", delay: "1.7s", size: 2.8 },
+  { x: "97%", y: "75%", type: "medium", color: "#7dfce7", dur: "3.6s", delay: "0.3s", size: 2 },
+  { x: "86%", y: "85%", type: "medium", color: "#ffd23e", dur: "2.8s", delay: "2.4s", size: 2.5 },
+  { x: "90%", y: "94%", type: "medium", color: "#ffffff", dur: "3.1s", delay: "1.0s", size: 2.2 },
+
+  { x: "74%", y: "91%", type: "medium", color: "#38bdf8", dur: "2.6s", delay: "1.9s", size: 2.5 },
+  { x: "60%", y: "93%", type: "medium", color: "#c084fc", dur: "3.5s", delay: "0.7s", size: 2.2 },
+  { x: "42%", y: "96%", type: "medium", color: "#fde047", dur: "2.9s", delay: "2.6s", size: 2.5 },
+  { x: "26%", y: "91%", type: "medium", color: "#7dfce7", dur: "3.3s", delay: "1.2s", size: 2 },
+  { x: "14%", y: "96%", type: "medium", color: "#ffffff", dur: "2.5s", delay: "0.6s", size: 2.8 },
+
+  { x: "10%", y: "76%", type: "medium", color: "#ffd23e", dur: "3.0s", delay: "2.0s", size: 2.5 },
+  { x: "2%", y: "72%", type: "medium", color: "#38bdf8", dur: "3.4s", delay: "0.8s", size: 2.2 },
+  { x: "7%", y: "52%", type: "medium", color: "#ffffff", dur: "2.8s", delay: "1.6s", size: 2.5 },
+  { x: "2%", y: "48%", type: "medium", color: "#7dfce7", dur: "3.2s", delay: "2.8s", size: 2 },
+  { x: "6%", y: "30%", type: "medium", color: "#c084fc", dur: "2.6s", delay: "0.3s", size: 2.5 },
+  { x: "11%", y: "38%", type: "medium", color: "#ffffff", dur: "3.5s", delay: "1.4s", size: 2.2 },
+  { x: "2%", y: "18%", type: "medium", color: "#fde047", dur: "2.9s", delay: "2.2s", size: 2.5 },
+
+  // --- 3. Micro Stardust Specks (36 stars) ---
+  { x: "3%", y: "11%", type: "dot", color: "#ffffff", dur: "4.2s", delay: "0.5s", size: 1.5 },
+  { x: "10%", y: "8%", type: "dot", color: "#bae6fd", dur: "5.0s", delay: "1.8s", size: 1.2 },
+  { x: "18%", y: "4%", type: "dot", color: "#fef08a", dur: "4.5s", delay: "2.6s", size: 1.5 },
+  { x: "24%", y: "14%", type: "dot", color: "#a5f3fc", dur: "3.8s", delay: "0.9s", size: 1.2 },
+  { x: "31%", y: "9%", type: "dot", color: "#ffffff", dur: "5.2s", delay: "3.1s", size: 1.4 },
+  { x: "38%", y: "4%", type: "dot", color: "#e9d5ff", dur: "4.1s", delay: "1.3s", size: 1.5 },
+  { x: "49%", y: "4%", type: "dot", color: "#bae6fd", dur: "4.8s", delay: "2.4s", size: 1.2 },
+  { x: "55%", y: "11%", type: "dot", color: "#ffffff", dur: "3.9s", delay: "0.4s", size: 1.5 },
+  { x: "67%", y: "3%", type: "dot", color: "#fef08a", dur: "4.7s", delay: "1.7s", size: 1.3 },
+  { x: "74%", y: "14%", type: "dot", color: "#a5f3fc", dur: "5.1s", delay: "2.9s", size: 1.5 },
+  { x: "81%", y: "8%", type: "dot", color: "#ffffff", dur: "4.3s", delay: "0.8s", size: 1.2 },
+  { x: "86%", y: "16%", type: "dot", color: "#e9d5ff", dur: "4.6s", delay: "3.4s", size: 1.4 },
+
+  { x: "93%", y: "21%", type: "dot", color: "#bae6fd", dur: "4.4s", delay: "1.2s", size: 1.5 },
+  { x: "98%", y: "34%", type: "dot", color: "#ffffff", dur: "5.3s", delay: "2.5s", size: 1.2 },
+  { x: "89%", y: "35%", type: "dot", color: "#fef08a", dur: "4.0s", delay: "0.3s", size: 1.4 },
+  { x: "94%", y: "43%", type: "dot", color: "#a5f3fc", dur: "4.9s", delay: "1.9s", size: 1.3 },
+  { x: "98%", y: "58%", type: "dot", color: "#ffffff", dur: "4.2s", delay: "3.0s", size: 1.5 },
+  { x: "88%", y: "60%", type: "dot", color: "#e9d5ff", dur: "5.0s", delay: "0.7s", size: 1.2 },
+  { x: "92%", y: "70%", type: "dot", color: "#bae6fd", dur: "4.6s", delay: "2.2s", size: 1.4 },
+  { x: "97%", y: "81%", type: "dot", color: "#ffffff", dur: "3.8s", delay: "1.5s", size: 1.5 },
+  { x: "89%", y: "88%", type: "dot", color: "#fef08a", dur: "5.4s", delay: "3.3s", size: 1.3 },
+  { x: "94%", y: "96%", type: "dot", color: "#a5f3fc", dur: "4.3s", delay: "0.6s", size: 1.5 },
+
+  { x: "85%", y: "97%", type: "dot", color: "#ffffff", dur: "4.7s", delay: "2.1s", size: 1.2 },
+  { x: "77%", y: "94%", type: "dot", color: "#e9d5ff", dur: "4.1s", delay: "1.0s", size: 1.4 },
+  { x: "69%", y: "97%", type: "dot", color: "#bae6fd", dur: "5.2s", delay: "2.8s", size: 1.3 },
+  { x: "57%", y: "96%", type: "dot", color: "#ffffff", dur: "3.9s", delay: "0.2s", size: 1.5 },
+  { x: "51%", y: "91%", type: "dot", color: "#fef08a", dur: "4.8s", delay: "1.6s", size: 1.2 },
+  { x: "39%", y: "94%", type: "dot", color: "#a5f3fc", dur: "4.4s", delay: "3.2s", size: 1.4 },
+  { x: "27%", y: "97%", type: "dot", color: "#ffffff", dur: "5.1s", delay: "0.9s", size: 1.5 },
+  { x: "21%", y: "89%", type: "dot", color: "#e9d5ff", dur: "4.3s", delay: "2.3s", size: 1.2 },
+  { x: "13%", y: "93%", type: "dot", color: "#bae6fd", dur: "4.9s", delay: "1.4s", size: 1.4 },
+  { x: "5%", y: "95%", type: "dot", color: "#ffffff", dur: "3.7s", delay: "0.4s", size: 1.5 },
+
+  { x: "1%", y: "83%", type: "dot", color: "#fef08a", dur: "4.5s", delay: "2.0s", size: 1.2 },
+  { x: "5%", y: "74%", type: "dot", color: "#a5f3fc", dur: "5.3s", delay: "3.5s", size: 1.4 },
+  { x: "2%", y: "63%", type: "dot", color: "#ffffff", dur: "4.0s", delay: "1.1s", size: 1.3 },
+  { x: "8%", y: "56%", type: "dot", color: "#e9d5ff", dur: "4.6s", delay: "2.7s", size: 1.5 },
+];
+
 export function CosmicDecorations() {
   return (
     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
@@ -164,7 +275,126 @@ ${ORBIT_KEYFRAMES_CSS}
           0%, 100% { opacity: 0.12; }
           50% { opacity: 0.22; }
         }
+
+        /* Twinkling Star Animations (Ngôi sao lấp lánh giữa vũ trụ) */
+        @keyframes sparkleCrossSpin {
+          0%, 100% {
+            opacity: 0.3;
+            transform: scale(0.7) rotate(0deg);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.3) rotate(20deg);
+          }
+        }
+
+        @keyframes starTwinkleFast {
+          0%, 100% {
+            opacity: 0.25;
+            transform: scale(0.75);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.35);
+          }
+        }
+
+        @keyframes starTwinkleSlow {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 0.95;
+            transform: scale(1.25);
+          }
+        }
+
+        @keyframes stardustDrift {
+          0%, 100% {
+            opacity: 0.15;
+            transform: scale(0.85);
+          }
+          50% {
+            opacity: 0.75;
+            transform: scale(1.15);
+          }
+        }
       `}</style>
+
+      {/* ================= COSMIC STARFIELD (BẦU TRỜI ĐẦY SAO LẤP LÁNH) ================= */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        {COSMIC_STARS.map((star, idx) => {
+          if (star.type === "sparkle") {
+            return (
+              <div
+                key={idx}
+                className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none will-change-transform"
+                style={{
+                  left: star.x,
+                  top: star.y,
+                  animation: `sparkleCrossSpin ${star.dur} ease-in-out infinite ${star.delay}`,
+                }}
+              >
+                <svg viewBox="-8 -8 16 16" className="w-3.5 h-3.5 sm:w-4 sm:h-4 overflow-visible" style={{ filter: `drop-shadow(0 0 5px ${star.color})` }}>
+                  <path d="M 0 -7 Q 0 0 7 0 Q 0 0 0 7 Q 0 0 -7 0 Q 0 0 0 -7 Z" fill={star.color} />
+                  <circle cx="0" cy="0" r="1.5" fill="#ffffff" />
+                </svg>
+              </div>
+            );
+          }
+          if (star.type === "sparkleSm") {
+            return (
+              <div
+                key={idx}
+                className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none will-change-transform"
+                style={{
+                  left: star.x,
+                  top: star.y,
+                  animation: `sparkleCrossSpin ${star.dur} ease-in-out infinite ${star.delay}`,
+                }}
+              >
+                <svg viewBox="-6 -6 12 12" className="w-2.5 h-2.5 sm:w-3 sm:h-3 overflow-visible" style={{ filter: `drop-shadow(0 0 3px ${star.color})` }}>
+                  <path d="M 0 -5 Q 0 0 5 0 Q 0 0 0 5 Q 0 0 -5 0 Q 0 0 0 -5 Z" fill={star.color} />
+                  <circle cx="0" cy="0" r="1" fill="#ffffff" />
+                </svg>
+              </div>
+            );
+          }
+          if (star.type === "medium") {
+            return (
+              <div
+                key={idx}
+                className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none rounded-full will-change-transform"
+                style={{
+                  left: star.x,
+                  top: star.y,
+                  width: `${star.size || 2.5}px`,
+                  height: `${star.size || 2.5}px`,
+                  backgroundColor: star.color,
+                  boxShadow: `0 0 6px ${star.color}`,
+                  animation: `starTwinkleFast ${star.dur} ease-in-out infinite ${star.delay}`,
+                }}
+              />
+            );
+          }
+          return (
+            <div
+              key={idx}
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none rounded-full"
+              style={{
+                left: star.x,
+                top: star.y,
+                width: `${star.size || 1.5}px`,
+                height: `${star.size || 1.5}px`,
+                backgroundColor: star.color,
+                opacity: star.opacity || 0.6,
+                animation: `stardustDrift ${star.dur} ease-in-out infinite ${star.delay}`,
+              }}
+            />
+          );
+        })}
+      </div>
 
       {/* ================= FAINT SOLAR SYSTEM ORBIT RINGS ================= */}
       <svg className="absolute inset-0 h-full w-full opacity-25 pointer-events-none" style={{ animation: "celestialOrbitPulse 8s ease-in-out infinite" }}>
