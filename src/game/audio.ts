@@ -685,6 +685,17 @@ export class SoundEngine {
     this.tone(300 + p * 500, 0.04, "square", 0.05);
   }
 
+  spaceChime() {
+    this.tone(880, 0.08, "sine", 0.12);
+    this.tone(1320, 0.09, "sine", 0.1, 0.06);
+    this.tone(1760, 0.14, "sine", 0.08, 0.12);
+  }
+
+  thrusterBoost() {
+    this.noise(0.35, 0.16, 400, 3200, 0, 0.7);
+    this.tone(220, 0.22, "triangle", 0.12, 0, 580);
+  }
+
   cancel() {
     this.tone(220, 0.08, "sine", 0.07, 0, 140);
   }
