@@ -230,6 +230,11 @@ export function SettingsModal({
                     <span className="truncate">{t.nowPlayingArmageddon}</span>
                   </div>
                 )}
+
+                <div className="mt-2 flex items-center gap-2 rounded-xl border border-void-800 bg-void-950/70 px-2.5 py-1.5 text-[11px] font-medium text-white/50">
+                  <span className="text-ice-400 flex-shrink-0">⏸️</span>
+                  <span className="leading-tight">{t.pauseAutoMuteDesc}</span>
+                </div>
               </div>
             </div>
 

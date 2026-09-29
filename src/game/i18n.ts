@@ -51,6 +51,7 @@ export interface Translations {
   musicTrackArmageddon: string;
   musicTrackSynth: string;
   nowPlayingArmageddon: string;
+  pauseAutoMuteDesc: string;
   sfxVolume: string;
   gameplayCategory: string;
   screenShake: string;
@@ -128,6 +129,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     musicTrackArmageddon: "Armageddon (Alibi Music)",
     musicTrackSynth: "Procedural Synth",
     nowPlayingArmageddon: "Đang phát: Epic Battle: Armageddon — Alibi Music",
+    pauseAutoMuteDesc: "Tự động tắt nhạc chiến đấu khi vào màn hình Tạm Dừng (Pause)",
     sfxVolume: "Hiệu Ứng Âm Thanh (SFX)",
     gameplayCategory: "Hình Ảnh & Hiệu Năng",
     screenShake: "Rung Chấn Màn Hình (Screen Shake)",
@@ -202,6 +204,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     musicTrackArmageddon: "Armageddon (Alibi Music)",
     musicTrackSynth: "Procedural Synth",
     nowPlayingArmageddon: "Now Playing: Epic Battle: Armageddon — Alibi Music",
+    pauseAutoMuteDesc: "Automatically pauses battle music when the game is paused",
     sfxVolume: "Sound Effects (SFX)",
     gameplayCategory: "Graphics & Performance",
     screenShake: "Screen Shake",

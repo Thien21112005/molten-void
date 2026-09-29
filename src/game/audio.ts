@@ -2,7 +2,7 @@
 
 type OscType = OscillatorType;
 
-export type MusicMode = "ambient" | "battle" | "off";
+export type MusicMode = "ambient" | "battle" | "paused" | "off";
 export type MusicTrack = "armageddon" | "synth";
 
 function getAudioUrl(filename: string): string {
@@ -169,7 +169,18 @@ export class SoundEngine {
   }
 
   setMusicMode(mode: MusicMode) {
+    const prev = this.musicMode;
     this.musicMode = mode;
+
+    // When ending a battle run and returning to ambient menus, rewind battle track to start
+    if (mode === "ambient" && prev === "battle" && this.bgmAudio) {
+      try {
+        this.bgmAudio.currentTime = 0;
+      } catch {
+        /* ignore */
+      }
+    }
+
     this.updateMusicPlayback();
   }
 
@@ -202,7 +213,7 @@ export class SoundEngine {
     audioEl.addEventListener("error", () => {
       if (!audioEl.src.endsWith(fallbackFile)) {
         audioEl.src = getAudioUrl(fallbackFile);
-        if (this.musicMode !== "off" && !this.muted && this.musicTrack === "armageddon") {
+        if (this.musicMode === "battle" && !this.muted && this.musicTrack === "armageddon") {
           void audioEl.play().catch(() => {});
         }
       }
@@ -214,36 +225,46 @@ export class SoundEngine {
   }
 
   private getCalculatedBgmVolume(): number {
-    if (this.muted || this.musicMode === "off") return 0;
-    // Battle mode (high intensity during shot aiming & flying): 75%
-    // Ambient mode (menus, pause, victory, roadmap): 42%
-    const factor = this.musicMode === "battle" ? 0.75 : 0.42;
-    return Math.max(0, Math.min(1, this.musicVolume * factor));
+    if (this.muted || this.musicMode !== "battle") return 0;
+    // Epic battle intensity: 75%
+    return Math.max(0, Math.min(1, this.musicVolume * 0.75));
   }
 
   updateMusicPlayback() {
-    if (this.musicTrack === "armageddon") {
-      this.initBgmAudio();
-      if (!this.bgmAudio) return;
+    this.initBgmAudio();
 
-      if (this.muted || this.musicMode === "off" || this.musicVolume <= 0.001) {
-        if (!this.bgmAudio.paused) {
-          this.bgmAudio.pause();
-        }
-      } else {
-        this.bgmAudio.muted = false;
-        this.bgmAudio.volume = this.getCalculatedBgmVolume();
-        if (this.bgmAudio.paused) {
-          const p = this.bgmAudio.play();
-          if (p !== undefined) {
-            p.catch(() => {
-              // Browser autoplay policy requires user interaction before playback
-            });
+    // 1. If muted, music turned off, or game PAUSED: Stop battle music immediately!
+    if (this.muted || this.musicMode === "off" || this.musicMode === "paused" || this.musicVolume <= 0.001) {
+      if (this.bgmAudio && !this.bgmAudio.paused) {
+        this.bgmAudio.pause();
+      }
+      return;
+    }
+
+    // 2. Battle Mode: Armageddon plays full force!
+    if (this.musicMode === "battle") {
+      if (this.musicTrack === "armageddon") {
+        if (this.bgmAudio) {
+          this.bgmAudio.muted = false;
+          this.bgmAudio.volume = this.getCalculatedBgmVolume();
+          if (this.bgmAudio.paused) {
+            const p = this.bgmAudio.play();
+            if (p !== undefined) {
+              p.catch(() => {
+                // Browser autoplay policy requires user interaction before playback
+              });
+            }
           }
         }
+      } else {
+        // Synth selected for battle
+        if (this.bgmAudio && !this.bgmAudio.paused) {
+          this.bgmAudio.pause();
+        }
       }
-    } else {
-      // Procedural Synth selected: pause HTML5 audio
+    } else if (this.musicMode === "ambient") {
+      // 3. Ambient Mode (Menu / Roadmap / Victory / Game Over):
+      // Pause Armageddon so it is strictly reserved for in-game battles
       if (this.bgmAudio && !this.bgmAudio.paused) {
         this.bgmAudio.pause();
       }
@@ -284,8 +305,24 @@ export class SoundEngine {
   }
 
   private onSequencerTick() {
-    if (!this.ctx || !this.isSequencerRunning || this.musicMode === "off" || this.musicTrack !== "synth") return;
+    // When muted, off, paused, or volume 0, silence the sequencer
+    if (
+      !this.ctx ||
+      !this.isSequencerRunning ||
+      this.musicMode === "off" ||
+      this.musicMode === "paused" ||
+      this.muted ||
+      this.musicVolume <= 0.001
+    ) {
+      return;
+    }
 
+    // In battle mode, procedural synth only runs if user explicitly picked "synth" (otherwise Armageddon plays)
+    if (this.musicMode === "battle" && this.musicTrack !== "synth") {
+      return;
+    }
+
+    // In ambient mode (Menu / Roadmap / Victory / Gameover), procedural synth provides the relaxing cosmic atmosphere!
     while (this.nextStepTime < this.ctx.currentTime + this.scheduleLookahead) {
       this.scheduleMusicStep(this.currentStep, this.nextStepTime);
       this.nextStepTime += this.secondsPerStep;

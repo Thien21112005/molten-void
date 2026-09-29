@@ -230,8 +230,8 @@ export class Engine {
       window.addEventListener("resize", this.resize);
     }
     try {
-      void document.fonts?.load('12px "Bungee"');
-      void document.fonts?.load('700 12px "Rajdhani"');
+      void document.fonts?.load('12px "Chakra Petch"');
+      void document.fonts?.load('700 12px "Be Vietnam Pro"');
     } catch {
       /* ignore */
     }
@@ -310,7 +310,7 @@ export class Engine {
     this.aimMode = "none";
     this.charging = false;
     sfx.click();
-    sfx.setMusicMode("ambient");
+    sfx.setMusicMode("paused");
     this.pushUI();
   }
 
