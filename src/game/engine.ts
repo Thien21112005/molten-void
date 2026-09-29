@@ -30,6 +30,8 @@ export interface VictoryData {
   totalStars: number;
 }
 
+export type CoreType = "standard" | "cluster" | "blast" | "heavy";
+
 export interface UIState {
   screen: Screen;
   score: number;
@@ -45,6 +47,7 @@ export interface UIState {
   launcherPos?: { x: number; y: number };
   landscape?: boolean;
   isAiming?: boolean;
+  selectedCore: CoreType;
   victoryData?: VictoryData;
   progress?: PlayerProgress;
 }
@@ -86,6 +89,11 @@ interface Orb {
   alive: boolean;
   slowT: number;
   trail: { x: number; y: number }[];
+  coreType: CoreType;
+  piercesLeft?: number;
+  piercedBlocks?: Set<Block>;
+  hasSplit?: boolean;
+  isSplitShard?: boolean;
 }
 interface Particle {
   kind: 0 | 1 | 2 | 3; // shard | spark | smoke | ring
@@ -163,9 +171,19 @@ export class Engine {
   private unsubMute?: () => void;
 
   // world
-  private gems: Gem[] = [];
-  private blocks: Block[] = [];
-  private orb: Orb | null = null;
+  private selectedCore: CoreType = "standard";
+  private orbsList: Orb[] = [];
+  public get orb(): Orb | null {
+    return this.orbsList[0] || null;
+  }
+  public set orb(val: Orb | null) {
+    if (!val) this.orbsList = [];
+    else this.orbsList = [val];
+  }
+  public get hasActiveOrb(): boolean {
+    return this.orbsList.some((o) => o.alive);
+  }
+  private coreSprites: Partial<Record<CoreType, HTMLCanvasElement>> = {};
   private launcher = { x: 100, y: 500 };
   private padR = 24;
   private orbR = 12;
@@ -348,6 +366,97 @@ export class Engine {
     this.pushUI();
   }
 
+  selectCore(type: CoreType) {
+    if (this.hasActiveOrb) return;
+    this.selectedCore = type;
+    sfx.click();
+    haptics.tick(10);
+    this.pushUI();
+  }
+
+  splitClusterOrb(o?: Orb): boolean {
+    const target =
+      o || this.orbsList.find((orb) => orb.alive && orb.coreType === "cluster" && !orb.hasSplit);
+    if (!target || target.hasSplit || !target.alive) return false;
+
+    target.hasSplit = true;
+    sfx.spaceChime();
+    sfx.shoot(0.7);
+    haptics.fire();
+    this.shake = Math.min(26, this.shake + 4);
+
+    const speed = Math.hypot(target.vx, target.vy) || this.maxSpeed * 0.8;
+    const currentAngle = Math.atan2(target.vy, target.vx);
+
+    target.r = Math.max(7, target.r * 0.82);
+
+    const spread = 0.42; // ~24 degrees
+    const shard1: Orb = {
+      x: target.x,
+      y: target.y,
+      vx: Math.cos(currentAngle + spread) * speed,
+      vy: Math.sin(currentAngle + spread) * speed,
+      r: target.r,
+      t: target.t,
+      alive: true,
+      slowT: 0,
+      trail: [{ x: target.x, y: target.y }],
+      coreType: "cluster",
+      hasSplit: true,
+      isSplitShard: true,
+    };
+
+    const shard2: Orb = {
+      x: target.x,
+      y: target.y,
+      vx: Math.cos(currentAngle - spread) * speed,
+      vy: Math.sin(currentAngle - spread) * speed,
+      r: target.r,
+      t: target.t,
+      alive: true,
+      slowT: 0,
+      trail: [{ x: target.x, y: target.y }],
+      coreType: "cluster",
+      hasSplit: true,
+      isSplitShard: true,
+    };
+
+    this.orbsList.push(shard1, shard2);
+
+    for (let i = 0; i < 14; i++) {
+      const a = rand(0, TAU);
+      const sp = rand(100, 280);
+      this.particles.push({
+        kind: 1,
+        x: target.x,
+        y: target.y,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp,
+        life: rand(0.2, 0.4),
+        tl: 0.4,
+        size: 3,
+        rot: 0,
+        vr: 0,
+        col: "125,252,231",
+        grav: 0,
+        drag: 2,
+      });
+    }
+
+    this.texts.push({
+      x: target.x,
+      y: target.y - 18,
+      t: 0,
+      life: 0.8,
+      str: "TRIPLE SPLIT!",
+      size: 16,
+      col: "#7dfce7",
+    });
+
+    this.pushUI();
+    return true;
+  }
+
   toggleMute() {
     sfx.ensure();
     sfx.setMuted(!sfx.muted);
@@ -365,8 +474,17 @@ export class Engine {
 
   private onPtrDown = (e: PointerEvent) => {
     sfx.ensure();
-    if (this.screen !== "playing" || this.orb?.alive) return;
+    if (this.screen !== "playing") return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
+
+    // In-flight cluster split check!
+    const activeCluster = this.orbsList.find((o) => o.alive && o.coreType === "cluster" && !o.hasSplit);
+    if (activeCluster) {
+      this.splitClusterOrb(activeCluster);
+      return;
+    }
+
+    if (this.hasActiveOrb) return;
     this.pointerId = e.pointerId;
     this.canvas.setPointerCapture(e.pointerId);
     const p = this.ptrPos(e);
@@ -447,16 +565,32 @@ export class Engine {
 
     if (this.screen !== "playing") return;
 
+    // In-flight cluster split via keyboard
+    if (k === " " || k === "Enter") {
+      const activeCluster = this.orbsList.find((o) => o.alive && o.coreType === "cluster" && !o.hasSplit);
+      if (activeCluster) {
+        e.preventDefault();
+        this.splitClusterOrb(activeCluster);
+        return;
+      }
+    }
+
+    // Number keys 1-4 for core selection
+    if (k === "1") { this.selectCore("standard"); return; }
+    if (k === "2") { this.selectCore("cluster"); return; }
+    if (k === "3") { this.selectCore("blast"); return; }
+    if (k === "4") { this.selectCore("heavy"); return; }
+
     if (k === "ArrowUp" || k === "w" || k === "W" || k === "ArrowLeft" || k === "a" || k === "A") {
       this.kbAimX = -1;
-      if (this.aimMode === "none" && !this.orb?.alive) this.aimMode = "kb";
+      if (this.aimMode === "none" && !this.hasActiveOrb) this.aimMode = "kb";
     } else if (k === "ArrowDown" || k === "s" || k === "S" || k === "ArrowRight" || k === "d" || k === "D") {
       this.kbAimX = 1;
-      if (this.aimMode === "none" && !this.orb?.alive) this.aimMode = "kb";
+      if (this.aimMode === "none" && !this.hasActiveOrb) this.aimMode = "kb";
     }
 
     if (k === " " && !e.repeat) {
-      if (!this.orb?.alive && this.orbs > 0) {
+      if (!this.hasActiveOrb && this.orbs > 0) {
         this.aimMode = "kb";
         this.charging = true;
         this.chargePow = 0;
@@ -596,6 +730,11 @@ export class Engine {
   }
 
   private makeOrbSprite(): HTMLCanvasElement {
+    return this.getOrbSprite("standard");
+  }
+
+  private getOrbSprite(coreType: CoreType): HTMLCanvasElement {
+    if (this.coreSprites[coreType]) return this.coreSprites[coreType]!;
     const s = 128;
     const c = document.createElement("canvas");
     c.width = s;
@@ -603,19 +742,45 @@ export class Engine {
     const g = c.getContext("2d")!;
     const cx = s / 2;
     const glow = g.createRadialGradient(cx, cx, 0, cx, cx, cx);
-    glow.addColorStop(0, "rgba(255,240,200,0.95)");
-    glow.addColorStop(0.18, "rgba(255,210,62,0.95)");
-    glow.addColorStop(0.34, "rgba(255,122,26,0.8)");
-    glow.addColorStop(0.6, "rgba(255,80,20,0.22)");
-    glow.addColorStop(1, "rgba(255,80,20,0)");
+
+    if (coreType === "cluster") {
+      glow.addColorStop(0, "rgba(230,255,250,0.98)");
+      glow.addColorStop(0.18, "rgba(125,252,231,0.95)");
+      glow.addColorStop(0.38, "rgba(46,230,201,0.75)");
+      glow.addColorStop(0.65, "rgba(0,180,216,0.2)");
+      glow.addColorStop(1, "rgba(0,180,216,0)");
+    } else if (coreType === "blast") {
+      glow.addColorStop(0, "rgba(255,250,220,0.98)");
+      glow.addColorStop(0.18, "rgba(255,160,40,0.95)");
+      glow.addColorStop(0.38, "rgba(255,60,20,0.85)");
+      glow.addColorStop(0.65, "rgba(200,20,20,0.25)");
+      glow.addColorStop(1, "rgba(200,20,20,0)");
+    } else if (coreType === "heavy") {
+      glow.addColorStop(0, "rgba(255,255,255,0.98)");
+      glow.addColorStop(0.18, "rgba(186,230,253,0.95)");
+      glow.addColorStop(0.38, "rgba(56,189,248,0.8)");
+      glow.addColorStop(0.65, "rgba(30,58,138,0.3)");
+      glow.addColorStop(1, "rgba(30,58,138,0)");
+    } else {
+      // standard
+      glow.addColorStop(0, "rgba(255,240,200,0.95)");
+      glow.addColorStop(0.18, "rgba(255,210,62,0.95)");
+      glow.addColorStop(0.34, "rgba(255,122,26,0.8)");
+      glow.addColorStop(0.6, "rgba(255,80,20,0.22)");
+      glow.addColorStop(1, "rgba(255,80,20,0)");
+    }
+
     g.fillStyle = glow;
     g.fillRect(0, 0, s, s);
-    // molten core detail
-    g.strokeStyle = "rgba(255,255,255,0.55)";
+
+    // Core detail
+    g.strokeStyle = "rgba(255,255,255,0.7)";
     g.lineWidth = 3;
     g.beginPath();
     g.arc(cx, cx, s * 0.13, -2.4, -0.6);
     g.stroke();
+
+    this.coreSprites[coreType] = c;
     return c;
   }
 
@@ -735,22 +900,27 @@ export class Engine {
   // ---------- game actions ----------
 
   private fire(angle: number, power: number) {
-    if (this.orb?.alive || this.orbs <= 0 || this.screen !== "playing") return;
+    if (this.hasActiveOrb || this.orbs <= 0 || this.screen !== "playing") return;
     this.orbs--;
     this.combo = 0;
     this.firstShot = true;
     const sp = (0.2 + 0.8 * power) * this.maxSpeed;
-    this.orb = {
-      x: this.launcher.x,
-      y: this.launcher.y,
-      vx: Math.cos(angle) * sp,
-      vy: Math.sin(angle) * sp,
-      r: this.orbR,
-      t: 0,
-      alive: true,
-      slowT: 0,
-      trail: [],
-    };
+    this.orbsList = [
+      {
+        x: this.launcher.x,
+        y: this.launcher.y,
+        vx: Math.cos(angle) * sp,
+        vy: Math.sin(angle) * sp,
+        r: this.orbR,
+        t: 0,
+        alive: true,
+        slowT: 0,
+        trail: [],
+        coreType: this.selectedCore,
+        piercesLeft: this.selectedCore === "heavy" ? 1 : 0,
+        hasSplit: false,
+      },
+    ];
     sfx.shoot(power);
     haptics.fire();
     this.shake = Math.min(26, this.shake + 1.5 + power * 3);
@@ -774,7 +944,7 @@ export class Engine {
     this.pushUI();
   }
 
-  private hitGem(g: Gem) {
+  private hitGem(g: Gem, triggeringOrb?: Orb) {
     g.dead = true;
     this.combo++;
     const gold = g.kind === "gold";
@@ -793,6 +963,69 @@ export class Engine {
     this.hitstop = Math.max(this.hitstop, 0.045 + 0.014 * Math.min(this.combo, 6));
     this.shake = Math.min(26, this.shake + 3.5 + 1.8 * Math.min(this.combo, 6));
     if (gold) this.flash = Math.max(this.flash, 0.4);
+
+    // Molten Blast Core AoE Explosion!
+    if (triggeringOrb?.coreType === "blast") {
+      const minDim = Math.min(this.W, this.H);
+      const blastRadius = minDim * 0.22;
+      sfx.thrusterBoost();
+      this.shake = Math.min(28, this.shake + 8);
+      this.flash = Math.max(this.flash, 0.5);
+
+      this.particles.push({
+        kind: 3,
+        x: g.x,
+        y: g.y,
+        vx: 0,
+        vy: 0,
+        life: 0.45,
+        tl: 0.45,
+        size: blastRadius * 2.2,
+        rot: 0,
+        vr: 0,
+        col: "255,80,20",
+        grav: 0,
+        drag: 0,
+      });
+
+      for (let i = 0; i < 22; i++) {
+        const a = rand(0, TAU);
+        const sp = rand(150, 480);
+        this.particles.push({
+          kind: 1,
+          x: g.x,
+          y: g.y,
+          vx: Math.cos(a) * sp,
+          vy: Math.sin(a) * sp,
+          life: rand(0.2, 0.45),
+          tl: 0.45,
+          size: rand(2.5, 5),
+          rot: 0,
+          vr: 0,
+          col: "255,140,40",
+          grav: 150,
+          drag: 2,
+        });
+      }
+
+      this.texts.push({
+        x: g.x,
+        y: g.y - g.r - 28,
+        t: 0,
+        life: 1.0,
+        str: "MOLTEN BLAST!",
+        size: 18,
+        col: "#ff5722",
+      });
+
+      // Chain destroy neighboring gems within blast radius
+      const nearby = this.gems.filter(
+        (other) => !other.dead && Math.hypot(other.x - g.x, other.y - g.y) <= blastRadius,
+      );
+      for (const other of nearby) {
+        this.hitGem(other);
+      }
+    }
 
     const cols = gold
       ? ["255,210,62", "255,243,176", "255,160,46"]
@@ -854,9 +1087,9 @@ export class Engine {
       drag: 0,
     });
 
-    if (this.orb) {
-      this.orb.vx *= 0.965;
-      this.orb.vy *= 0.965;
+    if (triggeringOrb) {
+      triggeringOrb.vx *= 0.965;
+      triggeringOrb.vy *= 0.965;
     }
 
     const size = clamp(Math.min(this.W, this.H) * 0.045, 17, 30);
@@ -923,11 +1156,12 @@ export class Engine {
     this.pushUI();
   }
 
-  private killOrb() {
-    if (!this.orb) return;
-    const o = this.orb;
-    this.orb = null;
-    this.combo = 0;
+  private killOrb(target?: Orb) {
+    const o = target || this.orb;
+    if (!o) return;
+    o.alive = false;
+    this.orbsList = this.orbsList.filter((item) => item !== o && item.alive);
+
     for (let i = 0; i < 10; i++) {
       this.particles.push({
         kind: 2,
@@ -965,10 +1199,14 @@ export class Engine {
       });
     }
     this.shake = Math.min(26, this.shake + 2);
-    if (this.orbs <= 0 && !this.pending && !this.gems.every((q) => q.dead)) {
-      this.pending = { type: "over", t: 0.85 };
+
+    if (this.orbsList.length === 0) {
+      this.combo = 0;
+      if (this.orbs <= 0 && !this.pending && !this.gems.every((q) => q.dead)) {
+        this.pending = { type: "over", t: 0.85 };
+      }
+      this.pushUI();
     }
-    this.pushUI();
   }
 
   private doLevelClear() {
@@ -1129,132 +1367,176 @@ export class Engine {
       }
     }
 
-    // orb physics (2 substeps)
-    if (this.orb?.alive) {
-      const o = this.orb;
+    // orb physics (2 substeps) for all active orbs
+    const activeOrbs = this.orbsList.filter((o) => o.alive);
+    if (activeOrbs.length > 0) {
       const sdt = simDt / 2;
       for (let s = 0; s < 2; s++) {
-        o.t += sdt;
-        o.vy += this.G * sdt;
-        o.x += o.vx * sdt;
-        o.y += o.vy * sdt;
+        for (const o of activeOrbs) {
+          if (!o.alive) continue;
+          o.t += sdt;
+          o.vy += this.G * sdt;
+          o.x += o.vx * sdt;
+          o.y += o.vy * sdt;
 
-        const rest = 0.56;
-        let impact = 0;
-        if (o.x - o.r < 0) {
-          o.x = o.r;
-          impact = Math.abs(o.vx);
-          o.vx = Math.abs(o.vx) * rest;
-        } else if (o.x + o.r > this.W) {
-          o.x = this.W - o.r;
-          impact = Math.abs(o.vx);
-          o.vx = -Math.abs(o.vx) * rest;
-        }
-        if (o.y - o.r < 0) {
-          o.y = o.r;
-          impact = Math.max(impact, Math.abs(o.vy));
-          o.vy = Math.abs(o.vy) * rest;
-        } else if (o.y + o.r > this.H) {
-          o.y = this.H - o.r;
-          impact = Math.max(impact, Math.abs(o.vy));
-          o.vy = -Math.abs(o.vy) * rest;
-          if (Math.abs(o.vy) < 55) o.vy = 0;
-        }
-        // ground friction so the orb comes to rest
-        if (o.y >= this.H - o.r - 0.5) {
-          o.vx *= Math.max(0, 1 - 2.4 * sdt);
-          if (Math.abs(o.vx) < 4) o.vx = 0;
-        }
-        if (impact > 150) {
-          const n = Math.min(8, 2 + Math.floor(impact / 220));
-          for (let i = 0; i < n; i++) {
-            this.particles.push({
-              kind: 1,
-              x: o.x,
-              y: o.y,
-              vx: rand(-160, 160),
-              vy: rand(-200, 40),
-              life: rand(0.12, 0.3),
-              tl: 0.3,
-              size: rand(1.5, 2.5),
-              rot: 0,
-              vr: 0,
-              col: "255,190,110",
-              grav: 300,
-              drag: 2,
-            });
+          const rest = 0.56;
+          let impact = 0;
+          if (o.x - o.r < 0) {
+            o.x = o.r;
+            impact = Math.abs(o.vx);
+            o.vx = Math.abs(o.vx) * rest;
+          } else if (o.x + o.r > this.W) {
+            o.x = this.W - o.r;
+            impact = Math.abs(o.vx);
+            o.vx = -Math.abs(o.vx) * rest;
           }
-          sfx.bounce(impact / this.maxSpeed);
-          haptics.bounce();
-          this.shake = Math.min(26, this.shake + Math.min(4, impact / 400));
-        }
-
-        // blocks
-        for (const b of this.blocks) {
-          const cx = clamp(o.x, b.x, b.x + b.w);
-          const cy = clamp(o.y, b.y, b.y + b.h);
-          let dx = o.x - cx;
-          let dy = o.y - cy;
-          const d2 = dx * dx + dy * dy;
-          if (d2 < o.r * o.r) {
-            const d = Math.sqrt(d2);
-            if (d < 0.001) {
-              dx = 0;
-              dy = -1;
-            } else {
-              dx /= d;
-              dy /= d;
+          if (o.y - o.r < 0) {
+            o.y = o.r;
+            impact = Math.max(impact, Math.abs(o.vy));
+            o.vy = Math.abs(o.vy) * rest;
+          } else if (o.y + o.r > this.H) {
+            o.y = this.H - o.r;
+            impact = Math.max(impact, Math.abs(o.vy));
+            o.vy = -Math.abs(o.vy) * rest;
+            if (Math.abs(o.vy) < 55) o.vy = 0;
+          }
+          // ground friction so the orb comes to rest
+          if (o.y >= this.H - o.r - 0.5) {
+            o.vx *= Math.max(0, 1 - 2.4 * sdt);
+            if (Math.abs(o.vx) < 4) o.vx = 0;
+          }
+          if (impact > 150) {
+            const n = Math.min(8, 2 + Math.floor(impact / 220));
+            for (let i = 0; i < n; i++) {
+              this.particles.push({
+                kind: 1,
+                x: o.x,
+                y: o.y,
+                vx: rand(-160, 160),
+                vy: rand(-200, 40),
+                life: rand(0.12, 0.3),
+                tl: 0.3,
+                size: rand(1.5, 2.5),
+                rot: 0,
+                vr: 0,
+                col: "255,190,110",
+                grav: 300,
+                drag: 2,
+              });
             }
-            o.x = cx + dx * o.r;
-            o.y = cy + dy * o.r;
-            const vn = o.vx * dx + o.vy * dy;
-            if (vn < 0) {
-              o.vx -= 1.62 * vn * dx;
-              o.vy -= 1.62 * vn * dy;
-              if (-vn > 160) {
-                sfx.thud(-vn / this.maxSpeed);
-                haptics.bounce();
-                this.shake = Math.min(26, this.shake + Math.min(4, -vn / 420));
-                for (let i = 0; i < 6; i++) {
+            sfx.bounce(impact / this.maxSpeed);
+            haptics.bounce();
+            this.shake = Math.min(26, this.shake + Math.min(4, impact / 400));
+          }
+
+          // blocks
+          for (const b of this.blocks) {
+            if (o.piercedBlocks?.has(b)) continue;
+            const cx = clamp(o.x, b.x, b.x + b.w);
+            const cy = clamp(o.y, b.y, b.y + b.h);
+            let dx = o.x - cx;
+            let dy = o.y - cy;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < o.r * o.r) {
+              // Heavy core pierce check:
+              if (o.coreType === "heavy" && (o.piercesLeft ?? 0) > 0) {
+                if (!o.piercedBlocks) o.piercedBlocks = new Set();
+                o.piercedBlocks.add(b);
+                o.piercesLeft = (o.piercesLeft ?? 1) - 1;
+                o.vx *= 0.86;
+                o.vy *= 0.86;
+                sfx.thud(1.0);
+                haptics.shatter(2);
+                this.shake = Math.min(26, this.shake + 5);
+                for (let pi = 0; pi < 10; pi++) {
                   this.particles.push({
-                    kind: 1,
+                    kind: 0,
                     x: cx,
                     y: cy,
-                    vx: rand(-140, 140),
-                    vy: rand(-180, 60),
-                    life: rand(0.1, 0.25),
-                    tl: 0.25,
-                    size: 2,
-                    rot: 0,
-                    vr: 0,
-                    col: "180,170,255",
-                    grav: 300,
-                    drag: 2,
+                    vx: rand(-160, 160),
+                    vy: rand(-160, 160),
+                    life: rand(0.25, 0.5),
+                    tl: 0.5,
+                    size: 4,
+                    rot: rand(0, TAU),
+                    vr: rand(-5, 5),
+                    col: "180,200,230",
+                    grav: 500,
+                    drag: 1.2,
                   });
+                }
+                this.texts.push({
+                  x: cx,
+                  y: cy - 14,
+                  t: 0,
+                  life: 0.8,
+                  str: "PIERCE!",
+                  size: 16,
+                  col: "#38bdf8",
+                });
+                break;
+              }
+
+              const d = Math.sqrt(d2);
+              if (d < 0.001) {
+                dx = 0;
+                dy = -1;
+              } else {
+                dx /= d;
+                dy /= d;
+              }
+              o.x = cx + dx * o.r;
+              o.y = cy + dy * o.r;
+              const vn = o.vx * dx + o.vy * dy;
+              if (vn < 0) {
+                o.vx -= 1.62 * vn * dx;
+                o.vy -= 1.62 * vn * dy;
+                if (-vn > 160) {
+                  sfx.thud(-vn / this.maxSpeed);
+                  haptics.bounce();
+                  this.shake = Math.min(26, this.shake + Math.min(4, -vn / 420));
+                  for (let i = 0; i < 6; i++) {
+                    this.particles.push({
+                      kind: 1,
+                      x: cx,
+                      y: cy,
+                      vx: rand(-140, 140),
+                      vy: rand(-180, 60),
+                      life: rand(0.1, 0.25),
+                      tl: 0.25,
+                      size: 2,
+                      rot: 0,
+                      vr: 0,
+                      col: "180,170,255",
+                      grav: 300,
+                      drag: 2,
+                    });
+                  }
                 }
               }
             }
           }
-        }
 
-        // gems
-        for (const g of this.gems) {
-          if (g.dead) continue;
-          const dx = o.x - g.x;
-          const dy = o.y - g.y;
-          const rr = o.r + g.r * 0.92;
-          if (dx * dx + dy * dy < rr * rr) this.hitGem(g);
+          // gems
+          for (const g of this.gems) {
+            if (g.dead) continue;
+            const dx = o.x - g.x;
+            const dy = o.y - g.y;
+            const rr = o.r + g.r * 0.92;
+            if (dx * dx + dy * dy < rr * rr) this.hitGem(g, o);
+          }
         }
-        if (!this.orb?.alive) break;
       }
 
-      o.trail.push({ x: o.x, y: o.y });
-      if (o.trail.length > 15) o.trail.shift();
+      for (const o of activeOrbs) {
+        o.trail.push({ x: o.x, y: o.y });
+        if (o.trail.length > 15) o.trail.shift();
 
-      const sp = Math.hypot(o.vx, o.vy);
-      if (sp < 75) o.slowT += dt;
-      else o.slowT = 0;
-      if (o.t > 8 || o.slowT > 0.55) this.killOrb();
+        const sp = Math.hypot(o.vx, o.vy);
+        if (sp < 75) o.slowT += dt;
+        else o.slowT = 0;
+        if (o.t > 8 || o.slowT > 0.55) this.killOrb(o);
+      }
     }
 
     // pending timers
@@ -1438,21 +1720,27 @@ export class Engine {
     // launcher + aim
     if (this.screen !== "menu") this.drawLauncher();
 
-    // orb + trail
-    const o = this.orb;
-    if (o?.alive && this.orbSprite) {
+    // orbs + trails
+    for (const o of this.orbsList) {
+      if (!o.alive) continue;
+      const sprite = this.getOrbSprite(o.coreType);
       ctx.globalCompositeOperation = "lighter";
+      let trailColor = "255,150,50";
+      if (o.coreType === "cluster") trailColor = "125,252,231";
+      else if (o.coreType === "blast") trailColor = "255,80,20";
+      else if (o.coreType === "heavy") trailColor = "56,189,248";
+
       for (let i = 0; i < o.trail.length; i++) {
         const tr = o.trail[i];
         const f = i / o.trail.length;
-        ctx.fillStyle = `rgba(255,150,50,${f * 0.3})`;
+        ctx.fillStyle = `rgba(${trailColor},${f * 0.35})`;
         ctx.beginPath();
         ctx.arc(tr.x, tr.y, o.r * (0.25 + 0.75 * f), 0, TAU);
         ctx.fill();
       }
       ctx.globalCompositeOperation = "source-over";
       const size = o.r * 5;
-      ctx.drawImage(this.orbSprite, o.x - size / 2, o.y - size / 2, size, size);
+      ctx.drawImage(sprite, o.x - size / 2, o.y - size / 2, size, size);
     }
 
     // particles
@@ -1525,7 +1813,7 @@ export class Engine {
       power = this.charging ? this.chargePow : 0;
     }
 
-    if (angle !== null && power > 0.02 && !this.orb?.alive) {
+    if (angle !== null && power > 0.02 && !this.hasActiveOrb) {
       const { pts, hit } = this.simTraj(angle, power);
       const pc = this.powerColor(power);
       for (let i = 0; i < pts.length; i++) {
@@ -1554,11 +1842,11 @@ export class Engine {
 
     // loaded orb on pad (or pulled back)
     if (
-      !this.orb?.alive &&
+      !this.hasActiveOrb &&
       this.orbs > 0 &&
-      (this.screen === "playing" || this.screen === "paused") &&
-      this.orbSprite
+      (this.screen === "playing" || this.screen === "paused")
     ) {
+      const padSprite = this.getOrbSprite(this.selectedCore);
       let ox = x;
       let oy = y;
       if (angle !== null && power > 0.02) {
@@ -1576,7 +1864,7 @@ export class Engine {
         ctx.stroke();
       }
       const size = this.orbR * 5 * (angle !== null && power > 0.02 ? 0.92 : 1);
-      ctx.drawImage(this.orbSprite, ox - size / 2, oy - size / 2, size, size);
+      ctx.drawImage(padSprite, ox - size / 2, oy - size / 2, size, size);
     }
 
     // kb power arc
@@ -1686,6 +1974,7 @@ export class Engine {
       launcherPos: { x: this.launcher.x, y: this.launcher.y },
       landscape: this.landscape,
       isAiming: this.aimMode !== "none",
+      selectedCore: this.selectedCore,
       victoryData: this.victoryData ?? undefined,
       progress: loadProgress(),
     });

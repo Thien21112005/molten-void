@@ -125,6 +125,14 @@ export interface Translations {
   shareResult: string;
   shareCopied: string;
   shareTextTemplate: string;
+  coreStandard: string;
+  coreCluster: string;
+  coreBlast: string;
+  coreHeavy: string;
+  coreClusterDesc: string;
+  coreBlastDesc: string;
+  coreHeavyDesc: string;
+  coreSelectTitle: string;
   currentStationBtn: string;
   starmapExploreHint: string;
   startNode: string;
@@ -252,6 +260,14 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     shareResult: "Chia Sẻ Thành Tích",
     shareCopied: "Đã sao chép vào bộ nhớ tạm!",
     shareTextTemplate: "🌌 Tôi vừa chinh phục Molten Void màn {level} với {stars}⭐ (Tổng {totalStars}/45⭐)! Bạn có phá được kỷ lục này không? https://thien21112005.github.io/molten-void/",
+    coreStandard: "Tiêu Chuẩn",
+    coreCluster: "Lõi Chùm",
+    coreBlast: "Bom Lửa",
+    coreHeavy: "Xuyên Phá",
+    coreClusterDesc: "Chạm lần nữa khi bay để tách làm 3 mảnh nhỏ tỏa ra các hướng",
+    coreBlastDesc: "Nổ tung phá hủy tinh thể trong bán kính xung quanh khi va chạm",
+    coreHeavyDesc: "Đâm thủng 1 thanh chắn thay vì dội ngược lại",
+    coreSelectTitle: "CHỌN LÕI ĐẠN ĐẶC BIỆT",
     currentStationBtn: "Trạm Hiện Tại",
     starmapExploreHint: "↔ Kéo ngang để khám phá • Chạm để chọn màn",
     startNode: "XUẤT PHÁT",
@@ -377,6 +393,14 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     shareResult: "Share Victory",
     shareCopied: "Copied to clipboard!",
     shareTextTemplate: "🌌 I just conquered Molten Void Sector {level} with {stars}⭐ ({totalStars}/45⭐ total)! Can you beat my score? https://thien21112005.github.io/molten-void/",
+    coreStandard: "Standard",
+    coreCluster: "Cluster",
+    coreBlast: "Molten Blast",
+    coreHeavy: "Heavy Pierce",
+    coreClusterDesc: "Tap again in flight to split into 3 shards radiating outward",
+    coreBlastDesc: "Explodes on impact shattering all crystals in blast radius",
+    coreHeavyDesc: "Pierces directly through 1 barrier instead of deflecting",
+    coreSelectTitle: "SELECT SPECIAL CORE",
     currentStationBtn: "Current Station",
     starmapExploreHint: "↔ Drag horizontally to explore • Tap to sling",
     startNode: "START",

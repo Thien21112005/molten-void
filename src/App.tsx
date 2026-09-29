@@ -13,6 +13,7 @@ import { VietnameseSpaceship } from "./components/VietnameseSpaceship";
 import { VietnameseAstronaut } from "./components/VietnameseAstronaut";
 import { CosmicDecorations } from "./components/CosmicDecorations";
 import { OnboardingDragHint } from "./components/OnboardingDragHint";
+import { CoreSelector } from "./components/CoreSelector";
 
 const initialUI: UIState = {
   screen: "menu",
@@ -26,6 +27,7 @@ const initialUI: UIState = {
   hs: [],
   muted: false,
   firstShot: false,
+  selectedCore: "standard",
 };
 
 /* ---------- inline SVG icons (no emoji) ---------- */
@@ -356,6 +358,25 @@ export default function App() {
           <div className="rounded-lg border border-void-700/80 bg-void-950/85 px-3 py-1.5 text-center text-xs font-semibold text-white/55 backdrop-blur-sm">
             <span>{t.firstShotSubHint}</span> <span className="kbd text-ice-300 ml-1">&#8593; &#8595; + SPACE</span>
           </div>
+        </div>
+      )}
+
+      {/* Tactical Core Selector during playing */}
+      {ui.screen === "playing" && (
+        <div
+          className={cn(
+            "pointer-events-auto absolute z-20 transition-all duration-300 left-3 sm:left-5",
+            ui.isAiming && "opacity-25 pointer-events-none"
+          )}
+          style={{
+            bottom: "max(1rem, env(safe-area-inset-bottom))",
+          }}
+        >
+          <CoreSelector
+            selectedCore={ui.selectedCore ?? "standard"}
+            onSelectCore={(c) => eng()?.selectCore(c)}
+            t={t}
+          />
         </div>
       )}
 
