@@ -121,6 +121,10 @@ export interface Translations {
   instantRestartHint: string;
   firstShotHint: string;
   firstShotSubHint: string;
+  dragToAimHint: string;
+  shareResult: string;
+  shareCopied: string;
+  shareTextTemplate: string;
   currentStationBtn: string;
   starmapExploreHint: string;
   startNode: string;
@@ -244,6 +248,10 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     instantRestartHint: "NHẤN R ĐỂ CHƠI LẠI TỨC THÌ",
     firstShotHint: "KÉO NGƯỢC & THẢ TAY",
     firstShotSubHint: "kéo bất kỳ đâu, hoặc",
+    dragToAimHint: "KÉO NGƯỢC ĐỂ CĂN LỰC • THẢ TAY ĐỂ BẮN",
+    shareResult: "Chia Sẻ Thành Tích",
+    shareCopied: "Đã sao chép vào bộ nhớ tạm!",
+    shareTextTemplate: "🌌 Tôi vừa chinh phục Molten Void màn {level} với {stars}⭐ (Tổng {totalStars}/45⭐)! Bạn có phá được kỷ lục này không? https://thien21112005.github.io/molten-void/",
     currentStationBtn: "Trạm Hiện Tại",
     starmapExploreHint: "↔ Kéo ngang để khám phá • Chạm để chọn màn",
     startNode: "XUẤT PHÁT",
@@ -365,6 +373,10 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     instantRestartHint: "PRESS R FOR INSTANT RESTART",
     firstShotHint: "PULL BACK & RELEASE",
     firstShotSubHint: "drag anywhere, or",
+    dragToAimHint: "PULL BACK TO AIM • RELEASE TO FIRE",
+    shareResult: "Share Victory",
+    shareCopied: "Copied to clipboard!",
+    shareTextTemplate: "🌌 I just conquered Molten Void Sector {level} with {stars}⭐ ({totalStars}/45⭐ total)! Can you beat my score? https://thien21112005.github.io/molten-void/",
     currentStationBtn: "Current Station",
     starmapExploreHint: "↔ Drag horizontally to explore • Tap to sling",
     startNode: "START",

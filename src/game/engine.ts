@@ -41,6 +41,9 @@ export interface UIState {
   hs: HighScore[];
   muted: boolean;
   firstShot: boolean;
+  launcherPos?: { x: number; y: number };
+  landscape?: boolean;
+  isAiming?: boolean;
   victoryData?: VictoryData;
   progress?: PlayerProgress;
 }
@@ -366,6 +369,7 @@ export class Engine {
     this.pullStart = p;
     this.pullCur = p;
     this.aimMode = "pull";
+    this.pushUI();
   };
 
   private onPtrMove = (e: PointerEvent) => {
@@ -382,6 +386,7 @@ export class Engine {
     if (this.aimMode !== "pull" || e.pointerId !== this.pointerId) return;
     this.aimMode = "none";
     this.pointerId = -1;
+    this.pushUI();
     if (this.screen !== "playing" || this.orb?.alive) return;
     const dx = this.pullStart.x - this.pullCur.x;
     const dy = this.pullStart.y - this.pullCur.y;
@@ -398,6 +403,7 @@ export class Engine {
     if (e.pointerId !== this.pointerId) return;
     this.aimMode = "none";
     this.pointerId = -1;
+    this.pushUI();
   };
 
   // ---------- input: keyboard ----------
@@ -511,6 +517,7 @@ export class Engine {
       b.x = clamp(b.x, 4, this.W - b.w - 4);
       b.y = clamp(b.y, 4, this.H - b.h - 4);
     }
+    this.pushUI();
   };
 
   private buildStatic() {
@@ -1626,6 +1633,9 @@ export class Engine {
       hs: this.hs,
       muted: sfx.muted,
       firstShot: this.firstShot,
+      launcherPos: { x: this.launcher.x, y: this.launcher.y },
+      landscape: this.landscape,
+      isAiming: this.aimMode !== "none",
       victoryData: this.victoryData ?? undefined,
       progress: loadProgress(),
     });

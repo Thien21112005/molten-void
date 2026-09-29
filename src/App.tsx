@@ -12,6 +12,7 @@ import { IconTacticalTarget, IconStar } from "./components/Icons";
 import { VietnameseSpaceship } from "./components/VietnameseSpaceship";
 import { VietnameseAstronaut } from "./components/VietnameseAstronaut";
 import { CosmicDecorations } from "./components/CosmicDecorations";
+import { OnboardingDragHint } from "./components/OnboardingDragHint";
 
 const initialUI: UIState = {
   screen: "menu",
@@ -337,17 +338,23 @@ export default function App() {
         </div>
       )}
 
-      {/* ---- first-shot hint ---- */}
-      {ui.screen === "playing" && ui.level === 1 && !ui.firstShot && ui.orbs > 0 && (
+      {/* ---- animated onboarding drag-to-aim hint (Level 1) ---- */}
+      {ui.screen === "playing" && ui.level === 1 && !ui.firstShot && !ui.isAiming && ui.orbs > 0 && ui.launcherPos && (
+        <OnboardingDragHint
+          launcherPos={ui.launcherPos}
+          landscape={ui.landscape ?? true}
+          t={t}
+        />
+      )}
+
+      {/* Keyboard alternative hint at bottom */}
+      {ui.screen === "playing" && ui.level === 1 && !ui.firstShot && !ui.isAiming && ui.orbs > 0 && (
         <div
           className="pointer-events-none absolute inset-x-0 z-20 flex justify-center"
-          style={{ bottom: "max(4.5rem, calc(env(safe-area-inset-bottom) + 3rem))" }}
+          style={{ bottom: "max(1.2rem, calc(env(safe-area-inset-bottom) + 0.8rem))" }}
         >
-          <div className="animate-pulse-soft rounded-lg border border-ember-400/40 bg-void-900/85 px-4 py-2 text-center">
-            <p className="font-display text-[13px] tracking-wide text-ember-300">{t.firstShotHint}</p>
-            <p className="mt-0.5 text-xs font-semibold text-white/55">
-              {t.firstShotSubHint} <span className="text-ice-300">&#8593; &#8595; + hold SPACE</span>
-            </p>
+          <div className="rounded-lg border border-void-700/80 bg-void-950/85 px-3 py-1.5 text-center text-xs font-semibold text-white/55 backdrop-blur-sm">
+            <span>{t.firstShotSubHint}</span> <span className="kbd text-ice-300 ml-1">&#8593; &#8595; + SPACE</span>
           </div>
         </div>
       )}
