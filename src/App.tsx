@@ -377,11 +377,11 @@ export default function App() {
             <div className="pointer-events-none absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-cyan-500/15 blur-3xl" />
 
             {/* Responsive Dual Column Dashboard */}
-            <div className="relative z-10 grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 md:gap-8">
+            <div className="relative z-10 grid grid-cols-1 items-center gap-6 md:grid-cols-2 md:gap-8">
               {/* Left Column: Command & Slingshot Launchpad */}
-              <div className="flex flex-col justify-between gap-5">
+              <div className="flex flex-col justify-center gap-4 sm:gap-5">
                 <div className="flex flex-col items-center text-center md:items-start md:text-left">
-                  <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-ice-500/40 bg-ice-950/50 px-3 py-1 text-[10px] font-bold tracking-[0.25em] text-ice-300 shadow-[0_0_12px_rgba(46,230,201,0.2)]">
+                  <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-ice-500/40 bg-ice-950/50 px-3 py-1 text-[10px] font-bold tracking-[0.25em] text-ice-300 shadow-[0_0_12px_rgba(46,230,201,0.2)]">
                     <span className="h-1.5 w-1.5 rounded-full bg-ice-400 animate-pulse" />
                     DEEP SPACE EXPEDITION &bull; 15 SECTORS
                   </div>
@@ -395,7 +395,7 @@ export default function App() {
                     </span>
                   </h1>
 
-                  <p className="mt-3 text-xs sm:text-sm font-semibold tracking-wide text-white/70">
+                  <p className="mt-2.5 text-xs sm:text-sm font-semibold tracking-wide text-white/70">
                     {t.tagline}
                   </p>
                 </div>
@@ -454,24 +454,22 @@ export default function App() {
               </div>
 
               {/* Right Column: Campaign Intel & Flight Controls */}
-              <div className="flex flex-col justify-between gap-4">
+              <div className="flex flex-col gap-3">
                 {/* Campaign Progress & Sector Intel */}
-                <div className="flex-1">
-                  <CampaignIntel
-                    progress={campaignProgress}
-                    t={t}
-                    onOpenRoadmap={() => eng()?.openRoadmap()}
-                    bestScore={ui.best}
-                  />
-                </div>
+                <CampaignIntel
+                  progress={campaignProgress}
+                  t={t}
+                  onOpenRoadmap={() => eng()?.openRoadmap()}
+                  bestScore={ui.best}
+                />
 
                 {/* Flight & Slingshot Controls Guide */}
-                <div className="rounded-xl border border-void-700/80 bg-void-950/80 p-3.5 shadow-md backdrop-blur-sm">
-                  <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-[0.25em] text-ice-400/90">
+                <div className="rounded-xl border border-void-700/80 bg-void-950/80 p-3 shadow-md backdrop-blur-sm">
+                  <div className="mb-1.5 flex items-center justify-between text-[11px] font-bold tracking-[0.25em] text-ice-400/90">
                     <span>{t.controlsTitle}</span>
                     <span className="text-white/40">{t.tactical}</span>
                   </div>
-                  <Controls t={t} />
+                  <Controls compact t={t} />
                 </div>
               </div>
             </div>

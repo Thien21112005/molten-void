@@ -65,21 +65,20 @@ export function CampaignIntel({
   ];
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border-2 border-void-700/80 bg-void-950/85 p-4 shadow-xl backdrop-blur-md">
+    <div className="flex flex-col gap-2.5 rounded-2xl border-2 border-void-700/80 bg-void-950/85 p-3.5 sm:p-4 shadow-xl backdrop-blur-md">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-void-800/80 pb-2.5">
+      <div className="flex items-center justify-between border-b border-void-800/80 pb-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-ice-500/40 bg-ice-500/15 text-xs text-ice-300 shadow-[0_0_10px_rgba(46,230,201,0.3)]">
+          <span className="flex h-5 w-5 items-center justify-center rounded-lg border border-ice-500/40 bg-ice-500/15 text-[10px] text-ice-300 shadow-[0_0_8px_rgba(46,230,201,0.3)]">
             ✦
           </span>
           <span className="font-display text-xs sm:text-sm font-bold tracking-wider text-ice-300 uppercase">
             {t.campaignIntel}
           </span>
         </div>
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-extrabold text-amber-300 shadow-sm">
-          <span>★</span>
-          <span>{totalStars}</span>
-          <span className="text-[9px] text-white/50">/ {MAX_POSSIBLE_STARS}</span>
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-extrabold text-amber-300 shadow-sm">
+          <span>★ {totalStars}</span>
+          <span className="text-[9px] text-white/40">/ {MAX_POSSIBLE_STARS}</span>
         </div>
       </div>
 
@@ -89,16 +88,16 @@ export function CampaignIntel({
           <span>{t.totalProgress}</span>
           <span className="text-ice-300 font-display">{totalProgressPercent}%</span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-void-900 border border-void-800">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-void-900 border border-void-800">
           <div
-            className="h-full bg-gradient-to-r from-ember-500 via-amber-400 to-ice-400 shadow-[0_0_12px_rgba(255,160,46,0.6)] transition-all duration-500"
+            className="h-full bg-gradient-to-r from-ember-500 via-amber-400 to-ice-400 shadow-[0_0_10px_rgba(255,160,46,0.6)] transition-all duration-500"
             style={{ width: `${Math.max(4, totalProgressPercent)}%` }}
           />
         </div>
       </div>
 
       {/* 3 Sector Clusters */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {sectors.map((sec) => {
           let sectorStars = 0;
           let sectorCleared = 0;
@@ -124,15 +123,15 @@ export function CampaignIntel({
             <div
               key={sec.id}
               className={cn(
-                "rounded-xl border p-2.5 transition",
+                "rounded-xl border px-3 py-2 transition",
                 isSectorUnlocked
-                  ? cn("bg-void-900/70 border-void-700/80 hover:border-void-600")
+                  ? "bg-void-900/70 border-void-700/80 hover:border-void-600"
                   : "bg-void-950/40 border-void-800/50 opacity-60",
               )}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">{sec.icon}</span>
+                  <span className="text-sm">{sec.icon}</span>
                   <div>
                     <h4 className={cn("text-xs font-bold leading-tight", sec.colorText)}>
                       {sec.name}
@@ -144,12 +143,10 @@ export function CampaignIntel({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <div className="text-right">
-                    <span className="text-xs font-display font-bold text-amber-300">
-                      ★ {sectorStars}
-                      <span className="text-[10px] text-white/40 font-normal">/15</span>
-                    </span>
-                  </div>
+                  <span className="text-xs font-display font-bold text-amber-300">
+                    ★ {sectorStars}
+                    <span className="text-[10px] text-white/40 font-normal">/15</span>
+                  </span>
                   <span
                     className={cn(
                       "rounded px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider",
@@ -169,24 +166,22 @@ export function CampaignIntel({
                 </div>
               </div>
 
-              {/* 5 mini level nodes */}
-              <div className="mt-2 flex items-center justify-between gap-1.5 pt-1.5 border-t border-void-800/60">
+              {/* Sleek compact level indicators */}
+              <div className="mt-1.5 flex items-center gap-1.5 pt-1 border-t border-void-800/50">
                 {levelsStatus.map((node) => (
                   <div
                     key={node.id}
                     className={cn(
-                      "flex flex-1 flex-col items-center justify-center rounded-lg py-1 px-0.5 border text-center transition",
+                      "flex h-5 flex-1 items-center justify-center rounded border text-[9px] font-bold font-display transition",
                       node.cleared
-                        ? "border-amber-400/40 bg-amber-500/10 text-amber-300 shadow-[0_0_8px_rgba(255,160,46,0.15)]"
+                        ? "border-amber-400/50 bg-amber-500/20 text-amber-300 shadow-[0_0_6px_rgba(255,160,46,0.3)]"
                         : node.unlocked
-                          ? "border-ice-500/30 bg-ice-500/5 text-ice-300"
-                          : "border-void-800/80 bg-void-900/40 text-white/20",
+                          ? "border-ice-500/40 bg-ice-500/10 text-ice-300"
+                          : "border-void-800/80 bg-void-900/60 text-white/20",
                     )}
+                    title={`Màn ${node.id}: ${node.cleared ? `${node.stars} sao` : node.unlocked ? "Đã mở" : "Chưa mở"}`}
                   >
-                    <span className="text-[10px] font-bold font-display">{node.id}</span>
-                    <span className="text-[9px] leading-none">
-                      {node.cleared ? "★".repeat(node.stars) || "★" : node.unlocked ? "•" : "🔒"}
-                    </span>
+                    {node.cleared ? (node.stars === 3 ? "★★★" : `${node.stars}★`) : node.unlocked ? node.id : "🔒"}
                   </div>
                 ))}
               </div>
@@ -194,22 +189,6 @@ export function CampaignIntel({
           );
         })}
       </div>
-
-      {/* Starmap Action Button */}
-      <button
-        type="button"
-        onClick={onOpenRoadmap}
-        className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-ice-500/50 bg-gradient-to-r from-ice-500/20 via-void-900 to-ice-500/20 py-2.5 text-xs font-bold uppercase tracking-wider text-ice-300 shadow-[0_0_18px_rgba(46,230,201,0.2)] transition hover:border-ice-400 hover:text-white hover:brightness-110 active:scale-98 cursor-pointer"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-4 w-4">
-          <circle cx="5" cy="6" r="2.5" />
-          <circle cx="12" cy="18" r="2.5" />
-          <circle cx="19" cy="8" r="2.5" />
-          <path d="M7.2 7.5L10 16" strokeDasharray="2 2" />
-          <path d="M14 16.5L17 9.5" strokeDasharray="2 2" />
-        </svg>
-        <span>{t.openRoadmapAction}</span>
-      </button>
     </div>
   );
 }
