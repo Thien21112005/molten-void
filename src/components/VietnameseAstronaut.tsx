@@ -124,7 +124,7 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
           animation: vnAstroZeroG 4.4s ease-in-out infinite;
         }
         .vn-flag-wave {
-          transform-origin: 50px 58px;
+          transform-origin: 95px 55px;
           animation: vnFlagClothWave 3s ease-in-out infinite;
         }
         .vn-ion-flame {
@@ -169,9 +169,9 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
         </div>
       )}
 
-      {/* Main Astronaut SVG Artwork (Curved, Soft Puffy Spacesuit, Prominent Flagpole) */}
+      {/* Main Astronaut SVG Artwork (Proper Proportions, Natural Arms, Balanced Legs, Solid Star Flag) */}
       <svg
-        viewBox="0 0 240 240"
+        viewBox="0 0 215 220"
         className={cn(
           "h-full w-full overflow-visible transition-transform duration-300 group-hover:scale-105",
           boostEffect && "scale-110",
@@ -180,13 +180,13 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
         <defs>
           {/* Vietnam Flag Crimson Silk Gradient */}
           <linearGradient id="vnFlagSilkRed" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#da251d" />
-            <stop offset="35%" stopColor="#f0382d" />
-            <stop offset="68%" stopColor="#d31d14" />
-            <stop offset="100%" stopColor="#ba150d" />
+            <stop offset="0%" stopColor="#ba150d" />
+            <stop offset="35%" stopColor="#d31d14" />
+            <stop offset="68%" stopColor="#f0382d" />
+            <stop offset="100%" stopColor="#da251d" />
           </linearGradient>
 
-          {/* Golden Star Luminous Gradient */}
+          {/* Golden Star Luminous Gradient (Pure solid yellow star) */}
           <linearGradient id="vnGoldStar" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#fff9a6" />
             <stop offset="45%" stopColor="#ffd23e" />
@@ -228,10 +228,10 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
           {/* Waving Fabric Ripple Sheen Overlay */}
           <linearGradient id="vnWaveSheen" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#ffffff" stopOpacity="0.08" />
-            <stop offset="26%" stopColor="#ffffff" stopOpacity="0.25" />
+            <stop offset="26%" stopColor="#ffffff" stopOpacity="0.22" />
             <stop offset="48%" stopColor="#000000" stopOpacity="0.22" />
-            <stop offset="76%" stopColor="#ffffff" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#000000" stopOpacity="0.25" />
+            <stop offset="76%" stopColor="#ffffff" stopOpacity="0.16" />
+            <stop offset="100%" stopColor="#000000" stopOpacity="0.24" />
           </linearGradient>
 
           {/* Soft Ion Plasma Flame */}
@@ -247,225 +247,221 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
         <g className="vn-astro-float">
           {/* ================= BACKGROUND STARDUST & SPARKS ================= */}
           <g opacity="0.85">
-            <circle cx="24" cy="170" r="1.5" fill="#7dfce7" className="vn-sparkle-1" />
-            <circle cx="218" cy="118" r="1.4" fill="#ffd23e" className="vn-sparkle-2" />
-            <circle cx="204" cy="198" r="1.6" fill="#7dfce7" className="vn-sparkle-1" />
-            <circle cx="38" cy="22" r="1.3" fill="#ffffff" className="vn-sparkle-2" />
+            <circle cx="14" cy="160" r="1.5" fill="#7dfce7" className="vn-sparkle-1" />
+            <circle cx="205" cy="112" r="1.4" fill="#ffd23e" className="vn-sparkle-2" />
+            <circle cx="190" cy="195" r="1.6" fill="#7dfce7" className="vn-sparkle-1" />
+            <circle cx="28" cy="22" r="1.3" fill="#ffffff" className="vn-sparkle-2" />
           </g>
 
           {/* ================= BACKPACK (PLSS - LIFE SUPPORT) ================= */}
           <g id="vn-backpack">
             {/* Soft Rounded Backpack Chassis */}
-            <rect x="174" y="76" width="24" height="64" rx="10" fill="#334155" stroke="#475569" strokeWidth="1.5" />
+            <rect x="168" y="72" width="20" height="54" rx="9" fill="#334155" stroke="#475569" strokeWidth="1.3" />
             {/* Rounded Oxygen Cylinder Tank */}
-            <rect x="180" y="82" width="13" height="38" rx="6.5" fill="#475569" stroke="#64748b" strokeWidth="1" />
-            <line x1="182" y1="94" x2="191" y2="94" stroke="#2ee6c9" strokeWidth="1.2" opacity="0.85" />
-            <line x1="182" y1="106" x2="191" y2="106" stroke="#2ee6c9" strokeWidth="1.2" opacity="0.85" />
+            <rect x="173" y="78" width="10" height="32" rx="5" fill="#475569" stroke="#64748b" strokeWidth="0.9" />
+            <line x1="175" y1="88" x2="181" y2="88" stroke="#2ee6c9" strokeWidth="1.1" opacity="0.85" />
+            <line x1="175" y1="98" x2="181" y2="98" stroke="#2ee6c9" strokeWidth="1.1" opacity="0.85" />
 
             {/* High-gain Comm Antenna with Pulsing Beacon */}
-            <line x1="188" y1="76" x2="204" y2="44" stroke="#94a3b8" strokeWidth="1.8" strokeLinecap="round" />
-            <circle cx="204" cy="44" r="3.5" fill="#ffd23e" />
-            <circle cx="204" cy="44" r="2" fill="#ff4d6d" className="animate-ping" style={{ transformOrigin: "204px 44px" }} />
+            <line x1="180" y1="72" x2="194" y2="44" stroke="#94a3b8" strokeWidth="1.6" strokeLinecap="round" />
+            <circle cx="194" cy="44" r="3" fill="#ffd23e" />
+            <circle cx="194" cy="44" r="1.7" fill="#ff4d6d" className="animate-ping" style={{ transformOrigin: "194px 44px" }} />
 
             {/* Thruster Nozzle & Soft Ion Plasma Flame */}
-            <polygon points="178,140 175,148 185,148 183,140" fill="#1e293b" stroke="#475569" strokeWidth="0.8" />
-            <path d="M 176 148 C 180 176, 181 176, 184 148 Z" fill="url(#vnIonFlame)" className="vn-ion-flame" />
+            <polygon points="172,126 169,133 178,133 176,126" fill="#1e293b" stroke="#475569" strokeWidth="0.8" />
+            <path d="M 170 133 C 173 154, 174 154, 177 133 Z" fill="url(#vnIonFlame)" className="vn-ion-flame" />
           </g>
 
-          {/* ================= SOFT PUFFY LEGS & MOON BOOTS ================= */}
+          {/* ================= SOFT BALANCED LEGS & MOON BOOTS (IDENTICAL SIZE) ================= */}
           <g id="vn-legs">
-            {/* Left Fore-Leg (Puffy bent knee in microgravity) */}
+            {/* Left Leg (Soft zero-G bend, balanced width 12.5px) */}
             <path
-              d="M 138 152 C 130 166, 124 178, 128 190"
+              d="M 135 142 C 128 154, 124 168, 126 186"
               fill="none"
               stroke="url(#vnPuffySuit)"
-              strokeWidth="15"
+              strokeWidth="12.5"
               strokeLinecap="round"
             />
-            {/* Rounded Knee Pad */}
-            <ellipse cx="127" cy="184" rx="7.5" ry="5.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.2" />
-            {/* Soft Puffy Moon Boot */}
+            {/* Left Rounded Knee Pad */}
+            <ellipse cx="126" cy="168" rx="6" ry="4.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+            {/* Left Moon Boot Body */}
             <path
-              d="M 124 192 C 121 204, 114 210, 117 216 C 122 220, 137 219, 140 214 C 142 208, 136 196, 133 192 Z"
+              d="M 121 188 C 118 196, 114 200, 116 205 C 120 208, 132 208, 134 204 C 135 199, 130 190, 128 188 Z"
               fill="#475569"
               stroke="#334155"
-              strokeWidth="1.2"
+              strokeWidth="1.1"
             />
-            {/* Glowing Boot Sole Cushion */}
-            <path d="M 116 216 C 123 219, 133 219, 140 214" stroke="#2ee6c9" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+            {/* Left Glowing Boot Sole Cushion */}
+            <path d="M 115 205 C 121 208, 129 208, 134 204" stroke="#2ee6c9" strokeWidth="2.2" strokeLinecap="round" fill="none" />
 
-            {/* Right Aft-Leg (Softly trailing in zero-G) */}
+            {/* Right Leg (Soft zero-G bend, IDENTICAL width 12.5px) */}
             <path
-              d="M 160 152 C 166 166, 170 178, 168 188"
+              d="M 155 142 C 162 154, 166 168, 164 186"
               fill="none"
               stroke="url(#vnPuffySuit)"
-              strokeWidth="14"
+              strokeWidth="12.5"
               strokeLinecap="round"
             />
-            {/* Rounded Knee Pad */}
-            <ellipse cx="168" cy="182" rx="6.5" ry="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.2" />
-            {/* Soft Puffy Moon Boot */}
+            {/* Right Rounded Knee Pad (Identical size) */}
+            <ellipse cx="164" cy="168" rx="6" ry="4.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+            {/* Right Moon Boot Body (Identical size) */}
             <path
-              d="M 166 190 C 168 200, 172 206, 176 212 C 180 215, 192 213, 192 208 C 192 203, 178 194, 174 190 Z"
+              d="M 159 188 C 157 196, 156 200, 158 205 C 162 208, 174 208, 176 204 C 177 199, 172 190, 170 188 Z"
               fill="#475569"
               stroke="#334155"
-              strokeWidth="1.2"
+              strokeWidth="1.1"
             />
-            {/* Glowing Boot Sole Cushion */}
-            <path d="M 174 212 C 180 214, 188 213, 193 208" stroke="#2ee6c9" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+            {/* Right Glowing Boot Sole Cushion */}
+            <path d="M 157 205 C 163 208, 171 208, 176 204" stroke="#2ee6c9" strokeWidth="2.2" strokeLinecap="round" fill="none" />
           </g>
 
           {/* ================= PUFFY SPACESUIT TORSO ================= */}
           <g id="vn-torso">
             {/* Soft Rounded Body Shape */}
             <path
-              d="M 132 102 
-                 C 124 116, 122 140, 132 152 
-                 C 142 162, 164 162, 172 152 
-                 C 182 140, 180 116, 172 102 
-                 C 162 106, 142 106, 132 102 Z"
+              d="M 130 96 
+                 C 124 108, 122 130, 131 142 
+                 C 138 150, 152 150, 159 142 
+                 C 168 130, 166 108, 160 96 
+                 C 152 100, 138 100, 130 96 Z"
               fill="url(#vnPuffySuit)"
               stroke="#cbd5e1"
               strokeWidth="1.5"
             />
 
             {/* Soft Padded Chest Utility Panel */}
-            <rect x="138" y="112" width="28" height="25" rx="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.2" />
+            <rect x="134" y="104" width="22" height="20" rx="4.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.1" />
             {/* Heartbeat / Arc-Reactor Pulse Core */}
-            <circle cx="152" cy="121" r="5" fill="#0f172a" stroke="#2ee6c9" strokeWidth="1.2" />
-            <circle cx="152" cy="121" r="2.8" fill="#7dfce7" className="animate-pulse" />
-            <circle cx="152" cy="121" r="1.2" fill="#ffffff" />
+            <circle cx="145" cy="112" r="4" fill="#0f172a" stroke="#2ee6c9" strokeWidth="1.1" />
+            <circle cx="145" cy="112" r="2.2" fill="#7dfce7" className="animate-pulse" />
+            <circle cx="145" cy="112" r="1" fill="#ffffff" />
             {/* Mini Telemetry Status Indicators */}
-            <line x1="143" y1="130" x2="161" y2="130" stroke="#2ee6c9" strokeWidth="1.2" strokeLinecap="round" opacity="0.85" />
+            <line x1="138" y1="119" x2="152" y2="119" stroke="#2ee6c9" strokeWidth="1" strokeLinecap="round" opacity="0.85" />
 
             {/* Soft Padded Utility Belt */}
-            <rect x="132" y="147" width="40" height="7.5" rx="3.5" fill="#475569" stroke="#334155" strokeWidth="1" />
-            <rect x="146" y="148" width="12" height="5.5" rx="2" fill="#2ee6c9" opacity="0.9" />
+            <rect x="129" y="137" width="32" height="6.5" rx="3" fill="#475569" stroke="#334155" strokeWidth="0.9" />
+            <rect x="140" y="138" width="10" height="4.5" rx="1.5" fill="#2ee6c9" opacity="0.9" />
           </g>
 
           {/* ================= FLEXIBLE CORRUGATED OXYGEN HOSES ================= */}
-          {/* Classic human astronaut life-support breathing hoses! */}
           <g id="vn-oxygen-hoses">
-            {/* Main Corrugated Hose from Backpack to Chest */}
             <path
-              d="M 180 98 C 196 118, 176 136, 160 128"
+              d="M 172 90 C 182 106, 166 120, 154 114"
               fill="none"
               stroke="#475569"
-              strokeWidth="4.5"
+              strokeWidth="3.8"
               strokeLinecap="round"
             />
             <path
-              d="M 180 98 C 196 118, 176 136, 160 128"
+              d="M 172 90 C 182 106, 166 120, 154 114"
               fill="none"
               stroke="#94a3b8"
-              strokeWidth="4.5"
-              strokeDasharray="2 3"
-              strokeLinecap="round"
-            />
-
-            {/* Secondary Air Hose from Helmet Base to Backpack */}
-            <path
-              d="M 170 100 C 182 105, 184 115, 178 122"
-              fill="none"
-              stroke="#64748b"
-              strokeWidth="3.2"
-              strokeDasharray="1.5 2.5"
+              strokeWidth="3.8"
+              strokeDasharray="2 2.5"
               strokeLinecap="round"
             />
           </g>
 
-          {/* ================= LEFT ARM WITH VIETNAMESE FLAG PATCH ================= */}
-          <g id="vn-left-arm">
-            {/* Soft Puffy Left Arm Floating in Zero-G */}
+          {/* ================= RIGHT ARM (VIEWER'S RIGHT: NATURAL BALANCED LENGTH) ================= */}
+          <g id="vn-right-arm">
+            {/* Soft Puffy Arm with Natural Bend (Balanced length ~30px) */}
             <path
-              d="M 170 106 C 186 115, 194 126, 188 142"
+              d="M 160 102 C 172 108, 178 116, 172 128"
               fill="none"
               stroke="url(#vnPuffySuit)"
-              strokeWidth="14"
+              strokeWidth="12"
+              strokeLinecap="round"
+            />
+            {/* Fabric Wrinkle Shading at the Elbow */}
+            <path
+              d="M 172 114 C 174 117, 173 120, 170 122"
+              stroke="#cbd5e1"
+              strokeWidth="1.2"
+              fill="none"
               strokeLinecap="round"
             />
 
             {/* 🇻🇳 VIETNAMESE NATIONAL MISSION PATCH ON SHOULDER */}
-            <rect x="176" y="112" width="13" height="9" rx="2" fill="#da251d" stroke="#ffd23e" strokeWidth="0.9" />
+            <rect x="166" y="104" width="11" height="7.5" rx="1.5" fill="#da251d" stroke="#ffd23e" strokeWidth="0.7" />
             <polygon
-              points="182.5,114 183.3,116 185.5,116 183.7,117.3 184.4,119.3 182.5,118 180.6,119.3 181.3,117.3 179.5,116 181.7,116"
+              points="171.5,105.5 172.2,107 173.8,107 172.5,108 173,109.5 171.5,108.5 170,109.5 170.5,108 169.2,107 170.8,107"
               fill="#ffd23e"
             />
 
             {/* Soft Rounded Astronaut Glove (Relaxed Wave in Space) */}
-            <circle cx="186" cy="144" r="6.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.2" />
-            <path d="M 184 142 C 186 140, 190 141, 191 144" stroke="#94a3b8" strokeWidth="1" fill="none" strokeLinecap="round" />
+            <circle cx="170" cy="132" r="5.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.1" />
+            <path d="M 168 130 C 170 128, 173 129, 174 132" stroke="#94a3b8" strokeWidth="0.9" fill="none" strokeLinecap="round" />
           </g>
 
           {/* ================= HELMET & GLOSSY SUN VISOR ================= */}
           <g id="vn-helmet">
             {/* Padded Neck Cushion Ring */}
-            <ellipse cx="152" cy="101" rx="22" ry="7" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.4" />
+            <ellipse cx="145" cy="94" rx="20" ry="6" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.3" />
 
             {/* Soft Perfectly Rounded Helmet Dome */}
-            <ellipse cx="152" cy="74" rx="33" ry="33" fill="url(#vnPuffySuit)" stroke="#cbd5e1" strokeWidth="1.6" />
+            <ellipse cx="145" cy="68" rx="29" ry="29" fill="url(#vnPuffySuit)" stroke="#cbd5e1" strokeWidth="1.5" />
 
             {/* Rounded Ear Communication Cushions */}
-            <rect x="117" y="66" width="6" height="16" rx="3" fill="#64748b" stroke="#475569" strokeWidth="1" />
-            <circle cx="120" cy="72" r="1.4" fill="#2ee6c9" />
-            <rect x="181" y="66" width="6" height="16" rx="3" fill="#64748b" stroke="#475569" strokeWidth="1" />
+            <rect x="114" y="61" width="5.5" height="14" rx="2.5" fill="#64748b" stroke="#475569" strokeWidth="1" />
+            <circle cx="117" cy="66" r="1.2" fill="#2ee6c9" />
+            <rect x="171" y="61" width="5.5" height="14" rx="2.5" fill="#64748b" stroke="#475569" strokeWidth="1" />
 
             {/* Big Glossy Panoramic Gold Visor */}
             <path
-              d="M 127 72 C 127 55, 172 55, 172 72 C 172 90, 127 90, 127 72 Z"
+              d="M 122 66 C 122 52, 164 52, 164 66 C 164 82, 122 82, 122 66 Z"
               fill="url(#vnGlossyVisor)"
               stroke="#f59e0b"
-              strokeWidth="1.4"
+              strokeWidth="1.3"
             />
 
             {/* Visor Glossy Specular Arc Reflections */}
             <path
-              d="M 134 65 C 142 59, 160 59, 167 65 C 160 62, 142 62, 134 65 Z"
+              d="M 128 60 C 136 55, 152 55, 160 60 C 152 57, 136 57, 128 60 Z"
               fill="#ffffff"
               opacity="0.8"
               className="vn-visor-glint"
             />
             {/* Cute Rounded Star Gleam in the Visor */}
-            <circle cx="136" cy="72" r="2.8" fill="#ffffff" opacity="0.85" />
-            <circle cx="163" cy="76" r="1.6" fill="#ffffff" opacity="0.65" />
+            <circle cx="130" cy="67" r="2.5" fill="#ffffff" opacity="0.85" />
+            <circle cx="155" cy="71" r="1.5" fill="#ffffff" opacity="0.65" />
 
             {/* Chin Vocoder & Oxygen Intake Vent */}
-            <rect x="145" y="92" width="14" height="6" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="0.9" />
-            <line x1="148" y1="95" x2="156" y2="95" stroke="#2ee6c9" strokeWidth="1" strokeLinecap="round" />
+            <rect x="139" y="86" width="12" height="5" rx="2.5" fill="#1e293b" stroke="#475569" strokeWidth="0.8" />
+            <line x1="142" y1="88.5" x2="148" y2="88.5" stroke="#2ee6c9" strokeWidth="0.8" strokeLinecap="round" />
           </g>
 
           {/* ================= PROMINENT METALLIC FLAGPOLE (CỘT CỜ KIM LOẠI RÕ NÉT) ================= */}
           <g id="vn-flagpole">
             {/* Solid Polished Titanium Staff with High Contrast */}
-            <rect x="47.5" y="14" width="5" height="210" rx="2.5" fill="url(#vnPoleMetallic)" stroke="#64748b" strokeWidth="1.2" />
+            <rect x="93" y="12" width="4.5" height="198" rx="2.2" fill="url(#vnPoleMetallic)" stroke="#64748b" strokeWidth="1" />
             {/* Center Specular Highlight Line */}
-            <line x1="49" y1="16" x2="49" y2="222" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
+            <line x1="94.2" y1="14" x2="94.2" y2="208" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" opacity="0.85" />
 
             {/* Radiant Golden Sphere Finial on Top of Flagpole */}
-            <circle cx="50" cy="14" r="7.5" fill="url(#vnGoldSphere)" stroke="#f59e0b" strokeWidth="1" />
-            <circle cx="47.5" cy="11.5" r="2.2" fill="#ffffff" opacity="0.85" />
+            <circle cx="95" cy="12" r="7" fill="url(#vnGoldSphere)" stroke="#f59e0b" strokeWidth="1" />
+            <circle cx="92.5" cy="9.5" r="2" fill="#ffffff" opacity="0.85" />
             {/* Gold Star Tip Finial */}
             <polygon
-              points="50,2 51.4,5.5 55,5.5 52.2,7.5 53.4,11 50,9 46.6,11 47.8,7.5 45,5.5 48.6,5.5"
+              points="95,1 96.2,4 99.5,4 97,5.8 98,9 95,7.2 92,9 93,5.8 90.5,4 93.8,4"
               fill="#ffd23e"
               stroke="#f59e0b"
               strokeWidth="0.5"
             />
 
             {/* Visible Metal Flag Rings / Grommets Clamping the Flag onto the Pole */}
-            <rect x="45.5" y="27" width="9" height="4" rx="2" fill="#ffd23e" stroke="#d97706" strokeWidth="0.8" />
-            <rect x="45.5" y="57" width="9" height="4" rx="2" fill="#ffd23e" stroke="#d97706" strokeWidth="0.8" />
-            <rect x="45.5" y="87" width="9" height="4" rx="2" fill="#ffd23e" stroke="#d97706" strokeWidth="0.8" />
+            <rect x="91" y="25" width="8" height="3.5" rx="1.7" fill="#ffd23e" stroke="#d97706" strokeWidth="0.7" />
+            <rect x="91" y="53" width="8" height="3.5" rx="1.7" fill="#ffd23e" stroke="#d97706" strokeWidth="0.7" />
+            <rect x="91" y="82" width="8" height="3.5" rx="1.7" fill="#ffd23e" stroke="#d97706" strokeWidth="0.7" />
           </g>
 
-          {/* ================= THE NATIONAL FLAG OF VIETNAM (CỜ ĐỎ SAO VÀNG) ================= */}
+          {/* ================= THE NATIONAL FLAG OF VIETNAM (CỜ ĐỎ SAO VÀNG NGUYÊN BẢN) ================= */}
           <g id="vn-national-flag" className="vn-flag-wave">
-            {/* Silky Aerodynamic Flag Fabric (Waving Proudly from the Pole) */}
+            {/* Silky Aerodynamic Flag Fabric (Waving to the Left from the Pole) */}
             <path
-              d="M 50 28 
-                 C 74 22, 104 34, 132 26 
-                 C 135 46, 130 68, 132 86 
-                 C 104 94, 74 82, 50 88 Z"
+              d="M 95 26 
+                 C 75 32, 45 20, 22 28 
+                 C 20 46, 25 66, 22 84 
+                 C 45 78, 75 90, 95 84 Z"
               fill="url(#vnFlagSilkRed)"
               stroke="#da251d"
               strokeWidth="0.8"
@@ -473,68 +469,65 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
 
             {/* Silky Wave Shading Sheen Overlay */}
             <path
-              d="M 50 28 
-                 C 74 22, 104 34, 132 26 
-                 C 135 46, 130 68, 132 86 
-                 C 104 94, 74 82, 50 88 Z"
+              d="M 95 26 
+                 C 75 32, 45 20, 22 28 
+                 C 20 46, 25 66, 22 84 
+                 C 45 78, 75 90, 95 84 Z"
               fill="url(#vnWaveSheen)"
             />
 
-            {/* Radiant Golden 5-Point Star (Centered Exactly on the Flag) */}
+            {/* PURE SOLID GOLDEN 5-POINT STAR (KHÔNG CÓ CHẤM TRÒN - CHUẨN CỜ TỔ QUỐC) */}
             <polygon
               points="
-                91,39
-                94.9,50.7
-                107.2,50.7
-                97.3,58.0
-                101.0,69.8
-                91,62.6
-                81.0,69.8
-                84.7,58.0
-                74.8,50.7
-                87.1,50.7
+                58.5,39
+                62.1,50.0
+                73.7,50.1
+                64.4,56.9
+                67.9,67.9
+                58.5,61.2
+                49.1,67.9
+                52.6,56.9
+                43.3,50.1
+                54.9,50.0
               "
               fill="url(#vnGoldStar)"
               stroke="#ffd23e"
               strokeWidth="0.8"
             />
-
-            {/* Central Star Core Glow */}
-            <circle cx="91" cy="56" r="3.5" fill="#ffffff" opacity="0.65" />
           </g>
 
-          {/* ================= RIGHT ARM CURVING TO GRASP FLAGPOLE (NATURAL BENT ELBOW) ================= */}
-          <g id="vn-right-arm">
-            {/* Soft Puffy Arm Curving with Bent Elbow (NO STIFF ROBOT PIPE!) */}
+          {/* ================= LEFT ARM HOLDING FLAGPOLE (NATURAL HUMAN REACH ~35px) ================= */}
+          <g id="vn-left-arm-holding">
+            {/* Soft Puffy Arm Reaching Comfortably to the Flagpole (Natural human length!) */}
             <path
-              d="M 134 108 C 118 116, 106 126, 100 134 C 92 142, 70 132, 52 118"
+              d="M 130 102 C 120 108, 112 114, 110 120 C 106 126, 98 122, 95 110"
               fill="none"
               stroke="url(#vnPuffySuit)"
-              strokeWidth="14"
+              strokeWidth="12"
               strokeLinecap="round"
             />
             {/* Fabric Wrinkle Shading at the Elbow */}
             <path
-              d="M 104 128 C 101 133, 103 138, 107 140"
+              d="M 112 116 C 110 119, 111 122, 114 124"
               stroke="#cbd5e1"
-              strokeWidth="1.5"
+              strokeWidth="1.2"
               fill="none"
               strokeLinecap="round"
             />
 
             {/* Puffy Glove Cuff */}
-            <ellipse cx="60" cy="122" rx="4.5" ry="7.5" fill="#64748b" stroke="#475569" strokeWidth="1" />
+            <ellipse cx="101" cy="112" rx="3.5" ry="6" fill="#64748b" stroke="#475569" strokeWidth="0.8" />
 
             {/* Puffy Hand Firmly Gripping Around the Pole (Drawn OVER the Flagpole) */}
-            <rect x="44" y="110" width="13" height="16" rx="5" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1.3" />
+            <rect x="90" y="104" width="11" height="14" rx="4.5" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1.1" />
 
             {/* Defined Puffy Fingers Curled Around Front of the Pole */}
-            <rect x="44" y="112" width="8.5" height="3" rx="1.5" fill="#e2e8f0" stroke="#64748b" strokeWidth="0.8" />
-            <rect x="44" y="116" width="8.5" height="3" rx="1.5" fill="#e2e8f0" stroke="#64748b" strokeWidth="0.8" />
-            <rect x="44" y="120" width="8.5" height="3" rx="1.5" fill="#e2e8f0" stroke="#64748b" strokeWidth="0.8" />
+            <rect x="90" y="106" width="7" height="2.5" rx="1.2" fill="#e2e8f0" stroke="#64748b" strokeWidth="0.7" />
+            <rect x="90" y="109.5" width="7" height="2.5" rx="1.2" fill="#e2e8f0" stroke="#64748b" strokeWidth="0.7" />
+            <rect x="90" y="113" width="7" height="2.5" rx="1.2" fill="#e2e8f0" stroke="#64748b" strokeWidth="0.7" />
 
             {/* Thumb Wrapping Around */}
-            <path d="M 48 115 C 53 115, 55 119, 52 123" fill="#f8fafc" stroke="#64748b" strokeWidth="1.1" strokeLinecap="round" />
+            <path d="M 94 108 C 97 108, 98 111, 96 114" fill="#f8fafc" stroke="#64748b" strokeWidth="0.9" strokeLinecap="round" />
           </g>
         </g>
       </svg>
