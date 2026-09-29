@@ -10,6 +10,7 @@ import { TRANSLATIONS, loadLanguage, type Language, type Translations } from "./
 import { audio } from "./game/audio";
 import { IconTacticalTarget, IconStar } from "./components/Icons";
 import { VietnameseSpaceship } from "./components/VietnameseSpaceship";
+import { VietnameseAstronaut } from "./components/VietnameseAstronaut";
 import { CosmicDecorations } from "./components/CosmicDecorations";
 
 const initialUI: UIState = {
@@ -406,14 +407,17 @@ export default function App() {
                     {t.deepSpaceExpedition}
                   </div>
 
-                  <h1 className="animate-float-slow font-display leading-[0.9] tracking-tight">
-                    <span className="block text-5xl sm:text-6xl text-ember-400 [text-shadow:0_0_34px_rgba(255,122,26,0.65),0_4px_0_rgba(90,25,0,0.8)]">
-                      MOLTEN
-                    </span>
-                    <span className="block text-5xl sm:text-6xl text-ice-400 [text-shadow:0_0_34px_rgba(46,230,201,0.6),0_4px_0_rgba(0,70,60,0.8)]">
-                      VOID
-                    </span>
-                  </h1>
+                  <div className="flex w-full items-center justify-center md:justify-start gap-4 sm:gap-6">
+                    <h1 className="animate-float-slow font-display leading-[0.9] tracking-tight">
+                      <span className="block text-5xl sm:text-6xl text-ember-400 [text-shadow:0_0_34px_rgba(255,122,26,0.65),0_4px_0_rgba(90,25,0,0.8)]">
+                        MOLTEN
+                      </span>
+                      <span className="block text-5xl sm:text-6xl text-ice-400 [text-shadow:0_0_34px_rgba(46,230,201,0.6),0_4px_0_rgba(0,70,60,0.8)]">
+                        VOID
+                      </span>
+                    </h1>
+                    <VietnameseAstronaut lang={lang} />
+                  </div>
 
                   <p className="mt-2.5 text-xs sm:text-sm font-semibold tracking-wide text-white/70">
                     {t.tagline}
