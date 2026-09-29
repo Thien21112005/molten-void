@@ -96,7 +96,7 @@ export function SettingsModal({
       </div>
 
       {/* Scrollable Body */}
-      <div className="flex-1 space-y-6 overflow-y-auto p-5 sm:p-6 scrollbar-thin scrollbar-thumb-void-700/60">
+      <div className="flex-1 space-y-6 overflow-y-auto p-5 sm:p-6 no-scrollbar">
         {/* Language Selection */}
         <div className="rounded-2xl border border-void-800 bg-void-900/60 p-4">
           <label className="mb-2.5 block text-xs font-bold tracking-wider text-ice-400 uppercase">

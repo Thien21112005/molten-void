@@ -229,7 +229,7 @@ export function CosmicRoadmap({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         className={cn(
-          "relative flex-1 select-none overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-void-700/60",
+          "relative flex-1 select-none overflow-x-auto overflow-y-hidden no-scrollbar",
           isDragging ? "cursor-grabbing select-none" : "cursor-grab scroll-smooth",
         )}
       >

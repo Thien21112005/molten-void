@@ -83,7 +83,7 @@ export interface Translations {
 
 export const TRANSLATIONS: Record<Language, Translations> = {
   vi: {
-    menu: "Menu Chính",
+    menu: "Menu",
     settings: "Cài Đặt",
     close: "Đóng",
     confirm: "Xác Nhận",

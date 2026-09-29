@@ -151,7 +151,7 @@ function ChunkBtn({
       )}
     >
       {icon && <span className="flex shrink-0 items-center justify-center">{icon}</span>}
-      <span className="truncate">{children}</span>
+      <span className="whitespace-nowrap flex items-center justify-center">{children}</span>
     </button>
   );
 }
@@ -277,37 +277,56 @@ export default function App() {
       {/* ---- HUD (during a run) ---- */}
       {inRun && (
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 px-3"
+          className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 px-3 sm:px-5"
           style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
         >
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold tracking-[0.34em] text-ember-300/80">{t.score}</span>
+          {/* Left Block: Score Terminal Panel */}
+          <div className="flex flex-col rounded-2xl border border-void-700/80 bg-void-950/85 px-3.5 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.6)] backdrop-blur-md">
+            <span className="text-[10px] sm:text-[11px] font-extrabold tracking-[0.25em] text-ember-400 uppercase leading-none mb-1">
+              {t.score}
+            </span>
             <span
               key={ui.score}
-              className="animate-pop-in inline-block font-display text-2xl leading-none text-white [text-shadow:0_0_18px_rgba(255,160,46,0.45)] sm:text-3xl"
+              className="animate-pop-in inline-block font-display text-2xl sm:text-3xl font-black leading-tight text-white [text-shadow:0_0_20px_rgba(255,160,46,0.55)]"
             >
               {ui.score.toLocaleString("en-US")}
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] font-bold tracking-[0.34em] text-ice-400/80">{t.level}</span>
-              <span className="font-display text-xl leading-none text-white sm:text-2xl">{ui.level}</span>
-            </div>
+          {/* Center Block: Illuminated Sector / Level Badge */}
+          <div className="flex items-center gap-2 rounded-2xl border-2 border-ice-400/50 bg-void-950/90 px-4 py-2 shadow-[0_0_24px_rgba(46,230,201,0.22)] backdrop-blur-md">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ice-400 opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-ice-300" />
+            </span>
+            <span className="text-xs font-black tracking-[0.22em] text-ice-300 uppercase">
+              {t.level}
+            </span>
+            <span className="font-display text-2xl sm:text-3xl font-black leading-none text-white [text-shadow:0_0_16px_rgba(46,230,201,0.5)]">
+              {ui.level}
+            </span>
+            <span className="text-[10px] font-bold text-ice-400/60">/ 15</span>
           </div>
 
-          <div className="pointer-events-auto flex flex-col items-end gap-2">
-            {/* Orbs Counter Pill */}
-            <div className="flex items-center gap-1.5 rounded-lg border border-void-700/80 bg-void-900/90 px-2.5 py-1.5 shadow-md">
-              <IconCore className={cn("h-4 w-4", ui.orbs === 0 && "opacity-30 grayscale")} />
-              {Array.from({ length: ui.orbs }).map((_, i) => (
-                <span
-                  key={i}
-                  className="h-2.5 w-2.5 rounded-full bg-ember-400 shadow-[0_0_8px_rgba(255,160,46,0.9)]"
-                />
-              ))}
-              <span className={cn("ml-1 font-display text-sm", ui.orbs === 0 ? "text-rose-alert" : "text-ember-300")}>
+          {/* Right Block: Cores / Orbs Capsule + Action Buttons */}
+          <div className="pointer-events-auto flex flex-col items-end gap-2.5">
+            {/* Orbs / Cores Tactical Capsule */}
+            <div className="flex items-center gap-2 rounded-2xl border-2 border-ember-500/50 bg-void-950/90 px-3.5 py-2 shadow-[0_0_22px_rgba(255,122,26,0.25)] backdrop-blur-md">
+              <IconCore className={cn("h-6 w-6 shrink-0 transition", ui.orbs === 0 && "opacity-30 grayscale")} />
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: ui.orbs }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="h-3.5 w-3.5 rounded-full bg-gradient-to-tr from-ember-500 to-amber-300 shadow-[0_0_10px_rgba(255,180,40,0.85)] ring-1 ring-amber-300/40 animate-pulse-soft"
+                  />
+                ))}
+              </div>
+              <span
+                className={cn(
+                  "ml-1 font-display text-xl sm:text-2xl font-black leading-none",
+                  ui.orbs === 0 ? "text-rose-alert [text-shadow:0_0_14px_rgba(255,77,109,0.7)]" : "text-amber-300 [text-shadow:0_0_16px_rgba(255,210,62,0.6)]",
+                )}
+              >
                 {ui.orbs}
               </span>
             </div>
@@ -318,28 +337,30 @@ export default function App() {
                 onClick={() => eng()?.toggleMute()}
                 aria-label={ui.muted ? "Unmute" : "Mute"}
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-lg border bg-void-900/90 shadow-md transition hover:text-ice-300 active:translate-y-0.5",
-                  ui.muted ? "border-rose-alert/50 text-rose-alert" : "border-void-700/80 text-white/80",
+                  "flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl border bg-void-950/90 shadow-md backdrop-blur-md transition hover:scale-105 active:scale-95 cursor-pointer",
+                  ui.muted
+                    ? "border-rose-alert/60 text-rose-alert shadow-[0_0_12px_rgba(255,77,109,0.3)]"
+                    : "border-void-700/80 text-white/80 hover:border-ice-400/60 hover:text-ice-300",
                 )}
               >
-                <IconSound muted={ui.muted} className="h-4.5 w-4.5" />
+                <IconSound muted={ui.muted} className="h-5 w-5" />
               </button>
 
               <button
                 onClick={() => setShowSettings(true)}
                 aria-label={t.settings}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-void-700/80 bg-void-900/90 text-white/80 shadow-md transition hover:border-ice-400/60 hover:text-ice-300 active:translate-y-0.5"
+                className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl border border-void-700/80 bg-void-950/90 text-white/80 shadow-md backdrop-blur-md transition hover:border-ice-400/60 hover:text-ice-300 hover:scale-105 active:scale-95 cursor-pointer"
               >
-                <IconGear className="h-4.5 w-4.5" />
+                <IconGear className="h-5 w-5" />
               </button>
 
               {ui.screen === "playing" && (
                 <button
                   onClick={() => eng()?.pause()}
                   aria-label="Pause"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-void-700/80 bg-void-900/90 text-white/80 shadow-md transition hover:border-ember-400/60 hover:text-ember-300 active:translate-y-0.5"
+                  className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl border border-void-700/80 bg-void-950/90 text-white/80 shadow-md backdrop-blur-md transition hover:border-ember-400/60 hover:text-ember-300 hover:scale-105 active:scale-95 cursor-pointer"
                 >
-                  <IconPause className="h-4.5 w-4.5" />
+                  <IconPause className="h-5 w-5" />
                 </button>
               )}
             </div>
@@ -522,7 +543,7 @@ export default function App() {
       {/* ---- PAUSED ---- */}
       {ui.screen === "paused" && (
         <Overlay>
-          <div className="animate-pop-in m-auto flex w-[min(92vw,22rem)] flex-col items-center rounded-2xl border-2 border-void-700 bg-void-900/95 p-6 shadow-[0_10px_0_rgba(0,0,0,0.45)]">
+          <div className="animate-pop-in m-auto flex w-[min(94vw,25rem)] flex-col items-center rounded-3xl border-2 border-void-700/90 bg-void-950/95 p-6 sm:p-7 shadow-[0_0_60px_rgba(0,0,0,0.85)] backdrop-blur-2xl">
             <h2 className="font-display text-2xl sm:text-3xl text-ice-400 [text-shadow:0_0_24px_rgba(46,230,201,0.5)]">{t.paused}</h2>
             <p className="mt-1 text-xs font-bold tracking-[0.28em] text-white/50">
               {t.score} {ui.score.toLocaleString("en-US")} &middot; LV {ui.level}
@@ -548,7 +569,7 @@ export default function App() {
                 </ChunkBtn>
               </div>
             </div>
-            <div className="mt-5">
+            <div className="mt-5 w-full">
               <Controls compact t={t} />
             </div>
           </div>
