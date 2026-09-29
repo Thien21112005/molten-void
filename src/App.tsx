@@ -10,6 +10,7 @@ import { TRANSLATIONS, loadLanguage, type Language, type Translations } from "./
 import { audio } from "./game/audio";
 import { IconTacticalTarget, IconStar } from "./components/Icons";
 import { VietnameseSpaceship } from "./components/VietnameseSpaceship";
+import { CosmicDecorations } from "./components/CosmicDecorations";
 
 const initialUI: UIState = {
   screen: "menu",
@@ -384,6 +385,9 @@ export default function App() {
       {/* ---- MENU ---- */}
       {ui.screen === "menu" && (
         <Overlay dim={true}>
+          {/* Cosmic Solar System Planets & Streaking Comets Environment */}
+          <CosmicDecorations />
+
           {/* Vietnamese Astronaut Exploratory Spaceship Patrolling the Menu */}
           <VietnameseSpaceship lang={lang} />
 

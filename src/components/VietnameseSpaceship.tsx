@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "../utils/cn";
 import { audio } from "../game/audio";
 import type { Language } from "../game/i18n";
@@ -23,14 +23,125 @@ const RADIO_MESSAGES_EN = [
   "VNSC Command: 'All systems green. Clear skies and good fortune, Commander!'",
 ];
 
+// 12 Organic Catmull-Rom Waypoints [x%, y%] around the main menu and planets
+// Creates a sweeping, undulating cosmic patrol ("lượn lượn các kiểu")
+const WAYPOINTS: [number, number][] = [
+  [18, 7],   // 1. Cruising past Terra exoplanet in top-left
+  [44, 11],  // 2. Swooping down toward Molten Void header
+  [74, 7],   // 3. Ascending wave towards Ice Planet in top-right
+  [91, 18],  // 4. Slingshot around Ice Planet, banking down
+  [95, 45],  // 5. Wide sweeping arc down right flank
+  [88, 68],  // 6. Inward dive towards Saturn Gas Giant
+  [92, 85],  // 7. Slingshot around Saturn, banking hard left
+  [68, 92],  // 8. Scooping under launchpad buttons
+  [42, 85],  // 9. Wave crest under menu modal
+  [18, 93],  // 10. Swooping past Magma Planet in bottom-left
+  [7, 65],   // 11. Banking climb up left flank
+  [12, 30],  // 12. Inward roll, climbing back to top-left
+];
+
+function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return 0.5 * (
+    2 * p1 +
+    (-p0 + p2) * t +
+    (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+    (-p0 + 3 * p1 - 3 * p2 + p3) * t3
+  );
+}
+
+function catmullRomDerivative(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const t2 = t * t;
+  return 0.5 * (
+    (-p0 + p2) +
+    2 * (2 * p0 - 5 * p1 + 4 * p2 - p3) * t +
+    3 * (-p0 + 3 * p1 - 3 * p2 + p3) * t2
+  );
+}
+
+function evaluateSpline(progress: number): { x: number; y: number; angle: number } {
+  const n = WAYPOINTS.length;
+  const p = ((progress % 1) + 1) % 1;
+  const rawIdx = p * n;
+  const i = Math.floor(rawIdx);
+  const u = rawIdx - i;
+
+  const p0 = WAYPOINTS[(i - 1 + n) % n];
+  const p1 = WAYPOINTS[i];
+  const p2 = WAYPOINTS[(i + 1) % n];
+  const p3 = WAYPOINTS[(i + 2) % n];
+
+  const x = catmullRom(p0[0], p1[0], p2[0], p3[0], u);
+  const y = catmullRom(p0[1], p1[1], p2[1], p3[1], u);
+
+  const dx = catmullRomDerivative(p0[0], p1[0], p2[0], p3[0], u);
+  const dy = catmullRomDerivative(p0[1], p1[1], p2[1], p3[1], u);
+
+  // Aspect ratio compensation so heading angle matches visual screen ratio (~16:9)
+  const aspect = typeof window !== "undefined" && window.innerHeight > 0
+    ? window.innerWidth / window.innerHeight
+    : 16 / 9;
+  
+  const angle = Math.atan2(dy, dx * (aspect / 1.777)) * (180 / Math.PI);
+
+  return { x, y, angle };
+}
+
 export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
+  const shipRef = useRef<HTMLDivElement>(null);
   const [boosted, setBoosted] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
+
+  const boostedRef = useRef(false);
+  const speedRef = useRef(1.0);
+  const progressRef = useRef(0.08); // Start at pleasant top-left location
+  const lastTimeRef = useRef<number | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+
   const boostTimeoutRef = useRef<number | null>(null);
   const msgTimeoutRef = useRef<number | null>(null);
 
   const messages = lang === "vi" ? RADIO_MESSAGES_VI : RADIO_MESSAGES_EN;
+
+  // Frame update loop with continuous progress integration (ZERO TELEPORTATION!)
+  const updateMotion = useCallback((now: number) => {
+    if (lastTimeRef.current === null) {
+      lastTimeRef.current = now;
+    }
+    const dt = Math.min((now - lastTimeRef.current) / 1000, 0.08);
+    lastTimeRef.current = now;
+
+    // Smoothly interpolate speed with physical inertia
+    const targetSpeed = boostedRef.current ? 2.2 : 1.0;
+    speedRef.current += (targetSpeed - speedRef.current) * Math.min(dt * 5, 1);
+
+    // Continuous progress integration: 1 full majestic lap every 26 seconds at 1.0x speed
+    const LAP_DURATION = 26;
+    progressRef.current = (progressRef.current + (speedRef.current * dt) / LAP_DURATION) % 1;
+
+    // Evaluate smooth Catmull-Rom spline position & heading
+    const { x, y, angle } = evaluateSpline(progressRef.current);
+
+    // Subtle micro-float weightlessness wobble
+    const wobbleY = Math.sin(now * 0.0035) * 4;
+
+    if (shipRef.current) {
+      shipRef.current.style.left = `${x}vw`;
+      shipRef.current.style.top = `${y}vh`;
+      shipRef.current.style.transform = `translate(-50%, -50%) translateY(${wobbleY}px) rotate(${angle}deg)`;
+    }
+
+    animFrameRef.current = requestAnimationFrame(updateMotion);
+  }, []);
+
+  useEffect(() => {
+    animFrameRef.current = requestAnimationFrame(updateMotion);
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [updateMotion]);
 
   const handleInteract = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -38,7 +149,8 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
     audio.spaceChime();
     audio.thrusterBoost();
 
-    // Trigger boost mode
+    // Trigger boost mode without resetting position or phase
+    boostedRef.current = true;
     setBoosted(true);
     setShowMessage(true);
     setMessageIndex((prev) => (prev + 1) % messages.length);
@@ -47,12 +159,13 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
     if (msgTimeoutRef.current) clearTimeout(msgTimeoutRef.current);
 
     boostTimeoutRef.current = window.setTimeout(() => {
+      boostedRef.current = false;
       setBoosted(false);
     }, 4500);
 
     msgTimeoutRef.current = window.setTimeout(() => {
       setShowMessage(false);
-    }, 5500);
+    }, 6000);
   };
 
   const handleDismissComms = (e: React.MouseEvent) => {
@@ -71,88 +184,26 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
 
   return (
     <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
-      {/* Dynamic CSS styles for the orbital patrol around the menu modal */}
+      {/* Inline styles for pulse, flares, and equalizer bars */}
       <style>{`
-        @keyframes vnCosmicOrbit {
-          0% {
-            left: 18%;
-            top: 7%;
-            transform: translate(-50%, -50%) rotate(8deg);
-          }
-          14% {
-            left: 80%;
-            top: 8%;
-            transform: translate(-50%, -50%) rotate(25deg);
-          }
-          24% {
-            left: 92%;
-            top: 26%;
-            transform: translate(-50%, -50%) rotate(72deg);
-          }
-          36% {
-            left: 90%;
-            top: 68%;
-            transform: translate(-50%, -50%) rotate(125deg);
-          }
-          48% {
-            left: 78%;
-            top: 91%;
-            transform: translate(-50%, -50%) rotate(168deg);
-          }
-          62% {
-            left: 28%;
-            top: 92%;
-            transform: translate(-50%, -50%) rotate(192deg);
-          }
-          74% {
-            left: 10%;
-            top: 76%;
-            transform: translate(-50%, -50%) rotate(245deg);
-          }
-          86% {
-            left: 6%;
-            top: 32%;
-            transform: translate(-50%, -50%) rotate(295deg);
-          }
-          95% {
-            left: 10%;
-            top: 13%;
-            transform: translate(-50%, -50%) rotate(345deg);
-          }
-          100% {
-            left: 18%;
-            top: 7%;
-            transform: translate(-50%, -50%) rotate(368deg);
-          }
-        }
-
-        @keyframes vnShipFloat {
-          0%, 100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-5px) rotate(1.2deg);
-          }
-        }
-
         @keyframes vnFlamePulse {
           0%, 100% {
             transform: scaleX(1) scaleY(1);
             opacity: 0.95;
           }
           50% {
-            transform: scaleX(1.3) scaleY(1.15);
+            transform: scaleX(1.35) scaleY(1.15);
             opacity: 1;
           }
         }
 
         @keyframes vnFlameBoost {
           0%, 100% {
-            transform: scaleX(2.3) scaleY(1.3);
+            transform: scaleX(2.4) scaleY(1.35);
             opacity: 1;
           }
           50% {
-            transform: scaleX(2.7) scaleY(1.45);
+            transform: scaleX(2.8) scaleY(1.5);
             opacity: 0.95;
           }
         }
@@ -160,10 +211,10 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
         @keyframes vnSparkleDrift {
           0% {
             transform: translateX(0) scale(1);
-            opacity: 0.85;
+            opacity: 0.9;
           }
           100% {
-            transform: translateX(-45px) scale(0.2);
+            transform: translateX(-50px) scale(0.15);
             opacity: 0;
           }
         }
@@ -171,16 +222,6 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
         @keyframes eqBarPulse {
           0%, 100% { height: 4px; }
           50% { height: 14px; }
-        }
-
-        .vn-orbit-shuttle {
-          position: absolute;
-          animation: vnCosmicOrbit 26s cubic-bezier(0.42, 0, 0.58, 1) infinite;
-          will-change: left, top, transform;
-        }
-
-        .vn-orbit-shuttle.is-boosted {
-          animation-duration: 11s !important;
         }
       `}</style>
 
@@ -195,7 +236,7 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
               {/* Golden Polarized Visor */}
               <ellipse cx="20" cy="18" rx="8" ry="6.5" fill="#f59e0b" />
               <path d="M 15 14 Q 20 12 25 14" stroke="#ffffff" strokeWidth="1.5" fill="none" opacity="0.8" strokeLinecap="round" />
-              {/* Space Suit Collar */}
+              {/* Space Suit Collar with Vietnam Flag */}
               <path d="M 10 32 C 10 27, 30 27, 30 32 Z" fill="#da251d" />
               <polygon points="20,28 21.2,31 24.5,31 22,32.8 23,35.5 20,34 17,35.5 18,32.8 15.5,31 18.8,31" fill="#ffd23e" />
             </svg>
@@ -236,23 +277,17 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
         </div>
       )}
 
-      {/* Orbiting Vessel Anchor */}
+      {/* Orbiting Vessel Anchor (GPU Accelerated Smooth Vector Motion) */}
       <div
-        className={cn(
-          "vn-orbit-shuttle group pointer-events-auto cursor-pointer select-none",
-          boosted && "is-boosted"
-        )}
+        ref={shipRef}
+        className="absolute top-0 left-0 pointer-events-auto cursor-pointer select-none group will-change-transform"
         onClick={handleInteract}
         role="button"
         tabIndex={0}
         title={lang === "vi" ? "Tàu phi hành gia Việt Nam VN-01 (Nhấp để tăng tốc!)" : "Vietnam Astronaut Shuttle VN-01 (Click to boost!)"}
       >
-        {/* Floating & Micro-banking Subcontainer */}
-        <div
-          className="relative flex flex-col items-center"
-          style={{ animation: "vnShipFloat 3.8s ease-in-out infinite" }}
-        >
-          {/* Interactive Hover Click-Me Indicator (shown when hovering) */}
+        <div className="relative flex flex-col items-center">
+          {/* Interactive Hover Click-Me Indicator */}
           <div className="absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
             <span className="rounded-md border border-amber-400/70 bg-void-950/90 px-2 py-0.5 text-[9px] font-bold tracking-wider text-amber-300 shadow-md backdrop-blur-sm">
               {lang === "vi" ? "🇻🇳 Nhấn để tăng tốc tàu VN-01!" : "🇻🇳 Click to boost VN-01 shuttle!"}
@@ -389,14 +424,12 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
               {/* ================= SPACESHIP HULL STRUCTURE ================= */}
 
               {/* Delta Wings & Tail Stabilizers */}
-              {/* Port Wing (Top) */}
               <polygon
                 points="75 22 28 8 20 14 36 28"
                 fill="url(#vnHullWing)"
                 stroke="#473b7b"
                 strokeWidth="1.2"
               />
-              {/* Starboard Wing (Bottom) */}
               <polygon
                 points="75 58 28 72 20 66 36 52"
                 fill="url(#vnHullWing)"
@@ -447,9 +480,7 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
               />
 
               {/* ================= THE VIETNAMESE FLAG (CỜ TỔ QUỐC VIỆT NAM) ================= */}
-              {/* Located proudly on the mid-fuselage armor plate */}
               <g transform="translate(42, 28)">
-                {/* Flag Base Plate with Golden Trim Border */}
                 <rect
                   x="0"
                   y="0"
@@ -462,7 +493,6 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
                   filter="drop-shadow(0 0 4px rgba(218,37,29,0.7))"
                 />
 
-                {/* Golden Five-Pointed Star of Vietnam (Centered accurately at (18, 12)) */}
                 <polygon
                   points="
                     18,4.8 
@@ -482,7 +512,6 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
               </g>
 
               {/* Tactical Aerospace Typography Markings */}
-              {/* "VIỆT NAM" on top spine */}
               <text
                 x="60"
                 y="21"
@@ -495,7 +524,6 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
               >
                 VIỆT NAM
               </text>
-              {/* "VN-01" callsign beneath flag */}
               <text
                 x="60"
                 y="61"
@@ -510,7 +538,6 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
               </text>
 
               {/* ================= COCKPIT CANOPY & ASTRONAUT ================= */}
-              {/* Cockpit Canopy Base */}
               <path
                 d="M 98 40 C 104 31, 128 31, 138 38 C 141 40, 141 40, 138 42 C 128 49, 104 49, 98 40 Z"
                 fill="url(#vnCanopyGlass)"
@@ -520,14 +547,12 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
 
               {/* Astronaut Inside Cockpit */}
               <g transform="translate(108, 40)">
-                {/* Space Suit Collar / Shoulders */}
                 <path
                   d="M -5 6 C -2 3, 4 3, 7 6 L 6 9 L -4 9 Z"
                   fill="#f1f5f9"
                   stroke="#334155"
                   strokeWidth="0.7"
                 />
-                {/* Astronaut Helmet (White EVA space helmet) */}
                 <circle
                   cx="1"
                   cy="0"
@@ -536,14 +561,12 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
                   stroke="#475569"
                   strokeWidth="0.8"
                 />
-                {/* Golden Reflective Sun Visor (Shining toward flight direction) */}
                 <path
                   d="M 2 -4.5 C 5 -3, 6 -1, 6 0 C 6 1, 5 3, 2 4.5 C 4 2, 4 -2, 2 -4.5 Z"
                   fill="url(#vnVisorGold)"
                   stroke="#b45309"
                   strokeWidth="0.5"
                 />
-                {/* Helmet Visor Specular Reflection Curve */}
                 <path
                   d="M 3 -3 C 5 -1.5, 5 0, 3 1.5"
                   fill="none"
@@ -569,11 +592,8 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
               <line x1="158" y1="40" x2="166" y2="40" stroke="#ffd23e" strokeWidth="1.4" strokeLinecap="round" />
 
               {/* ================= NAVIGATION & STROBE LIGHTS ================= */}
-              {/* Port Wingtip Red Nav Light */}
               <circle cx="21" cy="14" r="2.2" fill="#ef4444" className="animate-pulse" />
-              {/* Starboard Wingtip Green Nav Light */}
               <circle cx="21" cy="66" r="2.2" fill="#22c55e" className="animate-pulse" />
-              {/* Tail Dorsal White Strobe */}
               <circle cx="25" cy="40" r="1.8" fill="#ffffff" className="animate-ping" style={{ animationDuration: "1.2s" }} />
             </svg>
           </div>
