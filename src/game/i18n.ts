@@ -15,6 +15,7 @@ export interface Translations {
   paused: string;
   gameOver: string;
   victory: string;
+  roadmap: string;
   level: string;
   score: string;
   best: string;
@@ -94,6 +95,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     paused: "TẠM DỪNG",
     gameOver: "KẾT THÚC",
     victory: "CHIẾN THẮNG",
+    roadmap: "Bản Đồ",
     level: "MÀN",
     score: "ĐIỂM",
     best: "KỶ LỤC",
@@ -102,7 +104,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
 
     tagline: "Bắn lõi sao chổi • Phá vỡ tinh thể năng lượng • Kích hoạt chuỗi combo trên 15 cung đường vũ trụ.",
     playCampaign: "Chơi Chiến Dịch",
-    cosmicRoadmap: "Bản Đồ Viễn Chinh (15 Màn)",
+    cosmicRoadmap: "Bản Đồ Chiến Dịch",
     campaignStars: "SAO CHIẾN DỊCH",
     bestRun: "KỶ LỤC ĐIỂM",
     sectorsWon: "MÀN ĐÃ VƯỢT",
@@ -167,6 +169,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     paused: "PAUSED",
     gameOver: "GAME OVER",
     victory: "SECTOR CLEARED",
+    roadmap: "Roadmap",
     level: "LEVEL",
     score: "SCORE",
     best: "BEST",
@@ -175,7 +178,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
 
     tagline: "Sling comet cores • Shatter crystal lattices • Chain orbital combos across 15 handcrafted sectors.",
     playCampaign: "Play Campaign",
-    cosmicRoadmap: "Cosmic Roadmap (15 Levels)",
+    cosmicRoadmap: "Cosmic Roadmap",
     campaignStars: "CAMPAIGN STARS",
     bestRun: "BEST RUN",
     sectorsWon: "SECTORS WON",

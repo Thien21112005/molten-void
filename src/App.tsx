@@ -25,10 +25,24 @@ const initialUI: UIState = {
 
 function IconMap({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-      <line x1="8" y1="2" x2="8" y2="18" />
-      <line x1="16" y1="6" x2="16" y2="22" />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={cn("shrink-0", className)}
+    >
+      {/* Outer cosmic starmap folding panels */}
+      <polygon points="2 6 8 3 16 6 22 3 22 18 16 21 8 18 2 21" />
+      <line x1="8" y1="3" x2="8" y2="18" strokeDasharray="1.5 2" opacity="0.6" />
+      <line x1="16" y1="6" x2="16" y2="21" strokeDasharray="1.5 2" opacity="0.6" />
+      {/* Route waypoints & constellation trail */}
+      <circle cx="5" cy="13.5" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="10" r="1.8" fill="#ffd23e" stroke="#ff7a1a" strokeWidth="0.8" />
+      <circle cx="19" cy="11.5" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M5 13.5 Q8.5 7 12 10 T19 11.5" stroke="#7dfce7" strokeWidth="1.8" opacity="0.9" />
     </svg>
   );
 }
@@ -129,15 +143,15 @@ function ChunkBtn({
         onClick();
       }}
       className={cn(
-        "btn-chunk flex items-center justify-center gap-2.5 px-6 py-3.5 text-base uppercase tracking-wide cursor-pointer transition active:scale-95",
+        "btn-chunk flex items-center justify-center gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-wider cursor-pointer transition active:scale-95",
         primary
-          ? "bg-gradient-to-b from-ember-400 to-ember-600 text-void-950 shadow-[0_5px_0_#8f2f0c,0_10px_24px_rgba(255,110,30,0.35)] hover:brightness-110"
-          : "border-2 border-void-700 bg-void-800 text-ice-300 shadow-[0_5px_0_#0a0716] hover:border-ice-500/60 hover:text-ice-400",
+          ? "bg-gradient-to-b from-ember-400 to-ember-600 text-void-950 shadow-[0_4px_0_#8f2f0c,0_8px_20px_rgba(255,110,30,0.35)] hover:brightness-110"
+          : "border-2 border-void-700/90 bg-void-800/90 text-ice-300 shadow-[0_4px_0_#0a0716] hover:border-ice-400/70 hover:text-white hover:bg-void-800",
         className,
       )}
     >
-      {icon}
-      {children}
+      {icon && <span className="flex shrink-0 items-center justify-center">{icon}</span>}
+      <span className="truncate">{children}</span>
     </button>
   );
 }
@@ -434,7 +448,7 @@ export default function App() {
                   <ChunkBtn
                     primary
                     onClick={() => eng()?.play()}
-                    className="w-full py-3.5 text-lg shadow-[0_6px_0_#8f2f0c,0_12px_28px_rgba(255,110,30,0.4)]"
+                    className="w-full py-3 sm:py-3.5 text-sm sm:text-base font-bold shadow-[0_5px_0_#8f2f0c,0_10px_22px_rgba(255,110,30,0.38)]"
                     icon={<IconPlay className="h-5 w-5" />}
                   >
                     {t.playCampaign}
@@ -443,16 +457,16 @@ export default function App() {
                   <div className="grid grid-cols-2 gap-2.5">
                     <ChunkBtn
                       onClick={() => eng()?.openRoadmap()}
-                      className="py-2.5 text-sm"
-                      icon={<IconMap className="h-4 w-4" />}
+                      className="py-2.5 sm:py-3 text-xs sm:text-sm"
+                      icon={<IconMap className="h-4.5 w-4.5" />}
                     >
                       {t.cosmicRoadmap}
                     </ChunkBtn>
 
                     <ChunkBtn
                       onClick={() => setShowSettings(true)}
-                      className="py-2.5 text-sm"
-                      icon={<IconGear className="h-4 w-4" />}
+                      className="py-2.5 sm:py-3 text-xs sm:text-sm"
+                      icon={<IconGear className="h-4.5 w-4.5" />}
                     >
                       {t.settings}
                     </ChunkBtn>
@@ -509,27 +523,27 @@ export default function App() {
       {ui.screen === "paused" && (
         <Overlay>
           <div className="animate-pop-in m-auto flex w-[min(92vw,22rem)] flex-col items-center rounded-2xl border-2 border-void-700 bg-void-900/95 p-6 shadow-[0_10px_0_rgba(0,0,0,0.45)]">
-            <h2 className="font-display text-3xl text-ice-400 [text-shadow:0_0_24px_rgba(46,230,201,0.5)]">{t.paused}</h2>
+            <h2 className="font-display text-2xl sm:text-3xl text-ice-400 [text-shadow:0_0_24px_rgba(46,230,201,0.5)]">{t.paused}</h2>
             <p className="mt-1 text-xs font-bold tracking-[0.28em] text-white/50">
               {t.score} {ui.score.toLocaleString("en-US")} &middot; LV {ui.level}
             </p>
             <div className="mt-5 flex w-full flex-col gap-2.5">
-              <ChunkBtn primary onClick={() => eng()?.resume()} icon={<IconPlay className="h-4 w-4" />}>
+              <ChunkBtn primary onClick={() => eng()?.resume()} className="py-3 text-sm sm:text-base font-bold" icon={<IconPlay className="h-4.5 w-4.5" />}>
                 {t.resume}
               </ChunkBtn>
               <div className="grid grid-cols-2 gap-2.5">
-                <ChunkBtn onClick={() => eng()?.restart()} icon={<IconRestart className="h-4 w-4" />}>
+                <ChunkBtn onClick={() => eng()?.restart()} className="py-2.5 text-xs sm:text-sm font-bold" icon={<IconRestart className="h-4 w-4" />}>
                   {t.restart}
                 </ChunkBtn>
-                <ChunkBtn onClick={() => eng()?.openRoadmap()} icon={<IconMap className="h-4 w-4" />}>
-                  Roadmap
+                <ChunkBtn onClick={() => eng()?.openRoadmap()} className="py-2.5 text-xs sm:text-sm font-bold" icon={<IconMap className="h-4 w-4" />}>
+                  {t.roadmap}
                 </ChunkBtn>
               </div>
               <div className="grid grid-cols-2 gap-2.5">
-                <ChunkBtn onClick={() => setShowSettings(true)} icon={<IconGear className="h-4 w-4" />}>
+                <ChunkBtn onClick={() => setShowSettings(true)} className="py-2.5 text-xs sm:text-sm font-bold" icon={<IconGear className="h-4 w-4" />}>
                   {t.settings}
                 </ChunkBtn>
-                <ChunkBtn onClick={() => eng()?.toMenu()} icon={<IconHome className="h-4 w-4" />}>
+                <ChunkBtn onClick={() => eng()?.toMenu()} className="py-2.5 text-xs sm:text-sm font-bold" icon={<IconHome className="h-4 w-4" />}>
                   {t.menu}
                 </ChunkBtn>
               </div>
