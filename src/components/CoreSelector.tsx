@@ -109,16 +109,17 @@ export function CoreSelector({
   return (
     <div className="flex flex-col gap-1.5 select-none">
       {/* Tactical Selector Bar */}
-      <div className="flex items-center gap-1.5 sm:gap-2 rounded-2xl border border-void-700/80 bg-void-950/90 p-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.65)] backdrop-blur-md">
+      <div className="flex items-center gap-1 sm:gap-1.5 rounded-2xl border border-void-700/80 bg-void-950/90 p-1 sm:p-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.65)] backdrop-blur-md">
         {options.map((opt) => {
           const isSelected = selectedCore === opt.id;
           return (
             <button
               key={opt.id}
               disabled={disabled}
+              title={opt.desc}
               onClick={() => onSelectCore(opt.id)}
               className={cn(
-                "relative flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold transition-all cursor-pointer active:scale-95",
+                "relative flex items-center gap-1.5 rounded-xl px-2 py-1.5 sm:px-2.5 sm:py-1.5 text-xs font-bold transition-all cursor-pointer active:scale-95",
                 disabled && "opacity-50 cursor-not-allowed",
                 isSelected
                   ? cn("border-2", opt.borderCol, opt.bgGlow, opt.color)

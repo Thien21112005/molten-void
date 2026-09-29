@@ -379,17 +379,16 @@ export default function App() {
       {ui.screen === "playing" && (
         <div
           className={cn(
-            "pointer-events-auto absolute z-20 transition-all duration-300 left-3 sm:left-5",
-            ui.isAiming && "opacity-25 pointer-events-none"
+            "pointer-events-auto absolute z-20 transition-all duration-300 left-1/2 -translate-x-1/2",
+            ui.landscape ? "bottom-3 sm:bottom-4" : "top-20 sm:top-24",
+            ui.isAiming ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"
           )}
-          style={{
-            bottom: "max(1rem, env(safe-area-inset-bottom))",
-          }}
         >
           <CoreSelector
             selectedCore={ui.selectedCore ?? "standard"}
             onSelectCore={(c) => eng()?.selectCore(c)}
             t={t}
+            compact={true}
           />
         </div>
       )}
