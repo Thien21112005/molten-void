@@ -10,6 +10,7 @@ interface VietnameseAstronautProps {
   className?: string;
   reaction?: AstronautReaction;
   showReactionBadge?: boolean;
+  quotePlacement?: "top" | "bottom";
 }
 
 const REACTION_TEXTS = {
@@ -48,6 +49,7 @@ export function VietnameseAstronaut({
   className,
   reaction = "idle",
   showReactionBadge = false,
+  quotePlacement = "top",
 }: VietnameseAstronautProps) {
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [showQuote, setShowQuote] = useState(false);
@@ -106,13 +108,6 @@ export function VietnameseAstronaut({
       {showReactionBadge && reaction !== "idle" && (
         <div className="animate-pop-in pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-amber-400/70 bg-void-950/95 px-2.5 py-0.5 text-[10px] font-bold text-amber-300 shadow-[0_0_15px_rgba(255,180,40,0.5)] backdrop-blur-md z-30">
           {REACTION_TEXTS[lang][reaction]}
-        </div>
-      )}
-
-      {/* Floating Radio Quote Banner */}
-      {showQuote && (
-        <div className="animate-pop-in pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl border border-ice-400/70 bg-void-950/95 px-3 py-1.5 text-[11px] font-bold text-ice-300 shadow-[0_0_20px_rgba(46,230,201,0.5)] backdrop-blur-md z-30">
-          {activeQuote}
         </div>
       )}
 
@@ -304,7 +299,17 @@ export function VietnameseAstronaut({
 
       {/* Cyber Radio Speech Bubble */}
       {showQuote && (
-        <div className="animate-pop-in pointer-events-none absolute -top-16 left-1/2 z-40 w-52 -translate-x-1/2 sm:-top-20 sm:w-60 md:w-64">
+        <div
+          className={cn(
+            "animate-pop-in pointer-events-none absolute left-1/2 z-40 w-56 -translate-x-1/2 sm:w-64",
+            quotePlacement === "bottom"
+              ? "top-[calc(100%+0.6rem)] flex flex-col"
+              : "-top-16 sm:-top-20"
+          )}
+        >
+          {quotePlacement === "bottom" && (
+            <div className="mx-auto h-0 w-0 border-x-[6px] border-b-[6px] border-x-transparent border-b-void-950/95" />
+          )}
           <div className="rounded-xl border border-ember-400/60 bg-void-950/95 p-2.5 shadow-[0_0_24px_rgba(255,160,46,0.45)] backdrop-blur-md">
             <div className="mb-1 flex items-center justify-between text-[9px] font-bold tracking-widest text-ember-300 uppercase">
               <span className="flex items-center gap-1.5">
@@ -317,8 +322,9 @@ export function VietnameseAstronaut({
               {activeQuote}
             </p>
           </div>
-          {/* Bubble tail indicator */}
-          <div className="mx-auto h-0 w-0 border-x-[6px] border-t-[6px] border-x-transparent border-t-void-950/95" />
+          {quotePlacement !== "bottom" && (
+            <div className="mx-auto h-0 w-0 border-x-[6px] border-t-[6px] border-x-transparent border-t-void-950/95" />
+          )}
         </div>
       )}
 
