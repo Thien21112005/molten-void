@@ -9,6 +9,7 @@ interface VietnameseAstronautProps {
   lang: Language;
   className?: string;
   reaction?: AstronautReaction;
+  reactionText?: string;
   showReactionBadge?: boolean;
   quotePlacement?: "top" | "bottom";
 }
@@ -48,6 +49,7 @@ export function VietnameseAstronaut({
   lang,
   className,
   reaction = "idle",
+  reactionText,
   showReactionBadge = false,
   quotePlacement = "top",
 }: VietnameseAstronautProps) {
@@ -105,9 +107,9 @@ export function VietnameseAstronaut({
       )}
     >
       {/* Dynamic Floating Reaction Badge */}
-      {showReactionBadge && reaction !== "idle" && (
-        <div className="animate-pop-in pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-amber-400/70 bg-void-950/95 px-2.5 py-0.5 text-[10px] font-bold text-amber-300 shadow-[0_0_15px_rgba(255,180,40,0.5)] backdrop-blur-md z-30">
-          {REACTION_TEXTS[lang][reaction]}
+      {showReactionBadge && (reactionText || (reaction !== "idle" && REACTION_TEXTS[lang][reaction])) && (
+        <div className="animate-pop-in pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-amber-400/80 bg-void-950/95 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 shadow-[0_0_16px_rgba(255,180,40,0.55)] backdrop-blur-md z-30">
+          {reactionText ?? REACTION_TEXTS[lang][reaction]}
         </div>
       )}
 

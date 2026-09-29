@@ -149,6 +149,15 @@ export interface Translations {
   equipped: string;
   unlockAtStars: string;
   stardustTrails: string;
+  mascotAiming: string;
+  mascotHit: string;
+  mascotCombo: string;
+  mascotGold: string;
+  mascotMiss: string;
+  mascotClutch: string;
+  mascotLastCore: string;
+  mascotVictory: string;
+  mascotGameOver: string;
 }
 
 export const TRANSLATIONS: Record<Language, Translations> = {
@@ -296,6 +305,15 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     equipped: "Đang Dùng",
     unlockAtStars: "Cần {stars}⭐",
     stardustTrails: "Vệt Bụi Sao",
+    mascotAiming: "🎯 Khóa tọa độ...",
+    mascotHit: "⭐ Bắn chuẩn!",
+    mascotCombo: "🔥 Combo x{combo}!",
+    mascotGold: "🏆 Thêm lõi đạn!",
+    mascotMiss: "⚡ Tiếc quá, căn lại góc nào!",
+    mascotClutch: "🔥 Chỉ còn 1 tinh thể! Cố lên!",
+    mascotLastCore: "⚠️ Phát bắn quyết định!",
+    mascotVictory: "🇻🇳 Vẻ vang! Chiến thắng!",
+    mascotGameOver: "🚀 Đừng nản lòng, làm lại nào!",
   },
   en: {
     menu: "Main Menu",
@@ -441,6 +459,15 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     equipped: "Equipped",
     unlockAtStars: "Requires {stars}⭐",
     stardustTrails: "Stardust Trails",
+    mascotAiming: "🎯 Locking coords...",
+    mascotHit: "⭐ Direct hit!",
+    mascotCombo: "🔥 Combo x{combo}!",
+    mascotGold: "🏆 Bonus core!",
+    mascotMiss: "⚡ Close one, adjust angle!",
+    mascotClutch: "🔥 Only 1 crystal left! Go!",
+    mascotLastCore: "⚠️ Critical final core!",
+    mascotVictory: "🇻🇳 Victorious! Magnificent!",
+    mascotGameOver: "🚀 Don't give up, try again!",
   },
 };
 

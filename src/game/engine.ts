@@ -38,6 +38,13 @@ export interface VictoryData {
 
 export type CoreType = "standard" | "cluster" | "blast" | "heavy";
 
+export interface MascotState {
+  reaction: "idle" | "aiming" | "cheer" | "sad" | "victory";
+  key: string;
+  params?: Record<string, string | number>;
+  id: number;
+}
+
 export interface UIState {
   screen: Screen;
   score: number;
@@ -57,6 +64,7 @@ export interface UIState {
   victoryData?: VictoryData;
   progress?: PlayerProgress;
   isFromPaused?: boolean;
+  mascot?: MascotState;
 }
 
 const HS_KEY = "mv_hs_v1";
@@ -201,6 +209,8 @@ export class Engine {
   private levelScore = 0;
   private victoryData: VictoryData | null = null;
   private unsubMute?: () => void;
+  private mascotTimer: number | null = null;
+  private mascotState: MascotState = { reaction: "idle", key: "", id: 0 };
 
   // world
   private selectedCore: CoreType = "standard";
@@ -433,6 +443,32 @@ export class Engine {
     this.pushUI();
   }
 
+  public setMascot(
+    reaction: "idle" | "aiming" | "cheer" | "sad" | "victory",
+    key: string,
+    params?: Record<string, string | number>,
+    durationMs = 2200
+  ) {
+    if (this.mascotTimer) {
+      window.clearTimeout(this.mascotTimer);
+      this.mascotTimer = null;
+    }
+    this.mascotState = {
+      reaction,
+      key,
+      params,
+      id: Date.now(),
+    };
+    this.pushUI();
+
+    if (reaction !== "idle" && durationMs > 0) {
+      this.mascotTimer = window.setTimeout(() => {
+        this.mascotState = { reaction: "idle", key: "", id: Date.now() };
+        this.pushUI();
+      }, durationMs);
+    }
+  }
+
   splitClusterOrb(o?: Orb): boolean {
     const target =
       o || this.orbsList.find((orb) => orb.alive && orb.coreType === "cluster" && !orb.hasSplit);
@@ -550,6 +586,7 @@ export class Engine {
     this.pullStart = p;
     this.pullCur = p;
     this.aimMode = "pull";
+    this.setMascot("aiming", "mascotAiming", undefined, 0);
     this.pushUI();
   };
 
@@ -574,6 +611,7 @@ export class Engine {
     const len = Math.hypot(dx, dy);
     if (len < 10) {
       if (len > 4) sfx.cancel();
+      this.setMascot("idle", "", undefined, 0);
       return;
     }
     const power = clamp(len / this.maxDragDistance(), 0, 1);
@@ -584,6 +622,7 @@ export class Engine {
     if (e.pointerId !== this.pointerId) return;
     this.aimMode = "none";
     this.pointerId = -1;
+    this.setMascot("idle", "", undefined, 0);
     this.pushUI();
   };
 
@@ -1005,6 +1044,7 @@ export class Engine {
     this.orbs--;
     this.combo = 0;
     this.firstShot = true;
+    this.setMascot("idle", "", undefined, 0);
     const sp = (0.2 + 0.8 * power) * this.maxSpeed;
     this.orbsList = [
       {
@@ -1056,6 +1096,11 @@ export class Engine {
     if (gold) {
       if (this.orbs < MAX_ORBS) this.orbs++;
       sfx.orbEarned();
+      this.setMascot("cheer", "mascotGold", undefined, 2500);
+    } else if (this.combo >= 2) {
+      this.setMascot("cheer", "mascotCombo", { combo: this.combo }, 2400);
+    } else {
+      this.setMascot("cheer", "mascotHit", undefined, 2000);
     }
     sfx.shatter(this.combo, gold);
     haptics.shatter(this.combo);
@@ -1321,15 +1366,26 @@ export class Engine {
     this.shake = Math.min(26, this.shake + 2);
 
     if (this.orbsList.length === 0) {
+      if (this.combo === 0) {
+        if (this.orbs === 1) {
+          this.setMascot("sad", "mascotLastCore", undefined, 2600);
+        } else {
+          this.setMascot("sad", "mascotMiss", undefined, 2400);
+        }
+      } else if (this.gems.filter((q) => !q.dead).length === 1) {
+        this.setMascot("cheer", "mascotClutch", undefined, 2500);
+      }
       this.combo = 0;
       if (this.orbs <= 0 && !this.pending && !this.gems.every((q) => q.dead)) {
         this.pending = { type: "over", t: 0.85 };
+        this.setMascot("sad", "mascotGameOver", undefined, 3500);
       }
       this.pushUI();
     }
   }
 
   private doLevelClear() {
+    this.setMascot("victory", "mascotVictory", undefined, 4500);
     const cfg = getLevelConfig(this.level);
     let stars = 1;
     if (this.orbs >= cfg.star3MinOrbs) {
@@ -2452,6 +2508,7 @@ export class Engine {
       victoryData: this.victoryData ?? undefined,
       progress: loadProgress(),
       isFromPaused: this.previousScreen === "paused" || this.previousScreen === "playing",
+      mascot: this.mascotState,
     });
   }
 }

@@ -33,6 +33,19 @@ const initialUI: UIState = {
   selectedCore: "standard",
 };
 
+function getMascotText(mascot: UIState["mascot"], t: Translations): string | undefined {
+  if (!mascot || !mascot.key) return undefined;
+  const raw = (t as unknown as Record<string, string>)[mascot.key];
+  if (!raw) return undefined;
+  if (mascot.params) {
+    return Object.entries(mascot.params).reduce(
+      (str, [k, v]) => str.replace(`{${k}}`, String(v)),
+      raw,
+    );
+  }
+  return raw;
+}
+
 /* ---------- inline SVG icons (no emoji) ---------- */
 
 function IconMap({ className }: { className?: string }) {
@@ -405,8 +418,9 @@ export default function App() {
           <VietnameseAstronaut
             lang={lang}
             className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer drop-shadow-[0_0_16px_rgba(46,230,201,0.35)] hover:scale-105 active:scale-95 transition"
-            reaction={ui.isAiming ? "aiming" : "idle"}
-            showReactionBadge={ui.isAiming}
+            reaction={ui.mascot?.reaction ?? (ui.isAiming ? "aiming" : "idle")}
+            reactionText={getMascotText(ui.mascot, t)}
+            showReactionBadge={Boolean(ui.mascot?.reaction && ui.mascot.reaction !== "idle") || ui.isAiming}
           />
         </div>
       )}
