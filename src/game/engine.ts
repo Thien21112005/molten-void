@@ -9,6 +9,10 @@ import {
   TOTAL_LEVELS,
   type PlayerProgress,
 } from "./levels";
+import {
+  unlockAchievement,
+  checkCampaignMilestoneAchievements,
+} from "./achievements/achievementsData";
 
 export type Screen = "menu" | "playing" | "paused" | "gameover" | "victory" | "roadmap";
 
@@ -114,6 +118,8 @@ interface Orb {
   piercesLeft?: number;
   piercedBlocks?: Set<Block>;
   portalCooldown?: number;
+  bounces?: number;
+  gravityInfluenced?: boolean;
   hasSplit?: boolean;
   isSplitShard?: boolean;
 }
@@ -1090,8 +1096,11 @@ export class Engine {
       const nearby = this.gems.filter(
         (other) => !other.dead && Math.hypot(other.x - g.x, other.y - g.y) <= blastRadius,
       );
+      if (nearby.length >= 1) {
+        unlockAchievement("molten_demolisher");
+      }
       for (const other of nearby) {
-        this.hitGem(other);
+        this.hitGem(other, triggeringOrb);
       }
     }
 
@@ -1192,6 +1201,22 @@ export class Engine {
         size: size * 0.8,
         col: "#ffa02e",
       });
+    }
+
+    // Achievement checks
+    if (triggeringOrb) {
+      if (this.combo >= 3 && (triggeringOrb.bounces ?? 0) >= 1) {
+        unlockAchievement("ricochet_master");
+      }
+      if (this.combo >= 3 && triggeringOrb.coreType === "cluster") {
+        unlockAchievement("cluster_master");
+      }
+      if (triggeringOrb.coreType === "heavy" && (triggeringOrb.piercedBlocks?.size ?? 0) > 0) {
+        unlockAchievement("heavy_piercer");
+      }
+      if (triggeringOrb.gravityInfluenced) {
+        unlockAchievement("singularity_slingshot");
+      }
     }
 
     const isFinalGem = this.gems.every((q) => q.dead);
@@ -1296,6 +1321,7 @@ export class Engine {
       this.levelScore,
     );
     const progress = loadProgress();
+    checkCampaignMilestoneAchievements(progress.levels);
 
     this.victoryData = {
       level: this.level,
@@ -1456,6 +1482,7 @@ export class Engine {
             const gdy = gw.y - o.y;
             const distSq = gdx * gdx + gdy * gdy;
             if (distSq < gw.radius * gw.radius) {
+              o.gravityInfluenced = true;
               const dist = Math.sqrt(distSq);
               const force = (gw.strength * 450) / (distSq + 900);
               o.vx += (gdx / (dist + 0.001)) * force * sdt;
@@ -1485,6 +1512,7 @@ export class Engine {
               }
 
               if (entered) {
+                unlockAchievement("wormhole_voyager");
                 o.x = tx + (o.vx / sp) * (wh.r + 4);
                 o.y = ty + (o.vy / sp) * (wh.r + 4);
                 o.portalCooldown = 0.4;
@@ -1552,6 +1580,7 @@ export class Engine {
             if (Math.abs(o.vx) < 4) o.vx = 0;
           }
           if (impact > 150) {
+            o.bounces = (o.bounces ?? 0) + 1;
             const n = Math.min(8, 2 + Math.floor(impact / 220));
             for (let i = 0; i < n; i++) {
               this.particles.push({
@@ -1635,6 +1664,7 @@ export class Engine {
               o.y = cy + dy * o.r;
               const vn = o.vx * dx + o.vy * dy;
               if (vn < 0) {
+                o.bounces = (o.bounces ?? 0) + 1;
                 o.vx -= 1.62 * vn * dx;
                 o.vy -= 1.62 * vn * dy;
                 if (-vn > 160) {
@@ -1702,6 +1732,7 @@ export class Engine {
               const vn = relVx * nx + relVy * ny;
 
               if (vn < 0) {
+                o.bounces = (o.bounces ?? 0) + 1;
                 const restitution = 1.35;
                 o.vx = barVx + (relVx - (1 + restitution) * vn * nx);
                 o.vy = barVy + (relVy - (1 + restitution) * vn * ny);

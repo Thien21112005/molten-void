@@ -137,6 +137,11 @@ export interface Translations {
   starmapExploreHint: string;
   startNode: string;
   apexNode: string;
+  achievements: string;
+  achievementsUnlocked: string;
+  achievementUnlockedToast: string;
+  allBadgesCollected: string;
+  lockedBadge: string;
 }
 
 export const TRANSLATIONS: Record<Language, Translations> = {
@@ -272,6 +277,11 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     starmapExploreHint: "↔ Kéo ngang để khám phá • Chạm để chọn màn",
     startNode: "XUẤT PHÁT",
     apexNode: "ĐỈNH CAO",
+    achievements: "Danh Hiệu & Huy Hiệu",
+    achievementsUnlocked: "Đã mở khóa",
+    achievementUnlockedToast: "THÀNH TỰU MỚI MỞ KHÓA!",
+    allBadgesCollected: "Đại Sư Vũ Trụ",
+    lockedBadge: "Chưa mở khóa",
   },
   en: {
     menu: "Main Menu",
@@ -405,6 +415,11 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     starmapExploreHint: "↔ Drag horizontally to explore • Tap to sling",
     startNode: "START",
     apexNode: "APEX",
+    achievements: "Achievements & Badges",
+    achievementsUnlocked: "Unlocked",
+    achievementUnlockedToast: "NEW ACHIEVEMENT UNLOCKED!",
+    allBadgesCollected: "Cosmic Grandmaster",
+    lockedBadge: "Locked",
   },
 };
 

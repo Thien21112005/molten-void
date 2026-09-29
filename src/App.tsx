@@ -14,6 +14,8 @@ import { VietnameseAstronaut } from "./components/VietnameseAstronaut";
 import { CosmicDecorations } from "./components/CosmicDecorations";
 import { OnboardingDragHint } from "./components/OnboardingDragHint";
 import { CoreSelector } from "./components/CoreSelector";
+import { AchievementsModal } from "./components/AchievementsModal";
+import { AchievementToast } from "./components/AchievementToast";
 
 const initialUI: UIState = {
   screen: "menu",
@@ -130,6 +132,15 @@ function IconCore({ className }: { className?: string }) {
   );
 }
 
+function IconMedal({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="8" r="6" />
+      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+    </svg>
+  );
+}
+
 /* ---------- UI primitives ---------- */
 
 function ChunkBtn({
@@ -216,8 +227,9 @@ export default function App() {
   const engineRef = useRef<Engine | null>(null);
   const [ui, setUi] = useState<UIState>(initialUI);
 
-  // Settings & Localization state
+  // Settings & Localization & Achievements state
   const [showSettings, setShowSettings] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const [lang, setLang] = useState<Language>(() => loadLanguage());
   const [refreshKey, setRefreshKey] = useState(0);
   const t = TRANSLATIONS[lang];
@@ -505,19 +517,27 @@ export default function App() {
                     {t.playCampaign}
                   </ChunkBtn>
 
-                  <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
+                  <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
                     <ChunkBtn
                       onClick={() => eng()?.openRoadmap()}
-                      className="py-2.5 sm:py-3 text-xs sm:text-sm"
-                      icon={<IconMap className="h-4.5 w-4.5" />}
+                      className="py-2.5 sm:py-3 text-[11px] sm:text-xs"
+                      icon={<IconMap className="h-4 w-4" />}
                     >
-                      {t.cosmicRoadmap}
+                      {t.roadmap}
+                    </ChunkBtn>
+
+                    <ChunkBtn
+                      onClick={() => setShowAchievements(true)}
+                      className="py-2.5 sm:py-3 text-[11px] sm:text-xs text-amber-300 border-amber-500/50 hover:border-amber-400 bg-amber-950/20 hover:bg-amber-900/40"
+                      icon={<IconMedal className="h-4 w-4 text-amber-300" />}
+                    >
+                      {t.achievements}
                     </ChunkBtn>
 
                     <ChunkBtn
                       onClick={() => setShowSettings(true)}
-                      className="py-2.5 sm:py-3 text-xs sm:text-sm"
-                      icon={<IconGear className="h-4.5 w-4.5" />}
+                      className="py-2.5 sm:py-3 text-[11px] sm:text-xs"
+                      icon={<IconGear className="h-4 w-4" />}
                     >
                       {t.settings}
                     </ChunkBtn>
@@ -636,6 +656,15 @@ export default function App() {
                   {t.menu}
                 </ChunkBtn>
               </div>
+
+              {/* Achievements Modal Trigger */}
+              <ChunkBtn
+                onClick={() => setShowAchievements(true)}
+                className="w-full py-2.5 sm:py-3 text-xs sm:text-sm font-bold tracking-wider text-amber-300 border-amber-500/50 hover:border-amber-400 bg-amber-950/20"
+                icon={<IconMedal className="h-4.5 w-4.5 text-amber-300" />}
+              >
+                {t.achievements}
+              </ChunkBtn>
             </div>
 
             {/* Flight & Slingshot Tactical Controls Card */}
@@ -736,6 +765,20 @@ export default function App() {
           />
         </Overlay>
       )}
+
+      {/* ---- ACHIEVEMENTS MODAL ---- */}
+      {showAchievements && (
+        <Overlay dim={true}>
+          <AchievementsModal
+            onClose={() => setShowAchievements(false)}
+            lang={lang}
+            t={t}
+          />
+        </Overlay>
+      )}
+
+      {/* ---- IN-GAME ACHIEVEMENT TOAST ---- */}
+      <AchievementToast lang={lang} t={t} />
     </div>
   );
 }
