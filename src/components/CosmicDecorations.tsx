@@ -150,8 +150,10 @@ const COSMIC_STARS: CosmicStar[] = [
 
 export function CosmicDecorations() {
   return (
-    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
-      {/* Dynamic CSS styles for rotating planets, orbiting moons, celestial orbits, and comets */}
+    <>
+      {/* ================= BACKGROUND COSMOS (SAO, QUỸ ĐẠO & HÀNH TINH BAY PHÍA SAU BANNER) ================= */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
+        {/* Dynamic CSS styles for rotating planets, orbiting moons, celestial orbits, and comets */}
       <style>{`
         /* Planetary Surface & Atmosphere Rotations (Hành tinh tự xoay quanh trục) */
         @keyframes terraContinentSpin {
@@ -408,79 +410,6 @@ ${ORBIT_KEYFRAMES_CSS}
         <ellipse cx="50%" cy="50%" rx="60vw" ry="55vh" fill="none" stroke="#7dfce7" strokeWidth="0.9" strokeDasharray="5 18" opacity="0.8" />
       </svg>
 
-      {/* ================= STREAKING COMETS (SAO CHỔI BAY) ================= */}
-      {/* Comet 1: Cyan Ice Comet streaking from Top-Left to Bottom-Right */}
-      <div
-        className="absolute top-0 left-0 pointer-events-none z-15"
-        style={{
-          transformOrigin: "90% 50%",
-          animation: "cometStreak1 13s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
-        }}
-      >
-        <svg viewBox="0 0 200 40" className="w-48 sm:w-64 h-auto overflow-visible">
-          <defs>
-            <linearGradient id="cometTailCyan" x1="100%" y1="50%" x2="0%" y2="50%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-              <stop offset="20%" stopColor="#7dfce7" stopOpacity="0.85" />
-              <stop offset="55%" stopColor="#2ee6c9" stopOpacity="0.45" />
-              <stop offset="85%" stopColor="#0891b2" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#0e7490" stopOpacity="0" />
-            </linearGradient>
-            <radialGradient id="cometHeadCyan" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="40%" stopColor="#7dfce7" />
-              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          {/* Luminous Tail */}
-          <polygon points="180 20 0 10 0 30" fill="url(#cometTailCyan)" />
-          {/* Bright Core Nucleus */}
-          <circle cx="180" cy="20" r="10" fill="url(#cometHeadCyan)" />
-          <circle cx="180" cy="20" r="3.5" fill="#ffffff" />
-          {/* Sparks */}
-          <circle cx="140" cy="18" r="1.5" fill="#7dfce7" opacity="0.8" />
-          <circle cx="100" cy="22" r="1.2" fill="#ffffff" opacity="0.6" />
-          <circle cx="60" cy="19" r="1" fill="#2ee6c9" opacity="0.5" />
-        </svg>
-      </div>
-
-      {/* Comet 2: Amber Magma Comet streaking from Top-Right to Bottom-Left */}
-      <div
-        className="absolute top-0 left-0 pointer-events-none z-15"
-        style={{
-          transformOrigin: "90% 50%",
-          animation: "cometStreak2 16s cubic-bezier(0.22, 0.1, 0.25, 1) infinite",
-        }}
-      >
-        <svg viewBox="0 0 200 40" className="w-44 sm:w-56 h-auto overflow-visible">
-          <defs>
-            <linearGradient id="cometTailGold" x1="100%" y1="50%" x2="0%" y2="50%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-              <stop offset="25%" stopColor="#ffd23e" stopOpacity="0.85" />
-              <stop offset="60%" stopColor="#ff7a1a" stopOpacity="0.4" />
-              <stop offset="90%" stopColor="#f05423" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#991b1b" stopOpacity="0" />
-            </linearGradient>
-            <radialGradient id="cometHeadGold" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="45%" stopColor="#ffd23e" />
-              <stop offset="100%" stopColor="#ea580c" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <polygon points="180 20 0 12 0 28" fill="url(#cometTailGold)" />
-          <circle cx="180" cy="20" r="9" fill="url(#cometHeadGold)" />
-          <circle cx="180" cy="20" r="3" fill="#ffffff" />
-        </svg>
-      </div>
-
-      {/* Micro Shooting Star Flash */}
-      <div
-        className="absolute top-0 left-0 pointer-events-none z-15"
-        style={{ animation: "shootingStar1 7s ease-in-out infinite" }}
-      >
-        <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-ice-300 to-white shadow-[0_0_8px_#fff]" />
-      </div>
-
       {/* ================= PLANETARY BODIES (HỆ HÀNH TINH QUAY QUANH MENU) ================= */}
 
       {/* 1. PLANET 1: SATURN / RINGED GAS GIANT (Sao Thổ - Chuyển động theo Quỹ Đạo Vàng) */}
@@ -722,5 +651,81 @@ ${ORBIT_KEYFRAMES_CSS}
         </svg>
       </div>
     </div>
-  );
+
+    {/* ================= FOREGROUND STREAKING COMETS (SAO CHỔI BAY VỤT QUA TRÊN BANNER) ================= */}
+    <div className="absolute inset-0 pointer-events-none z-[25] overflow-hidden select-none">
+      {/* Comet 1: Cyan Ice Comet streaking from Top-Left to Bottom-Right across the banner */}
+      <div
+        className="absolute top-0 left-0 pointer-events-none"
+        style={{
+          transformOrigin: "90% 50%",
+          animation: "cometStreak1 13s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
+        }}
+      >
+        <svg viewBox="0 0 200 40" className="w-48 sm:w-64 h-auto overflow-visible filter drop-shadow-[0_0_16px_rgba(46,230,201,0.6)]">
+          <defs>
+            <linearGradient id="cometTailCyan" x1="100%" y1="50%" x2="0%" y2="50%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+              <stop offset="20%" stopColor="#7dfce7" stopOpacity="0.85" />
+              <stop offset="55%" stopColor="#2ee6c9" stopOpacity="0.45" />
+              <stop offset="85%" stopColor="#0891b2" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#0e7490" stopOpacity="0" />
+            </linearGradient>
+            <radialGradient id="cometHeadCyan" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="40%" stopColor="#7dfce7" />
+              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          {/* Luminous Tail */}
+          <polygon points="180 20 0 10 0 30" fill="url(#cometTailCyan)" />
+          {/* Bright Core Nucleus */}
+          <circle cx="180" cy="20" r="10" fill="url(#cometHeadCyan)" />
+          <circle cx="180" cy="20" r="3.5" fill="#ffffff" />
+          {/* Sparks */}
+          <circle cx="140" cy="18" r="1.5" fill="#7dfce7" opacity="0.8" />
+          <circle cx="100" cy="22" r="1.2" fill="#ffffff" opacity="0.6" />
+          <circle cx="60" cy="19" r="1" fill="#2ee6c9" opacity="0.5" />
+        </svg>
+      </div>
+
+      {/* Comet 2: Amber Magma Comet streaking from Top-Right to Bottom-Left across the banner */}
+      <div
+        className="absolute top-0 left-0 pointer-events-none"
+        style={{
+          transformOrigin: "90% 50%",
+          animation: "cometStreak2 16s cubic-bezier(0.22, 0.1, 0.25, 1) infinite",
+        }}
+      >
+        <svg viewBox="0 0 200 40" className="w-44 sm:w-56 h-auto overflow-visible filter drop-shadow-[0_0_16px_rgba(255,122,26,0.6)]">
+          <defs>
+            <linearGradient id="cometTailGold" x1="100%" y1="50%" x2="0%" y2="50%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+              <stop offset="25%" stopColor="#ffd23e" stopOpacity="0.85" />
+              <stop offset="60%" stopColor="#ff7a1a" stopOpacity="0.4" />
+              <stop offset="90%" stopColor="#f05423" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="#991b1b" stopOpacity="0" />
+            </linearGradient>
+            <radialGradient id="cometHeadGold" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="45%" stopColor="#ffd23e" />
+              <stop offset="100%" stopColor="#ea580c" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <polygon points="180 20 0 12 0 28" fill="url(#cometTailGold)" />
+          <circle cx="180" cy="20" r="9" fill="url(#cometHeadGold)" />
+          <circle cx="180" cy="20" r="3" fill="#ffffff" />
+        </svg>
+      </div>
+
+      {/* Micro Shooting Star Flash across upper deck */}
+      <div
+        className="absolute top-0 left-0 pointer-events-none"
+        style={{ animation: "shootingStar1 7s ease-in-out infinite" }}
+      >
+        <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-ice-300 to-white shadow-[0_0_12px_#fff]" />
+      </div>
+    </div>
+  </>
+);
 }
