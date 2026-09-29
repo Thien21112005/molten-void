@@ -391,7 +391,7 @@ export default function App() {
           {/* Vietnamese Astronaut Exploratory Spaceship Patrolling the Menu */}
           <VietnameseSpaceship lang={lang} />
 
-          <div className="animate-rise-in relative m-auto flex w-[min(95vw,56rem)] flex-col overflow-hidden rounded-3xl border-2 border-void-700/80 bg-void-950/90 p-5 sm:p-7 md:p-8 shadow-[0_0_80px_rgba(0,0,0,0.85)] backdrop-blur-xl">
+          <div className="animate-rise-in relative z-20 m-auto flex w-[min(95vw,56rem)] flex-col overflow-hidden rounded-3xl border-2 border-void-700/80 bg-void-950/90 p-5 sm:p-7 md:p-8 shadow-[0_0_80px_rgba(0,0,0,0.85)] backdrop-blur-xl">
             {/* Cosmic Ambient Background Blurs */}
             <div className="pointer-events-none absolute -top-12 -left-12 h-64 w-64 rounded-full bg-ember-500/15 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-cyan-500/15 blur-3xl" />

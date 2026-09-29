@@ -39,7 +39,7 @@ const ORBIT_KEYFRAMES_CSS = [
 
 export function CosmicDecorations() {
   return (
-    <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden select-none">
+    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
       {/* Dynamic CSS styles for rotating planets, orbiting moons, celestial orbits, and comets */}
       <style>{`
         /* Planetary Surface & Atmosphere Rotations (Hành tinh tự xoay quanh trục) */
