@@ -465,9 +465,12 @@ export function CosmicDecorations() {
             </clipPath>
           </defs>
 
-          {/* Ice Aura */}
+          {/* Ice Aura Ring */}
           <circle cx="50" cy="50" r="29" fill="none" stroke="#7dfce7" strokeWidth="1.8" opacity="0.8" />
-          <circle cx="50" cy="26" r="26" fill="url(#iceCore)" />
+          {/* Concentric Planet Core Sphere */}
+          <circle cx="50" cy="50" r="26" fill="url(#iceCore)" />
+          {/* Specular 3D Glare */}
+          <circle cx="42" cy="42" r="10" fill="#ffffff" opacity="0.22" />
 
           {/* Glacial Ridges with Rotating Crystalline Facets */}
           <g clipPath="url(#iceClip)" opacity="0.7">
