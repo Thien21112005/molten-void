@@ -1,4 +1,5 @@
 import { sfx } from "./audio";
+import { haptics } from "./haptics";
 import { loadSettings } from "./settings";
 import {
   getLevelConfig,
@@ -751,6 +752,7 @@ export class Engine {
       trail: [],
     };
     sfx.shoot(power);
+    haptics.fire();
     this.shake = Math.min(26, this.shake + 1.5 + power * 3);
     for (let i = 0; i < 8; i++) {
       this.particles.push({
@@ -785,6 +787,7 @@ export class Engine {
       sfx.orbEarned();
     }
     sfx.shatter(this.combo, gold);
+    haptics.shatter(this.combo);
 
     // fx
     this.hitstop = Math.max(this.hitstop, 0.045 + 0.014 * Math.min(this.combo, 6));
@@ -1003,6 +1006,7 @@ export class Engine {
     this.flash = 0.55;
     this.shake = Math.min(26, this.shake + 5);
     sfx.levelClear();
+    haptics.victory();
 
     // confetti
     const cols = ["255,160,46", "46,230,201", "255,210,62", "255,255,255", "255,77,109"];
@@ -1181,6 +1185,7 @@ export class Engine {
             });
           }
           sfx.bounce(impact / this.maxSpeed);
+          haptics.bounce();
           this.shake = Math.min(26, this.shake + Math.min(4, impact / 400));
         }
 
@@ -1208,6 +1213,7 @@ export class Engine {
               o.vy -= 1.62 * vn * dy;
               if (-vn > 160) {
                 sfx.thud(-vn / this.maxSpeed);
+                haptics.bounce();
                 this.shake = Math.min(26, this.shake + Math.min(4, -vn / 420));
                 for (let i = 0; i < 6; i++) {
                   this.particles.push({
