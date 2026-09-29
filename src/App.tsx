@@ -359,6 +359,24 @@ export default function App() {
         </div>
       )}
 
+      {/* Dynamic Astronaut Mascot Companion during in-game run */}
+      {ui.screen === "playing" && (
+        <div
+          className="pointer-events-auto absolute z-20 transition-all duration-300"
+          style={{
+            bottom: "max(1rem, env(safe-area-inset-bottom))",
+            right: "max(0.75rem, env(safe-area-inset-right))",
+          }}
+        >
+          <VietnameseAstronaut
+            lang={lang}
+            className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer drop-shadow-[0_0_16px_rgba(46,230,201,0.35)] hover:scale-105 active:scale-95 transition"
+            reaction={ui.isAiming ? "aiming" : "idle"}
+            showReactionBadge={ui.isAiming}
+          />
+        </div>
+      )}
+
       {/* ---- persistent sound & settings buttons (outside run) ---- */}
       {!inRun && (
         <div
@@ -617,6 +635,14 @@ export default function App() {
           <div className="animate-pop-in m-auto flex w-[min(94vw,28rem)] flex-col items-center rounded-3xl border-2 border-void-700 bg-void-950/95 p-6 sm:p-8 shadow-[0_0_70px_rgba(0,0,0,0.88)] backdrop-blur-2xl">
             <p className="text-[11px] font-bold tracking-[0.4em] text-rose-alert">{t.coresDepleted}</p>
             <h2 className="mt-1 font-display text-4xl text-ember-400 [text-shadow:0_0_28px_rgba(255,122,26,0.6)]">{t.gameOver}</h2>
+
+            {/* Comforting Mascot */}
+            <VietnameseAstronaut
+              lang={lang}
+              className="h-20 w-20 sm:h-24 sm:w-24 -my-1 drop-shadow-[0_0_20px_rgba(255,77,109,0.35)]"
+              reaction="sad"
+              showReactionBadge
+            />
 
             <div className="mt-4 flex items-end gap-6">
               <div className="text-center">

@@ -3,6 +3,7 @@ import type { VictoryData } from "../game/engine";
 import type { Translations } from "../game/i18n";
 import { StarRating } from "./StarRating";
 import { audio } from "../game/audio";
+import { VietnameseAstronaut } from "./VietnameseAstronaut";
 
 export interface VictoryModalProps {
   data: VictoryData;
@@ -65,8 +66,16 @@ export function VictoryModal({
         {data.levelName}
       </h2>
 
+      {/* Celebrating Astronaut Mascot */}
+      <VietnameseAstronaut
+        lang={t?.menu === "Menu" ? "vi" : "en"}
+        className="h-20 w-20 sm:h-24 sm:w-24 -my-1 drop-shadow-[0_0_25px_rgba(255,210,62,0.45)]"
+        reaction="victory"
+        showReactionBadge
+      />
+
       {/* 3 Stars display */}
-      <div className="my-5 flex flex-col items-center">
+      <div className="my-3 flex flex-col items-center">
         <StarRating stars={data.stars} size="xl" animate />
         <p className="mt-2 text-xs font-bold tracking-widest text-ice-300">
           {data.stars === 3

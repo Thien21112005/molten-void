@@ -3,10 +3,29 @@ import { audio } from "../game/audio";
 import type { Language } from "../game/i18n";
 import { cn } from "../utils/cn";
 
+export type AstronautReaction = "idle" | "aiming" | "cheer" | "sad" | "victory";
+
 interface VietnameseAstronautProps {
   lang: Language;
   className?: string;
+  reaction?: AstronautReaction;
+  showReactionBadge?: boolean;
 }
+
+const REACTION_TEXTS = {
+  vi: {
+    aiming: "🎯 Khóa tọa độ...",
+    cheer: "⭐ Tuyệt đỉnh!",
+    sad: "⚡ Cố lên nào!",
+    victory: "🇻🇳 Vẻ vang!",
+  },
+  en: {
+    aiming: "🎯 Locking coords...",
+    cheer: "⭐ Splendid shot!",
+    sad: "⚡ You got this!",
+    victory: "🇻🇳 Victorious!",
+  },
+};
 
 const RADIO_QUOTES_VI = [
   "🇻🇳 'Cờ đỏ sao vàng tung bay kiêu hãnh giữa không gian sâu!'",
@@ -24,7 +43,12 @@ const RADIO_QUOTES_EN = [
   "✨ 'A brave leap into the void, a great pride for Vietnam!'",
 ];
 
-export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProps) {
+export function VietnameseAstronaut({
+  lang,
+  className,
+  reaction = "idle",
+  showReactionBadge = false,
+}: VietnameseAstronautProps) {
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [showQuote, setShowQuote] = useState(false);
   const [boostEffect, setBoostEffect] = useState(false);
@@ -55,6 +79,17 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
 
   const activeQuote = (lang === "vi" ? RADIO_QUOTES_VI : RADIO_QUOTES_EN)[quoteIndex];
 
+  const reactionClass =
+    reaction === "aiming"
+      ? "vn-astronaut-aiming"
+      : reaction === "cheer"
+        ? "vn-astronaut-cheer"
+        : reaction === "sad"
+          ? "vn-astronaut-sad"
+          : reaction === "victory"
+            ? "vn-astronaut-victory"
+            : "vn-zero-g-float";
+
   return (
     <div
       onClick={handleClick}
@@ -67,7 +102,55 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
         className,
       )}
     >
+      {/* Dynamic Floating Reaction Badge */}
+      {showReactionBadge && reaction !== "idle" && (
+        <div className="animate-pop-in pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-amber-400/70 bg-void-950/95 px-2.5 py-0.5 text-[10px] font-bold text-amber-300 shadow-[0_0_15px_rgba(255,180,40,0.5)] backdrop-blur-md z-30">
+          {REACTION_TEXTS[lang][reaction]}
+        </div>
+      )}
+
+      {/* Floating Radio Quote Banner */}
+      {showQuote && (
+        <div className="animate-pop-in pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl border border-ice-400/70 bg-void-950/95 px-3 py-1.5 text-[11px] font-bold text-ice-300 shadow-[0_0_20px_rgba(46,230,201,0.5)] backdrop-blur-md z-30">
+          {activeQuote}
+        </div>
+      )}
+
       <style>{`
+        /* Dynamic Reactive Astronaut keyframes */
+        @keyframes vnAiming {
+          0%, 100% {
+            transform: translate3d(-3px, 2px, 0) rotate(-4deg) scale(1.03);
+          }
+          50% {
+            transform: translate3d(-6px, 4px, 0) rotate(-7deg) scale(1.06);
+          }
+        }
+        @keyframes vnCheer {
+          0%, 100% {
+            transform: translate3d(0, -6px, 0) rotate(-2deg) scale(1.08);
+          }
+          50% {
+            transform: translate3d(0, -14px, 0) rotate(4deg) scale(1.14);
+          }
+        }
+        @keyframes vnSad {
+          0%, 100% {
+            transform: translate3d(0, 4px, 0) rotate(3deg) scale(0.96);
+          }
+          50% {
+            transform: translate3d(0, 8px, 0) rotate(5deg) scale(0.93);
+          }
+        }
+        @keyframes vnVictory {
+          0%, 100% {
+            transform: translate3d(0, -8px, 0) rotate(-3deg) scale(1.1);
+          }
+          50% {
+            transform: translate3d(0, -18px, 0) rotate(5deg) scale(1.16);
+          }
+        }
+
         /* Authentic Wandering 2D Zero-G Orbit Drift (Quỹ Đạo Lơ Lửng Bất Ổn - Không Bị Lên Xuống) */
         @keyframes vnErraticOrbitDrift {
           0% {
@@ -173,6 +256,18 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
         }
         .vn-zero-g-float {
           animation: vnErraticOrbitDrift 9.6s ease-in-out infinite;
+        }
+        .vn-astronaut-aiming {
+          animation: vnAiming 1.8s ease-in-out infinite;
+        }
+        .vn-astronaut-cheer {
+          animation: vnCheer 1.2s ease-in-out infinite;
+        }
+        .vn-astronaut-sad {
+          animation: vnSad 2.2s ease-in-out infinite;
+        }
+        .vn-astronaut-victory {
+          animation: vnVictory 1.4s ease-in-out infinite;
         }
         .vn-legs-sway {
           transform-origin: 145px 141px;
@@ -309,7 +404,7 @@ export function VietnameseAstronaut({ lang, className }: VietnameseAstronautProp
         </defs>
 
         {/* ================= ZERO-G WEIGHTLESS FLOATING DRIFT ENTITY ================= */}
-        <g className="vn-zero-g-float">
+        <g className={reactionClass}>
           {/* Stardust Sparks & Drifting Thruster Particles */}
           <g opacity="0.85">
             <circle cx="14" cy="150" r="1.5" fill="#7dfce7" className="vn-sparkle-1" />
