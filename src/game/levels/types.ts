@@ -13,6 +13,30 @@ export interface LevelBlockConfig {
   rh: number; // relative height (e.g. 0.22)
 }
 
+export interface GravityWellConfig {
+  rx: number; // 0.0 to 1.0 (relative to playfield width)
+  ry: number; // 0.0 to 1.0 (relative to playfield height)
+  strength?: number; // Gravitational pull multiplier (default 1.0)
+  radius?: number; // Influence radius (relative, default 0.22)
+}
+
+export interface WormholeConfig {
+  x1: number; // Portal A relative x
+  y1: number; // Portal A relative y
+  x2: number; // Portal B relative x
+  y2: number; // Portal B relative y
+  r?: number; // Portal relative radius (default 0.035)
+}
+
+export interface RotatorConfig {
+  rx: number; // Relative center x
+  ry: number; // Relative center y
+  len: number; // Relative length
+  width?: number; // Relative thickness (default 0.02)
+  speed: number; // Angular speed in rad/s (positive = clockwise)
+  initAngle?: number; // Starting angle in radians
+}
+
 export interface LevelConfig {
   id: number;
   name: string;
@@ -26,6 +50,9 @@ export interface LevelConfig {
   star2MinOrbs: number;
   gems: LevelGemConfig[];
   blocks: LevelBlockConfig[];
+  gravityWells?: GravityWellConfig[];
+  wormholes?: WormholeConfig[];
+  rotators?: RotatorConfig[];
 }
 
 export interface LevelRecord {

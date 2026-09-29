@@ -75,6 +75,9 @@ export const LEVELS: LevelConfig[] = [
     blocks: [
       { rx: 0.62, ry: 0.65, rw: 0.16, rh: 0.028 },
     ],
+    gravityWells: [
+      { rx: 0.66, ry: 0.36, strength: 1.0, radius: 0.22 },
+    ],
     gems: [
       { rx: 0.46, ry: 0.28, kind: "ice" },
       { rx: 0.55, ry: 0.42, kind: "ice" },
@@ -93,6 +96,9 @@ export const LEVELS: LevelConfig[] = [
     blocks: [
       { rx: 0.54, ry: 0.20, rw: 0.02, rh: 0.22 },
       { rx: 0.72, ry: 0.56, rw: 0.02, rh: 0.20 },
+    ],
+    wormholes: [
+      { x1: 0.46, y1: 0.28, x2: 0.78, y2: 0.68, r: 0.038 },
     ],
     gems: [
       { rx: 0.45, ry: 0.56, kind: "ice" },
@@ -131,6 +137,9 @@ export const LEVELS: LevelConfig[] = [
     blocks: [
       { rx: 0.66, ry: 0.28, rw: 0.16, rh: 0.028 },
       { rx: 0.66, ry: 0.31, rw: 0.02, rh: 0.26 },
+    ],
+    rotators: [
+      { rx: 0.66, ry: 0.48, len: 0.16, width: 0.022, speed: 1.5 },
     ],
     gems: [
       { rx: 0.50, ry: 0.35, kind: "ice" },
@@ -171,6 +180,12 @@ export const LEVELS: LevelConfig[] = [
     blocks: [
       { rx: 0.68, ry: 0.22, rw: 0.02, rh: 0.16 },
       { rx: 0.68, ry: 0.60, rw: 0.02, rh: 0.16 },
+    ],
+    gravityWells: [
+      { rx: 0.68, ry: 0.42, strength: 1.3, radius: 0.25 },
+    ],
+    rotators: [
+      { rx: 0.68, ry: 0.42, len: 0.24, width: 0.02, speed: -1.2 },
     ],
     gems: [
       { rx: 0.54, ry: 0.42, kind: "ice" },
@@ -213,6 +228,9 @@ export const LEVELS: LevelConfig[] = [
     blocks: [
       { rx: 0.70, ry: 0.38, rw: 0.035, rh: 0.08 },
     ],
+    rotators: [
+      { rx: 0.72, ry: 0.42, len: 0.22, width: 0.022, speed: 2.0 },
+    ],
     gems: [
       { rx: 0.55, ry: 0.42, kind: "ice" },
       { rx: 0.60, ry: 0.25, kind: "ice" },
@@ -234,6 +252,9 @@ export const LEVELS: LevelConfig[] = [
     blocks: [
       { rx: 0.52, ry: 0.26, rw: 0.02, rh: 0.24 },
       { rx: 0.74, ry: 0.44, rw: 0.02, rh: 0.26 },
+    ],
+    wormholes: [
+      { x1: 0.46, y1: 0.22, x2: 0.88, y2: 0.72, r: 0.038 },
     ],
     gems: [
       { rx: 0.44, ry: 0.62, kind: "ice" },
@@ -258,6 +279,9 @@ export const LEVELS: LevelConfig[] = [
       { rx: 0.60, ry: 0.58, rw: 0.18, rh: 0.028 },
       { rx: 0.78, ry: 0.35, rw: 0.02, rh: 0.16 },
     ],
+    gravityWells: [
+      { rx: 0.68, ry: 0.40, strength: 1.6, radius: 0.30 },
+    ],
     gems: [
       { rx: 0.48, ry: 0.40, kind: "ice" },
       { rx: 0.54, ry: 0.14, kind: "ice" },
@@ -281,6 +305,15 @@ export const LEVELS: LevelConfig[] = [
       { rx: 0.58, ry: 0.32, rw: 0.02, rh: 0.30 },
       { rx: 0.78, ry: 0.18, rw: 0.02, rh: 0.28 },
       { rx: 0.78, ry: 0.60, rw: 0.14, rh: 0.028 },
+    ],
+    gravityWells: [
+      { rx: 0.68, ry: 0.44, strength: 1.4, radius: 0.26 },
+    ],
+    wormholes: [
+      { x1: 0.48, y1: 0.20, x2: 0.86, y2: 0.66, r: 0.038 },
+    ],
+    rotators: [
+      { rx: 0.78, ry: 0.36, len: 0.20, width: 0.02, speed: 1.8 },
     ],
     gems: [
       { rx: 0.46, ry: 0.52, kind: "ice" },

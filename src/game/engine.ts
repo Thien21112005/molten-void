@@ -79,6 +79,27 @@ interface Block {
   w: number;
   h: number;
 }
+interface GravityWell {
+  x: number;
+  y: number;
+  radius: number;
+  strength: number;
+}
+interface Wormhole {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  r: number;
+}
+interface Rotator {
+  x: number;
+  y: number;
+  len: number;
+  width: number;
+  speed: number;
+  angle: number;
+}
 interface Orb {
   x: number;
   y: number;
@@ -92,6 +113,7 @@ interface Orb {
   coreType: CoreType;
   piercesLeft?: number;
   piercedBlocks?: Set<Block>;
+  portalCooldown?: number;
   hasSplit?: boolean;
   isSplitShard?: boolean;
 }
@@ -190,6 +212,11 @@ export class Engine {
   private gemR = 16;
   private G = 1200;
   private maxSpeed = 1400;
+  private blocks: Block[] = [];
+  private gems: Gem[] = [];
+  private gravityWells: GravityWell[] = [];
+  private wormholes: Wormhole[] = [];
+  private rotators: Rotator[] = [];
 
   // fx
   private particles: Particle[] = [];
@@ -889,6 +916,47 @@ export class Engine {
       });
     }
 
+    // Load cosmic obstacles
+    this.gravityWells = [];
+    if (cfg.gravityWells) {
+      for (const gw of cfg.gravityWells) {
+        this.gravityWells.push({
+          x: gw.rx * W,
+          y: gw.ry * H,
+          radius: (gw.radius ?? 0.22) * Math.min(W, H),
+          strength: (gw.strength ?? 1.0) * this.G * 0.9,
+        });
+      }
+    }
+
+    this.wormholes = [];
+    if (cfg.wormholes) {
+      for (const wh of cfg.wormholes) {
+        const r = (wh.r ?? 0.035) * Math.min(W, H);
+        this.wormholes.push({
+          x1: wh.x1 * W,
+          y1: wh.y1 * H,
+          x2: wh.x2 * W,
+          y2: wh.y2 * H,
+          r: clamp(r, 14, 28),
+        });
+      }
+    }
+
+    this.rotators = [];
+    if (cfg.rotators) {
+      for (const rot of cfg.rotators) {
+        this.rotators.push({
+          x: rot.rx * W,
+          y: rot.ry * H,
+          len: rot.len * (this.landscape ? W : H),
+          width: (rot.width ?? 0.02) * Math.min(W, H),
+          speed: rot.speed,
+          angle: rot.initAngle ?? 0,
+        });
+      }
+    }
+
     // Default aim angle toward average crystal center
     if (this.gems.length > 0) {
       const avgX = this.gems.reduce((s, g) => s + g.x, 0) / this.gems.length;
@@ -1367,6 +1435,11 @@ export class Engine {
       }
     }
 
+    // Update rotating obstacles
+    for (const rot of this.rotators) {
+      rot.angle = (rot.angle + rot.speed * dt) % TAU;
+    }
+
     // orb physics (2 substeps) for all active orbs
     const activeOrbs = this.orbsList.filter((o) => o.alive);
     if (activeOrbs.length > 0) {
@@ -1376,6 +1449,79 @@ export class Engine {
           if (!o.alive) continue;
           o.t += sdt;
           o.vy += this.G * sdt;
+
+          // Gravity Wells pull
+          for (const gw of this.gravityWells) {
+            const gdx = gw.x - o.x;
+            const gdy = gw.y - o.y;
+            const distSq = gdx * gdx + gdy * gdy;
+            if (distSq < gw.radius * gw.radius) {
+              const dist = Math.sqrt(distSq);
+              const force = (gw.strength * 450) / (distSq + 900);
+              o.vx += (gdx / (dist + 0.001)) * force * sdt;
+              o.vy += (gdy / (dist + 0.001)) * force * sdt;
+            }
+          }
+
+          // Wormhole Portals
+          if ((o.portalCooldown ?? 0) > 0) {
+            o.portalCooldown = Math.max(0, (o.portalCooldown ?? 0) - sdt);
+          } else {
+            for (const wh of this.wormholes) {
+              const d1Sq = (o.x - wh.x1) ** 2 + (o.y - wh.y1) ** 2;
+              const d2Sq = (o.x - wh.x2) ** 2 + (o.y - wh.y2) ** 2;
+              const sp = Math.hypot(o.vx, o.vy) || 120;
+              let entered = false;
+              let tx = 0, ty = 0;
+
+              if (d1Sq < (wh.r + o.r * 0.4) ** 2) {
+                entered = true;
+                tx = wh.x2;
+                ty = wh.y2;
+              } else if (d2Sq < (wh.r + o.r * 0.4) ** 2) {
+                entered = true;
+                tx = wh.x1;
+                ty = wh.y1;
+              }
+
+              if (entered) {
+                o.x = tx + (o.vx / sp) * (wh.r + 4);
+                o.y = ty + (o.vy / sp) * (wh.r + 4);
+                o.portalCooldown = 0.4;
+                sfx.spaceChime();
+                haptics.fire();
+                this.shake = Math.min(26, this.shake + 3);
+
+                this.particles.push({
+                  kind: 3,
+                  x: tx,
+                  y: ty,
+                  vx: 0,
+                  vy: 0,
+                  life: 0.35,
+                  tl: 0.35,
+                  size: wh.r * 2.4,
+                  rot: 0,
+                  vr: 0,
+                  col: "46,230,201",
+                  grav: 0,
+                  drag: 0,
+                });
+
+                this.texts.push({
+                  x: tx,
+                  y: ty - wh.r - 12,
+                  t: 0,
+                  life: 0.8,
+                  str: "WARP!",
+                  size: 15,
+                  col: "#2ee6c9",
+                });
+                break;
+              }
+            }
+          }
+
           o.x += o.vx * sdt;
           o.y += o.vy * sdt;
 
@@ -1517,6 +1663,72 @@ export class Engine {
             }
           }
 
+          // rotators
+          for (const rot of this.rotators) {
+            const cosA = Math.cos(rot.angle);
+            const sinA = Math.sin(rot.angle);
+            const halfL = rot.len / 2;
+            const p1x = rot.x - cosA * halfL;
+            const p1y = rot.y - sinA * halfL;
+            const p2x = rot.x + cosA * halfL;
+            const p2y = rot.y + sinA * halfL;
+
+            const segDx = p2x - p1x;
+            const segDy = p2y - p1y;
+            const segLenSq = segDx * segDx + segDy * segDy;
+            const t_proj = segLenSq > 0 ? clamp(((o.x - p1x) * segDx + (o.y - p1y) * segDy) / segLenSq, 0, 1) : 0;
+            const cx = p1x + t_proj * segDx;
+            const cy = p1y + t_proj * segDy;
+
+            let dx = o.x - cx;
+            let dy = o.y - cy;
+            const distSq = dx * dx + dy * dy;
+            const minR = o.r + rot.width / 2;
+
+            if (distSq < minR * minR) {
+              const dist = Math.sqrt(distSq);
+              const nx = dist > 0.001 ? dx / dist : 0;
+              const ny = dist > 0.001 ? dy / dist : -1;
+              o.x = cx + nx * minR;
+              o.y = cy + ny * minR;
+
+              const r_arm_x = cx - rot.x;
+              const r_arm_y = cy - rot.y;
+              const barVx = -rot.speed * r_arm_y;
+              const barVy = rot.speed * r_arm_x;
+
+              const relVx = o.vx - barVx;
+              const relVy = o.vy - barVy;
+              const vn = relVx * nx + relVy * ny;
+
+              if (vn < 0) {
+                const restitution = 1.35;
+                o.vx = barVx + (relVx - (1 + restitution) * vn * nx);
+                o.vy = barVy + (relVy - (1 + restitution) * vn * ny);
+                sfx.thud(1.0);
+                haptics.bounce();
+                this.shake = Math.min(26, this.shake + 3.5);
+                for (let i = 0; i < 6; i++) {
+                  this.particles.push({
+                    kind: 1,
+                    x: cx,
+                    y: cy,
+                    vx: rand(-120, 120),
+                    vy: rand(-120, 120),
+                    life: rand(0.12, 0.28),
+                    tl: 0.28,
+                    size: 2.2,
+                    rot: 0,
+                    vr: 0,
+                    col: "255,210,62",
+                    grav: 200,
+                    drag: 2,
+                  });
+                }
+              }
+            }
+          }
+
           // gems
           for (const g of this.gems) {
             if (g.dead) continue;
@@ -1600,8 +1812,35 @@ export class Engine {
     const maxSteps = cfg.trajectoryGuide === "minimal" ? 22 : 70;
     for (let i = 0; i < maxSteps; i++) {
       vy += this.G * dt;
+      // Gravity well trajectory bending
+      for (const gw of this.gravityWells) {
+        const gdx = gw.x - x;
+        const gdy = gw.y - y;
+        const distSq = gdx * gdx + gdy * gdy;
+        if (distSq < gw.radius * gw.radius) {
+          const dist = Math.sqrt(distSq);
+          const force = (gw.strength * 450) / (distSq + 900);
+          vx += (gdx / (dist + 0.001)) * force * dt;
+          vy += (gdy / (dist + 0.001)) * force * dt;
+        }
+      }
       x += vx * dt;
       y += vy * dt;
+      // Wormhole trajectory jump
+      for (const wh of this.wormholes) {
+        const d1Sq = (x - wh.x1) ** 2 + (y - wh.y1) ** 2;
+        const d2Sq = (x - wh.x2) ** 2 + (y - wh.y2) ** 2;
+        const s = Math.hypot(vx, vy) || 120;
+        if (d1Sq < wh.r * wh.r) {
+          x = wh.x2 + (vx / s) * (wh.r + 4);
+          y = wh.y2 + (vy / s) * (wh.r + 4);
+          break;
+        } else if (d2Sq < wh.r * wh.r) {
+          x = wh.x1 + (vx / s) * (wh.r + 4);
+          y = wh.y1 + (vy / s) * (wh.r + 4);
+          break;
+        }
+      }
       if (i % 3 === 0) pts.push({ x, y });
       if (x < 0 || x > this.W || y > this.H || y < 0) {
         hit = { x: clamp(x, 0, this.W), y: clamp(y, 0, this.H) };
@@ -1666,6 +1905,12 @@ export class Engine {
     }
     ctx.globalCompositeOperation = "source-over";
 
+    // gravity wells (accretion halos under structures)
+    this.drawGravityWells();
+
+    // wormholes
+    this.drawWormholes();
+
     // blocks
     for (const b of this.blocks) {
       ctx.fillStyle = "#191433";
@@ -1687,6 +1932,9 @@ export class Engine {
       }
       ctx.stroke();
     }
+
+    // rotators
+    this.drawRotators();
 
     // gems
     for (const g of this.gems) {
@@ -1758,6 +2006,173 @@ export class Engine {
       ctx.fillStyle = `rgba(255,190,90,${this.flash * 0.22})`;
       ctx.fillRect(0, 0, W, H);
       ctx.globalCompositeOperation = "source-over";
+    }
+  }
+
+  private drawGravityWells() {
+    const { ctx } = this;
+    for (const gw of this.gravityWells) {
+      const pulse = 1 + 0.08 * Math.sin(this.t * 3.5);
+      const r = gw.radius * pulse;
+
+      // Outer gravitational field halo
+      ctx.globalCompositeOperation = "lighter";
+      const g = ctx.createRadialGradient(gw.x, gw.y, 10, gw.x, gw.y, r);
+      g.addColorStop(0, "rgba(147, 51, 234, 0.45)");
+      g.addColorStop(0.4, "rgba(79, 70, 229, 0.2)");
+      g.addColorStop(0.8, "rgba(14, 165, 233, 0.08)");
+      g.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(gw.x, gw.y, r, 0, TAU);
+      ctx.fill();
+
+      // Accretion spiral lines
+      ctx.strokeStyle = "rgba(192, 132, 252, 0.6)";
+      ctx.lineWidth = 1.6;
+      ctx.save();
+      ctx.translate(gw.x, gw.y);
+      ctx.rotate(this.t * 2.2);
+      ctx.setLineDash([6, 12]);
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.55, 0, TAU);
+      ctx.stroke();
+      ctx.setLineDash([4, 8]);
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.5)";
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.8, 0, TAU);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      ctx.globalCompositeOperation = "source-over";
+
+      // Event Horizon (Singularity Black Core)
+      const coreR = Math.max(10, gw.radius * 0.16);
+      ctx.fillStyle = "#020108";
+      ctx.beginPath();
+      ctx.arc(gw.x, gw.y, coreR, 0, TAU);
+      ctx.fill();
+
+      // Glowing photon sphere ring
+      ctx.strokeStyle = "rgba(238, 242, 255, 0.85)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(gw.x, gw.y, coreR, 0, TAU);
+      ctx.stroke();
+    }
+  }
+
+  private drawWormholes() {
+    const { ctx } = this;
+    for (const wh of this.wormholes) {
+      // Entanglement bridge dashed line between portals
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.strokeStyle = "rgba(46, 230, 201, 0.18)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 8]);
+      ctx.lineDashOffset = -this.t * 20;
+      ctx.beginPath();
+      ctx.moveTo(wh.x1, wh.y1);
+      ctx.lineTo(wh.x2, wh.y2);
+      ctx.stroke();
+      ctx.restore();
+
+      const drawPortal = (px: number, py: number, isEntry: boolean) => {
+        const pulse = 1 + 0.07 * Math.sin(this.t * 4 + (isEntry ? 0 : Math.PI));
+        const pr = wh.r * pulse;
+        const colorPrimary = isEntry ? "46, 230, 201" : "217, 70, 239";
+        const colorSecondary = isEntry ? "14, 165, 233" : "168, 85, 247";
+
+        ctx.globalCompositeOperation = "lighter";
+        const grad = ctx.createRadialGradient(px, py, 2, px, py, pr * 1.8);
+        grad.addColorStop(0, `rgba(${colorPrimary}, 0.5)`);
+        grad.addColorStop(0.5, `rgba(${colorSecondary}, 0.25)`);
+        grad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(px, py, pr * 1.8, 0, TAU);
+        ctx.fill();
+
+        // Swirling spiral rings
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate((isEntry ? 1 : -1) * this.t * 3.5);
+        ctx.strokeStyle = `rgba(${colorPrimary}, 0.85)`;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.arc(0, 0, pr, 0, TAU * 0.7);
+        ctx.stroke();
+
+        ctx.strokeStyle = `rgba(${colorSecondary}, 0.7)`;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(0, 0, pr * 0.65, Math.PI * 0.5, TAU * 0.85);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.globalCompositeOperation = "source-over";
+        // Void Core
+        ctx.fillStyle = "#030014";
+        ctx.beginPath();
+        ctx.arc(px, py, pr * 0.35, 0, TAU);
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${colorPrimary}, 0.9)`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      };
+
+      drawPortal(wh.x1, wh.y1, true);
+      drawPortal(wh.x2, wh.y2, false);
+    }
+  }
+
+  private drawRotators() {
+    const { ctx } = this;
+    for (const rot of this.rotators) {
+      ctx.save();
+      ctx.translate(rot.x, rot.y);
+      ctx.rotate(rot.angle);
+
+      const halfL = rot.len / 2;
+      const halfW = rot.width / 2;
+
+      // Outer kinetic energy glow
+      ctx.globalCompositeOperation = "lighter";
+      ctx.strokeStyle = "rgba(46, 230, 201, 0.4)";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(-halfL - 2, -halfW - 2, rot.len + 4, rot.width + 4);
+
+      ctx.globalCompositeOperation = "source-over";
+      // Metallic beam body
+      ctx.fillStyle = "#1e1b4b";
+      ctx.fillRect(-halfL, -halfW, rot.len, rot.width);
+
+      // Neon energy core line
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(-halfL + 6, -1.5, rot.len - 12, 3);
+
+      // Edge border
+      ctx.strokeStyle = "rgba(125, 252, 231, 0.9)";
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(-halfL, -halfW, rot.len, rot.width);
+
+      // Center pivot hub
+      ctx.fillStyle = "#0f172a";
+      ctx.beginPath();
+      ctx.arc(0, 0, rot.width * 0.85, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255, 210, 62, 0.95)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffd23e";
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, TAU);
+      ctx.fill();
+
+      ctx.restore();
     }
   }
 
