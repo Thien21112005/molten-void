@@ -22,6 +22,7 @@ export function SettingsModal({
   const [settings, setSettings] = useState<GameSettings>(() => loadSettings());
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [activePreview, setActivePreview] = useState<TrackPreviewId | null>(null);
 
   useEffect(() => {
@@ -79,6 +80,17 @@ export function SettingsModal({
     } catch {
       /* ignore */
     }
+  };
+
+  const handleSaveAndApply = () => {
+    audio.ensure();
+    audio.orbEarned();
+    applySettings(settings);
+    onLanguageChange?.(settings.language);
+    setSaveSuccess(true);
+    setTimeout(() => {
+      onClose();
+    }, 450);
   };
 
   return (
@@ -469,18 +481,41 @@ export function SettingsModal({
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between border-t border-void-800/80 bg-void-900/80 px-6 py-3.5 text-xs text-white/40">
-        <span>Molten Void v1.3.0 &bull; Alibi Music Inspired</span>
-        <button
-          onClick={() => {
-            audio.click();
-            onClose();
-          }}
-          className="rounded-xl border border-ice-500/50 bg-ice-500/10 px-4 py-1.5 font-bold tracking-wider text-ice-300 transition hover:bg-ice-500/20 active:scale-95"
-        >
-          {t.close}
-        </button>
+      {/* Footer Actions: Save & Apply */}
+      <div className="flex items-center justify-between border-t border-void-800/80 bg-void-900/90 px-5 sm:px-6 py-3.5 backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          {saveSuccess ? (
+            <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 animate-pop-in">
+              <span>✓</span> {t.settingsSaved}
+            </span>
+          ) : (
+            <span className="text-[11px] text-white/40 hidden sm:inline">
+              Molten Void &bull; v1.3.0
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => {
+              audio.click();
+              onClose();
+            }}
+            className="rounded-xl border border-void-700 bg-void-800/80 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-white/70 transition hover:bg-void-700 hover:text-white active:scale-95 cursor-pointer"
+          >
+            {t.close}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSaveAndApply}
+            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-ember-400 to-amber-400 px-4 sm:px-5 py-2 text-xs font-black uppercase tracking-wider text-void-950 shadow-[0_3px_0_#8f2f0c,0_0_16px_rgba(255,122,26,0.35)] transition hover:brightness-110 active:scale-95 cursor-pointer"
+          >
+            <span>💾</span>
+            <span>{t.saveAndApply}</span>
+          </button>
+        </div>
       </div>
     </div>
   );

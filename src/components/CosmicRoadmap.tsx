@@ -7,12 +7,15 @@ import {
   MAX_POSSIBLE_STARS,
 } from "../game/levels/progress";
 import { StarRating } from "./StarRating";
+import type { Translations } from "../game/i18n";
+import { audio } from "../game/audio";
 import { cn } from "../utils/cn";
 
 export interface CosmicRoadmapProps {
   onSelectLevel: (levelId: number) => void;
   onBackToMenu: () => void;
   currentLevel?: number;
+  t?: Translations;
 }
 
 interface NodeCoord {
@@ -48,6 +51,7 @@ export function CosmicRoadmap({
   onSelectLevel,
   onBackToMenu,
   currentLevel = 1,
+  t,
 }: CosmicRoadmapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentNodeRef = useRef<HTMLDivElement>(null);
@@ -192,21 +196,25 @@ export function CosmicRoadmap({
       {/* Top Floating Glass Header */}
       <div className="z-30 flex items-center justify-between border-b border-void-800/80 bg-void-950/85 px-4 py-3 backdrop-blur-md sm:px-6">
         <button
-          onClick={onBackToMenu}
-          className="flex items-center gap-1.5 rounded-xl border border-void-700 bg-void-900/90 px-3 py-1.5 text-xs font-bold tracking-wider text-white/80 transition hover:bg-void-800 hover:text-white active:scale-95"
+          onClick={() => {
+            audio.ensure();
+            audio.click();
+            onBackToMenu();
+          }}
+          className="flex items-center gap-1.5 rounded-xl border border-void-700 bg-void-900/90 px-3 py-1.5 text-xs font-bold tracking-wider text-white/80 transition hover:bg-void-800 hover:text-white active:scale-95 cursor-pointer"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="h-4 w-4">
             <path d="M15 18l-6-6 6-6" />
           </svg>
-          Menu
+          {t?.menu ?? "Menu"}
         </button>
 
         <div className="text-center">
           <h2 className="font-display text-base tracking-wider text-white sm:text-lg">
-            COSMIC CAMPAIGN ROADMAP
+            {t?.roadmapTitle ?? "COSMIC CAMPAIGN ROADMAP"}
           </h2>
           <p className="text-[10px] font-bold tracking-[0.25em] text-ice-400/90">
-            WEST TO EAST &bull; 15 EXPEDITIONS
+            {t?.roadmapSubtitle ?? "WEST TO EAST • 15 EXPEDITIONS"}
           </p>
         </div>
 
@@ -646,7 +654,7 @@ export function CosmicRoadmap({
                 {isStart && (
                   <div className="animate-bounce-subtle pointer-events-none absolute -top-11 left-1/2 flex -translate-x-1/2 flex-col items-center">
                     <span className="flex items-center gap-1 whitespace-nowrap rounded-full border border-emerald-400/80 bg-emerald-500/95 px-2.5 py-0.5 font-display text-[9px] font-bold tracking-widest text-void-950 shadow-[0_0_14px_rgba(52,211,153,0.8)]">
-                      🚩 START
+                      🚩 {t?.startNode ?? "START"}
                     </span>
                     <div className="h-2.5 w-0.5 bg-emerald-400" />
                   </div>
@@ -656,7 +664,7 @@ export function CosmicRoadmap({
                 {isApex && (
                   <div className="animate-float-slow pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center">
                     <span className="flex items-center gap-1 whitespace-nowrap rounded-full border-2 border-amber-300 bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-0.5 font-display text-[10px] font-bold tracking-widest text-void-950 shadow-[0_0_22px_rgba(255,200,50,0.9)]">
-                      🏆 APEX
+                      🏆 {t?.apexNode ?? "APEX"}
                     </span>
                     <div className="h-2.5 w-0.5 bg-amber-400" />
                   </div>
@@ -666,7 +674,7 @@ export function CosmicRoadmap({
                 {isCurrent && unlocked && !isStart && !isApex && (
                   <div className="animate-pulse-soft pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2">
                     <span className="whitespace-nowrap rounded-full border border-ember-400/90 bg-ember-500 px-2.5 py-0.5 font-display text-[8px] font-bold tracking-widest text-void-950 shadow-[0_0_16px_rgba(255,122,26,0.9)]">
-                      PLAY
+                      {t?.play ?? "PLAY"}
                     </span>
                   </div>
                 )}
@@ -677,6 +685,8 @@ export function CosmicRoadmap({
                   disabled={!unlocked}
                   onClick={() => {
                     if (!hasDragged && unlocked) {
+                      audio.ensure();
+                      audio.click();
                       onSelectLevel(level.id);
                     }
                   }}
@@ -697,24 +707,19 @@ export function CosmicRoadmap({
                   {/* Top Bevel Highlight */}
                   <div className="pointer-events-none absolute inset-x-1.5 top-1 h-2 rounded-t-xl bg-white/25" />
 
-                  {/* Level Number or Lock Icon */}
-                  {unlocked ? (
-                    <span
-                      className={cn(
-                        "font-display text-2xl leading-none transition-transform group-hover:scale-105",
-                        isCurrent || record.cleared
-                          ? "text-void-950 font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]"
-                          : "text-white [text-shadow:0_0_12px_rgba(255,255,255,0.4)]",
-                      )}
-                    >
-                      {level.id}
-                    </span>
-                  ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-6 w-6 text-white/30">
-                      <rect x="5" y="11" width="14" height="10" rx="2" />
-                      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-                    </svg>
-                  )}
+                  {/* Level Number */}
+                  <span
+                    className={cn(
+                      "font-display leading-none transition-transform group-hover:scale-105",
+                      unlocked
+                        ? isCurrent || record.cleared
+                          ? "text-2xl text-void-950 font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]"
+                          : "text-2xl text-white [text-shadow:0_0_12px_rgba(255,255,255,0.4)]"
+                        : "text-xl text-white/30 font-semibold tracking-wider",
+                    )}
+                  >
+                    {level.id}
+                  </span>
                 </button>
 
                 {/* 3-STAR RATING DISPLAY (UNDER NODE) */}
@@ -726,7 +731,7 @@ export function CosmicRoadmap({
                   {/* High score badge */}
                   {record.highScore > 0 && (
                     <span className="mt-0.5 whitespace-nowrap font-display text-[9px] tracking-wide text-amber-300">
-                      {record.highScore.toLocaleString("en-US")} pts
+                      {record.highScore.toLocaleString("en-US")} {t?.points ?? "pts"}
                     </span>
                   )}
                 </div>
@@ -739,18 +744,21 @@ export function CosmicRoadmap({
       {/* Bottom Floating Control Bar */}
       <div className="z-30 flex items-center justify-between border-t border-void-800/80 bg-void-950/90 px-4 py-2.5 text-xs backdrop-blur-md sm:px-6">
         <button
-          onClick={scrollToCurrentLevel}
-          className="flex items-center gap-1.5 rounded-lg border border-ice-500/50 bg-ice-950/40 px-3 py-1 font-semibold text-ice-300 transition hover:bg-ice-900/50 active:scale-95"
+          onClick={() => {
+            audio.click();
+            scrollToCurrentLevel();
+          }}
+          className="flex items-center gap-1.5 rounded-lg border border-ice-500/50 bg-ice-950/40 px-3 py-1 font-semibold text-ice-300 transition hover:bg-ice-900/50 active:scale-95 cursor-pointer"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-3.5 w-3.5">
             <circle cx="12" cy="12" r="9" />
             <circle cx="12" cy="12" r="3" fill="currentColor" />
           </svg>
-          Current Station
+          {t?.currentStationBtn ?? "Current Station"}
         </button>
 
         <span className="text-[11px] font-semibold text-white/50">
-          ↔ Drag horizontally to explore &bull; Tap to sling
+          {t?.starmapExploreHint ?? "↔ Drag horizontally to explore • Tap to sling"}
         </span>
       </div>
     </div>

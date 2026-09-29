@@ -106,6 +106,25 @@ export interface Translations {
   nextSector: string;
   coresBonus: string;
   newBest: string;
+  saveAndApply: string;
+  settingsSaved: string;
+  deepSpaceExpedition: string;
+  levelSpan: string;
+  coresDepleted: string;
+  levelClearedHeader: string;
+  perfectRun3Stars: string;
+  greatShot2Stars: string;
+  cleared1Star: string;
+  levelScore: string;
+  coreReserveBonus: string;
+  totalRunScore: string;
+  instantRestartHint: string;
+  firstShotHint: string;
+  firstShotSubHint: string;
+  currentStationBtn: string;
+  starmapExploreHint: string;
+  startNode: string;
+  apexNode: string;
 }
 
 export const TRANSLATIONS: Record<Language, Translations> = {
@@ -210,6 +229,25 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     nextSector: "Khu Vực Tiếp Theo",
     coresBonus: "Thưởng bảo toàn đạn",
     newBest: "KỶ LỤC MỚI!",
+    saveAndApply: "Lưu & Áp Dụng",
+    settingsSaved: "Đã lưu cài đặt!",
+    deepSpaceExpedition: "CHIẾN DỊCH KHÔNG GIAN SÂU • 15 KHU VỰC",
+    levelSpan: "Màn",
+    coresDepleted: "LÕI NĂNG LƯỢNG ĐÃ CẠN",
+    levelClearedHeader: "ĐÃ VƯỢT QUA MÀN",
+    perfectRun3Stars: "HOÀN HẢO — 3 SAO!",
+    greatShot2Stars: "RẤT TỐT — 2 SAO",
+    cleared1Star: "VƯỢT MÀN — 1 SAO",
+    levelScore: "Điểm Màn",
+    coreReserveBonus: "Thưởng Đạn Còn Lại",
+    totalRunScore: "Tổng Điểm Lượt Chơi",
+    instantRestartHint: "NHẤN R ĐỂ CHƠI LẠI TỨC THÌ",
+    firstShotHint: "KÉO NGƯỢC & THẢ TAY",
+    firstShotSubHint: "kéo bất kỳ đâu, hoặc",
+    currentStationBtn: "Trạm Hiện Tại",
+    starmapExploreHint: "↔ Kéo ngang để khám phá • Chạm để chọn màn",
+    startNode: "XUẤT PHÁT",
+    apexNode: "ĐỈNH CAO",
   },
   en: {
     menu: "Main Menu",
@@ -312,6 +350,25 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     nextSector: "Next Sector",
     coresBonus: "Conserved Cores Bonus",
     newBest: "NEW BEST!",
+    saveAndApply: "Save & Apply",
+    settingsSaved: "Settings saved!",
+    deepSpaceExpedition: "DEEP SPACE EXPEDITION • 15 SECTORS",
+    levelSpan: "Levels",
+    coresDepleted: "CORES DEPLETED",
+    levelClearedHeader: "LEVEL CLEARED",
+    perfectRun3Stars: "PERFECT RUN — 3 STARS!",
+    greatShot2Stars: "GREAT SHOT — 2 STARS",
+    cleared1Star: "CLEARED — 1 STAR",
+    levelScore: "Level Score",
+    coreReserveBonus: "Core Reserve Bonus",
+    totalRunScore: "Total Run Score",
+    instantRestartHint: "PRESS R FOR INSTANT RESTART",
+    firstShotHint: "PULL BACK & RELEASE",
+    firstShotSubHint: "drag anywhere, or",
+    currentStationBtn: "Current Station",
+    starmapExploreHint: "↔ Drag horizontally to explore • Tap to sling",
+    startNode: "START",
+    apexNode: "APEX",
   },
 };
 

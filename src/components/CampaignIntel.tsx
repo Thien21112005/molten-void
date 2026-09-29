@@ -137,7 +137,7 @@ export function CampaignIntel({
                       {sec.name}
                     </h4>
                     <span className="text-[10px] text-white/40">
-                      Màn {sec.startLevel} - {sec.endLevel}
+                      {t.levelSpan} {sec.startLevel} - {sec.endLevel}
                     </span>
                   </div>
                 </div>
@@ -172,16 +172,16 @@ export function CampaignIntel({
                   <div
                     key={node.id}
                     className={cn(
-                      "flex h-5 flex-1 items-center justify-center rounded border text-[9px] font-bold font-display transition",
+                      "flex h-5 flex-1 items-center justify-center rounded border text-[9px] font-display transition",
                       node.cleared
-                        ? "border-amber-400/50 bg-amber-500/20 text-amber-300 shadow-[0_0_6px_rgba(255,160,46,0.3)]"
+                        ? "border-amber-400/60 bg-amber-500/20 text-amber-300 shadow-[0_0_6px_rgba(255,160,46,0.3)] font-bold"
                         : node.unlocked
-                          ? "border-ice-500/40 bg-ice-500/10 text-ice-300"
-                          : "border-void-800/80 bg-void-900/60 text-white/20",
+                          ? "border-ice-500/60 bg-ice-500/15 text-ice-300 shadow-[0_0_8px_rgba(46,230,201,0.25)] ring-1 ring-ice-400/40 font-black"
+                          : "border-void-800/80 bg-void-950/70 text-white/30 font-medium",
                     )}
-                    title={`Màn ${node.id}: ${node.cleared ? `${node.stars} sao` : node.unlocked ? "Đã mở" : "Chưa mở"}`}
+                    title={`${t.level} ${node.id}: ${node.cleared ? `${node.stars} ${t.stars}` : node.unlocked ? t.sectorStatusActive : t.sectorStatusLocked}`}
                   >
-                    {node.cleared ? (node.stars === 3 ? "★★★" : `${node.stars}★`) : node.unlocked ? node.id : "🔒"}
+                    {node.cleared ? (node.stars === 3 ? "★★★" : `${node.stars}★`) : node.id}
                   </div>
                 ))}
               </div>

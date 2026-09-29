@@ -340,9 +340,9 @@ export default function App() {
           style={{ bottom: "max(4.5rem, calc(env(safe-area-inset-bottom) + 3rem))" }}
         >
           <div className="animate-pulse-soft rounded-lg border border-ember-400/40 bg-void-900/85 px-4 py-2 text-center">
-            <p className="font-display text-[13px] tracking-wide text-ember-300">PULL BACK &amp; RELEASE</p>
+            <p className="font-display text-[13px] tracking-wide text-ember-300">{t.firstShotHint}</p>
             <p className="mt-0.5 text-xs font-semibold text-white/55">
-              drag anywhere, or <span className="text-ice-300">&#8593; &#8595; + hold SPACE</span>
+              {t.firstShotSubHint} <span className="text-ice-300">&#8593; &#8595; + hold SPACE</span>
             </p>
           </div>
         </div>
@@ -394,7 +394,7 @@ export default function App() {
                 <div className="flex flex-col items-center text-center md:items-start md:text-left">
                   <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-ice-500/40 bg-ice-950/50 px-3 py-1 text-[10px] font-bold tracking-[0.25em] text-ice-300 shadow-[0_0_12px_rgba(46,230,201,0.2)]">
                     <span className="h-1.5 w-1.5 rounded-full bg-ice-400 animate-pulse" />
-                    DEEP SPACE EXPEDITION &bull; 15 SECTORS
+                    {t.deepSpaceExpedition}
                   </div>
 
                   <h1 className="animate-float-slow font-display leading-[0.9] tracking-tight">
@@ -493,6 +493,7 @@ export default function App() {
         <Overlay>
           <RoadmapModal
             currentLevel={ui.level}
+            t={t}
             onSelectLevel={(lvl) => eng()?.startLevel(lvl)}
             onBackToMenu={() => eng()?.toMenu()}
           />
@@ -504,6 +505,7 @@ export default function App() {
         <Overlay>
           <VictoryModal
             data={ui.victoryData}
+            t={t}
             hasNextLevel={ui.victoryData.level < 15}
             onNextLevel={() => eng()?.nextLevel()}
             onRetry={() => eng()?.restart()}
@@ -552,7 +554,7 @@ export default function App() {
       {ui.screen === "gameover" && (
         <Overlay>
           <div className="animate-pop-in m-auto flex w-[min(94vw,26rem)] flex-col items-center rounded-2xl border-2 border-void-700 bg-void-900/95 p-6 shadow-[0_10px_0_rgba(0,0,0,0.45)]">
-            <p className="text-[11px] font-bold tracking-[0.4em] text-rose-alert">CORES DEPLETED</p>
+            <p className="text-[11px] font-bold tracking-[0.4em] text-rose-alert">{t.coresDepleted}</p>
             <h2 className="mt-1 font-display text-4xl text-ember-400 [text-shadow:0_0_28px_rgba(255,122,26,0.6)]">{t.gameOver}</h2>
 
             <div className="mt-4 flex items-end gap-6">
@@ -595,7 +597,7 @@ export default function App() {
               </ChunkBtn>
               <div className="grid grid-cols-2 gap-2.5">
                 <ChunkBtn onClick={() => eng()?.openRoadmap()} icon={<IconMap className="h-4 w-4" />}>
-                  Roadmap
+                  {t.roadmap}
                 </ChunkBtn>
                 <ChunkBtn onClick={() => eng()?.toMenu()} icon={<IconHome className="h-4 w-4" />}>
                   {t.menu}
@@ -603,7 +605,7 @@ export default function App() {
               </div>
             </div>
             <p className="mt-3 text-[11px] font-semibold tracking-[0.2em] text-white/40">
-              PRESS <span className="text-ember-300">R</span> FOR INSTANT RESTART
+              {t.instantRestartHint}
             </p>
           </div>
         </Overlay>
