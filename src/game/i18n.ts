@@ -41,6 +41,19 @@ export interface Translations {
   chargeHint: string;
   quickRestartHint: string;
 
+  // Campaign Intel
+  campaignIntel: string;
+  totalProgress: string;
+  sector1Name: string;
+  sector2Name: string;
+  sector3Name: string;
+  sectorStatusCleared: string;
+  sectorStatusActive: string;
+  sectorStatusLocked: string;
+  openRoadmapAction: string;
+  levelTarget: string;
+  levelTargetDesc: string;
+
   // Settings Modal
   settingsTitle: string;
   languageLabel: string;
@@ -52,6 +65,14 @@ export interface Translations {
   musicTrackSynth: string;
   nowPlayingArmageddon: string;
   pauseAutoMuteDesc: string;
+  menuBgmLabel: string;
+  menuTrackCosmic: string;
+  menuTrackCosmicDesc: string;
+  menuTrackCyber: string;
+  menuTrackCyberDesc: string;
+  battleBgmLabel: string;
+  battleTrackName: string;
+  battleTrackDesc: string;
   sfxVolume: string;
   gameplayCategory: string;
   screenShake: string;
@@ -120,6 +141,19 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     chargeHint: "nhấn giữ nạp lực, nhả để bắn",
     quickRestartHint: "chơi lại nhanh",
 
+    // Campaign Intel
+    campaignIntel: "HỒ SƠ CHIẾN DỊCH",
+    totalProgress: "Tổng Tiến Độ Thu Thập",
+    sector1Name: "Vành Đai Tiểu Hành Tinh",
+    sector2Name: "Tinh Vân Plasma",
+    sector3Name: "Hư Vô Tận Cùng",
+    sectorStatusCleared: "Hoàn Thành",
+    sectorStatusActive: "Chiến Đấu",
+    sectorStatusLocked: "Bị Khóa",
+    openRoadmapAction: "Mở Bản Đồ Tinh Hệ Chi Tiết",
+    levelTarget: "MỤC TIÊU MÀN",
+    levelTargetDesc: "Bảo toàn số đạn và dọn sạch các lõi năng lượng",
+
     settingsTitle: "CÀI ĐẶT TRÒ CHƠI",
     languageLabel: "Ngôn Ngữ (Language)",
     audioCategory: "Âm Thanh & Nhạc Nền",
@@ -130,6 +164,14 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     musicTrackSynth: "Procedural Synth",
     nowPlayingArmageddon: "Đang phát: Epic Battle: Armageddon — Alibi Music",
     pauseAutoMuteDesc: "Tự động tắt nhạc chiến đấu khi vào màn hình Tạm Dừng (Pause)",
+    menuBgmLabel: "Nhạc Nền Menu & Khám Phá",
+    menuTrackCosmic: "Vũ Trụ Huyền Bí",
+    menuTrackCosmicDesc: "Giai điệu thư thái, phiêu bồng không gian sâu",
+    menuTrackCyber: "Nhịp Xung Điện Tử",
+    menuTrackCyberDesc: "Synthwave điện tử 118 BPM nhịp nhàng hiện đại",
+    battleBgmLabel: "Nhạc Chiến Đấu Khi Vào Trận",
+    battleTrackName: "Armageddon (Alibi Music)",
+    battleTrackDesc: "Hào hùng dồn dập • Tự động dừng khi Tạm dừng",
     sfxVolume: "Hiệu Ứng Âm Thanh (SFX)",
     gameplayCategory: "Hình Ảnh & Hiệu Năng",
     screenShake: "Rung Chấn Màn Hình (Screen Shake)",
@@ -195,6 +237,19 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     chargeHint: "hold to charge, release to fire",
     quickRestartHint: "instant restart",
 
+    // Campaign Intel
+    campaignIntel: "CAMPAIGN INTEL",
+    totalProgress: "Total Expedition Progress",
+    sector1Name: "Asteroid Belt",
+    sector2Name: "Plasma Nebula",
+    sector3Name: "Cosmic Abyss",
+    sectorStatusCleared: "Cleared",
+    sectorStatusActive: "Active",
+    sectorStatusLocked: "Locked",
+    openRoadmapAction: "Open Full Starmap Roadmap",
+    levelTarget: "LEVEL OBJECTIVE",
+    levelTargetDesc: "Conserve comet cores and eliminate all energy crystals",
+
     settingsTitle: "GAME SETTINGS",
     languageLabel: "Language",
     audioCategory: "Audio & Music",
@@ -205,6 +260,14 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     musicTrackSynth: "Procedural Synth",
     nowPlayingArmageddon: "Now Playing: Epic Battle: Armageddon — Alibi Music",
     pauseAutoMuteDesc: "Automatically pauses battle music when the game is paused",
+    menuBgmLabel: "Menu & Exploration BGM",
+    menuTrackCosmic: "Cosmic Odyssey",
+    menuTrackCosmicDesc: "Ethereal, relaxing deep space ambient synth",
+    menuTrackCyber: "Cyber Pulse",
+    menuTrackCyberDesc: "Rhythmic 118 BPM synthwave retro groove",
+    battleBgmLabel: "In-Game Battle Music",
+    battleTrackName: "Armageddon (Alibi Music)",
+    battleTrackDesc: "Intense orchestral battle • Auto-pauses on pause",
     sfxVolume: "Sound Effects (SFX)",
     gameplayCategory: "Graphics & Performance",
     screenShake: "Screen Shake",

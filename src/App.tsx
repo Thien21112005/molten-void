@@ -4,6 +4,7 @@ import { cn } from "./utils/cn";
 import { VictoryModal } from "./components/VictoryModal";
 import { RoadmapModal } from "./components/RoadmapModal";
 import { SettingsModal } from "./components/SettingsModal";
+import { CampaignIntel } from "./components/CampaignIntel";
 import { loadProgress, getTotalStars, MAX_POSSIBLE_STARS } from "./game/levels/progress";
 import { TRANSLATIONS, loadLanguage, type Language, type Translations } from "./game/i18n";
 
@@ -156,49 +157,6 @@ function ChunkBtn({
   );
 }
 
-function ScoreTable({
-  hs,
-  highlight,
-  t,
-}: {
-  hs: HighScore[];
-  highlight?: { s: number; nb: boolean };
-  t: Translations;
-}) {
-  return (
-    <div className="w-full rounded-xl border-2 border-void-700 bg-void-950/70 px-4 py-3">
-      <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-[0.28em] text-ember-300/90">
-        <span>{t.highScores}</span>
-        <span className="text-ice-400/80">{t.top5}</span>
-      </div>
-      {hs.length === 0 ? (
-        <p className="py-3 text-center text-sm font-semibold tracking-wider text-white/40">
-          {t.noRunsYet}
-        </p>
-      ) : (
-        <ul className="space-y-1">
-          {hs.map((h, i) => {
-            const isMe = !!highlight && h.s === highlight.s && highlight.nb;
-            return (
-              <li
-                key={`${h.s}-${i}`}
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-2 py-1 text-sm",
-                  isMe ? "bg-ember-500/15 ring-1 ring-ember-400/50" : i === 0 ? "text-ember-300" : "text-white/70",
-                )}
-              >
-                <span className={cn("w-5 font-display text-xs", i === 0 ? "text-ember-400" : "text-white/40")}>{i + 1}</span>
-                <span className="font-display text-[13px] tracking-wide">{h.s.toLocaleString("en-US")}</span>
-                <span className="ml-auto text-xs font-bold tracking-wider text-ice-400/80">LV {h.l}</span>
-                <span className="w-11 text-right text-[11px] font-semibold text-white/35">{h.d}</span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
 
 function Controls({ compact, t }: { compact?: boolean; t: Translations }) {
   return (
@@ -495,11 +453,16 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Right Column: Telemetry Leaderboard & Flight Controls */}
+              {/* Right Column: Campaign Intel & Flight Controls */}
               <div className="flex flex-col justify-between gap-4">
-                {/* High Scores Terminal */}
+                {/* Campaign Progress & Sector Intel */}
                 <div className="flex-1">
-                  <ScoreTable hs={ui.hs} t={t} />
+                  <CampaignIntel
+                    progress={campaignProgress}
+                    t={t}
+                    onOpenRoadmap={() => eng()?.openRoadmap()}
+                    bestScore={ui.best}
+                  />
                 </div>
 
                 {/* Flight & Slingshot Controls Guide */}
@@ -601,8 +564,20 @@ export default function App() {
               )}
             </div>
 
-            <div className="mt-4 w-full">
-              <ScoreTable hs={ui.hs} highlight={{ s: ui.score, nb: ui.newBest }} t={t} />
+            {/* Tactical Level Debrief Card */}
+            <div className="mt-4 w-full rounded-2xl border border-void-700/80 bg-void-950/80 p-3.5 text-center shadow-inner">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-amber-300">
+                <span>🎯</span>
+                <span className="uppercase tracking-wider">{t.levelTarget} {ui.level}</span>
+              </div>
+              <p className="mt-1 text-xs text-white/70">
+                {t.levelTargetDesc}
+              </p>
+              <div className="mt-2.5 flex items-center justify-center gap-4 text-[11px] text-white/50 border-t border-void-800/80 pt-2">
+                <span>{t.campaignStars}: <strong className="text-amber-300">★ {totalCampaignStars}/{MAX_POSSIBLE_STARS}</strong></span>
+                <span>&bull;</span>
+                <span>{t.sectorsWon}: <strong className="text-ice-300">{clearedSectorsCount}/15</strong></span>
+              </div>
             </div>
 
             <div className="mt-5 flex w-full flex-col gap-2.5">
