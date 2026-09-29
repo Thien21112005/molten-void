@@ -17,6 +17,9 @@ export interface CosmicRoadmapProps {
   onBackToMenu: () => void;
   currentLevel?: number;
   t?: Translations;
+  isFromPaused?: boolean;
+  onResumeGame?: () => void;
+  onClose?: () => void;
 }
 
 interface NodeCoord {
@@ -253,6 +256,9 @@ export function CosmicRoadmap({
   onBackToMenu,
   currentLevel = 1,
   t,
+  isFromPaused = false,
+  onResumeGame,
+  onClose,
 }: CosmicRoadmapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentNodeRef = useRef<HTMLDivElement>(null);
@@ -396,19 +402,39 @@ export function CosmicRoadmap({
     <div className="animate-rise-in m-auto flex h-[min(94vh,44rem)] w-[min(96vw,62rem)] flex-col overflow-hidden rounded-3xl border-2 border-void-700/80 bg-void-950/95 shadow-[0_0_80px_rgba(0,0,0,0.85)] backdrop-blur-xl">
       {/* Top Floating Glass Header */}
       <div className="z-30 flex items-center justify-between border-b border-void-800/80 bg-void-950/85 px-4 py-3 backdrop-blur-md sm:px-6">
-        <button
-          onClick={() => {
-            audio.ensure();
-            audio.click();
-            onBackToMenu();
-          }}
-          className="flex items-center gap-1.5 rounded-xl border border-void-700 bg-void-900/90 px-3 py-1.5 text-xs font-bold tracking-wider text-white/80 transition hover:bg-void-800 hover:text-white active:scale-95 cursor-pointer"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="h-4 w-4">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-          {t?.menu ?? "Menu"}
-        </button>
+        {/* Left Action: Back / Menu */}
+        <div className="flex items-center gap-2">
+          {isFromPaused ? (
+            <button
+              onClick={() => {
+                audio.ensure();
+                audio.click();
+                if (onClose) onClose();
+                else onBackToMenu();
+              }}
+              className="flex items-center gap-1.5 rounded-xl border border-void-700 bg-void-900/90 px-3 py-1.5 text-xs font-bold tracking-wider text-white/80 transition hover:bg-void-800 hover:text-white active:scale-95 cursor-pointer"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="h-4 w-4">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              {t?.back ?? "Quay Lại"}
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                audio.ensure();
+                audio.click();
+                onBackToMenu();
+              }}
+              className="flex items-center gap-1.5 rounded-xl border border-void-700 bg-void-900/90 px-3 py-1.5 text-xs font-bold tracking-wider text-white/80 transition hover:bg-void-800 hover:text-white active:scale-95 cursor-pointer"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="h-4 w-4">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              {t?.menu ?? "Menu"}
+            </button>
+          )}
+        </div>
 
         <div className="text-center">
           <h2 className="font-display text-base tracking-wider text-white sm:text-lg">
@@ -419,14 +445,51 @@ export function CosmicRoadmap({
           </p>
         </div>
 
-        {/* Total Stars Counter */}
-        <div className="flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-950/40 px-3 py-1.5 shadow-[0_0_15px_rgba(255,179,38,0.2)]">
-          <svg viewBox="0 0 24 24" fill="#ffb326" className="h-4 w-4 overflow-visible drop-shadow-[0_0_6px_rgba(255,179,38,0.8)]">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
-          <span className="font-display text-xs tracking-wide text-amber-300 sm:text-sm">
-            {totalStars} <span className="text-[10px] text-white/40">/ {MAX_POSSIBLE_STARS}</span>
-          </span>
+        {/* Right Action: Resume / Stars Counter / Close */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {isFromPaused && onResumeGame && (
+            <button
+              onClick={() => {
+                audio.ensure();
+                audio.click();
+                onResumeGame();
+              }}
+              className="flex items-center gap-1.5 rounded-xl border border-emerald-500/70 bg-gradient-to-r from-emerald-600/90 to-teal-600/90 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_0_16px_rgba(16,185,129,0.35)] hover:brightness-110 active:scale-95 cursor-pointer"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              <span>{t?.resume ?? "Tiếp Tục"}</span>
+            </button>
+          )}
+
+          {/* Total Stars Counter */}
+          <div className="flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-950/40 px-2.5 sm:px-3 py-1.5 shadow-[0_0_15px_rgba(255,179,38,0.2)]">
+            <svg viewBox="0 0 24 24" fill="#ffb326" className="h-4 w-4 overflow-visible drop-shadow-[0_0_6px_rgba(255,179,38,0.8)]">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <span className="font-display text-xs tracking-wide text-amber-300 sm:text-sm">
+              {totalStars} <span className="text-[10px] text-white/40">/ {MAX_POSSIBLE_STARS}</span>
+            </span>
+          </div>
+
+          {/* Direct Close Button */}
+          {onClose && (
+            <button
+              onClick={() => {
+                audio.ensure();
+                audio.click();
+                onClose();
+              }}
+              aria-label={t?.close ?? "Đóng"}
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-void-700/80 bg-void-900/80 text-white/70 hover:border-ice-400 hover:text-white transition active:scale-95 cursor-pointer"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 

@@ -56,6 +56,7 @@ export interface UIState {
   selectedCore: CoreType;
   victoryData?: VictoryData;
   progress?: PlayerProgress;
+  isFromPaused?: boolean;
 }
 
 const HS_KEY = "mv_hs_v1";
@@ -185,6 +186,7 @@ export class Engine {
 
   // state
   private screen: Screen = "menu";
+  private previousScreen: Screen = "menu";
   private score = 0;
   private level = 1;
   private orbs = 3;
@@ -364,9 +366,23 @@ export class Engine {
     sfx.ensure();
     sfx.click();
     sfx.setMusicMode("roadmap");
+    this.previousScreen = this.screen;
     this.screen = "roadmap";
     this.aimMode = "none";
     this.charging = false;
+    this.pushUI();
+  }
+
+  closeRoadmap() {
+    sfx.ensure();
+    sfx.click();
+    if (this.previousScreen === "paused" || this.previousScreen === "playing") {
+      this.screen = "paused";
+      sfx.setMusicMode("paused");
+    } else {
+      this.screen = "menu";
+      sfx.setMusicMode("menu");
+    }
     this.pushUI();
   }
 
@@ -381,7 +397,7 @@ export class Engine {
   }
 
   resume() {
-    if (this.screen !== "paused") return;
+    if (this.screen !== "paused" && this.screen !== "roadmap") return;
     sfx.ensure();
     this.screen = "playing";
     sfx.click();
@@ -2435,6 +2451,7 @@ export class Engine {
       selectedCore: this.selectedCore,
       victoryData: this.victoryData ?? undefined,
       progress: loadProgress(),
+      isFromPaused: this.previousScreen === "paused" || this.previousScreen === "playing",
     });
   }
 }

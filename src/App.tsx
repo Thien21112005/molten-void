@@ -586,6 +586,9 @@ export default function App() {
           <RoadmapModal
             currentLevel={ui.level}
             t={t}
+            isFromPaused={ui.isFromPaused}
+            onResumeGame={() => eng()?.resume()}
+            onClose={() => eng()?.closeRoadmap()}
             onSelectLevel={(lvl) => eng()?.startLevel(lvl)}
             onBackToMenu={() => eng()?.toMenu()}
           />
