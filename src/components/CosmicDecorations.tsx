@@ -1,5 +1,42 @@
 import React from "react";
 
+/* Orbit calculation helpers for continuous Keplerian planetary revolution */
+function formatCalc(pct: number, val: number, unit: string): string {
+  if (val >= 0) {
+    return `calc(${pct}% + ${val.toFixed(2)}${unit})`;
+  }
+  return `calc(${pct}% - ${Math.abs(val).toFixed(2)}${unit})`;
+}
+
+function generateOrbitKeyframes(
+  animName: string,
+  rxVw: number,
+  ryVh: number,
+  startAngleDeg: number,
+  steps = 72
+): string {
+  let css = `        @keyframes ${animName} {\n`;
+  for (let i = 0; i <= steps; i++) {
+    const pct = ((i / steps) * 100).toFixed(2);
+    // Clockwise revolution: angle increases steadily across 360 degrees
+    const angleDeg = (startAngleDeg + (i / steps) * 360) % 360;
+    const rad = (angleDeg * Math.PI) / 180;
+    const x = Math.cos(rad) * rxVw;
+    const y = Math.sin(rad) * ryVh;
+    css += `          ${pct}% { left: ${formatCalc(50, x, "vw")}; top: ${formatCalc(50, y, "vh")}; }\n`;
+  }
+  css += `        }\n`;
+  return css;
+}
+
+// 4 Mathematical Keplerian Elliptical Orbits matching the SVG background paths exactly
+const ORBIT_KEYFRAMES_CSS = [
+  generateOrbitKeyframes("orbitMagma", 36, 34, 205),
+  generateOrbitKeyframes("orbitTerra", 44, 41, 15),
+  generateOrbitKeyframes("orbitSaturn", 52, 48, 145),
+  generateOrbitKeyframes("orbitIce", 60, 55, 315),
+].join("\n");
+
 export function CosmicDecorations() {
   return (
     <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden select-none">
@@ -65,52 +102,8 @@ export function CosmicDecorations() {
           100% { transform: rotate(360deg) translateX(46px) rotate(-360deg); }
         }
 
-        /* Planetary Celestial Orbit around the Menu Modal (Các hành tinh chuyển động quanh menu) */
-        @keyframes celestialOrbitInner {
-          0% {
-            left: 9%;
-            top: 13%;
-          }
-          25% {
-            left: 88%;
-            top: 15%;
-          }
-          50% {
-            left: 90%;
-            top: 83%;
-          }
-          75% {
-            left: 8%;
-            top: 81%;
-          }
-          100% {
-            left: 9%;
-            top: 13%;
-          }
-        }
-
-        @keyframes celestialOrbitOuter {
-          0% {
-            left: 91%;
-            top: 82%;
-          }
-          25% {
-            left: 8%;
-            top: 85%;
-          }
-          50% {
-            left: 7%;
-            top: 11%;
-          }
-          75% {
-            left: 90%;
-            top: 13%;
-          }
-          100% {
-            left: 91%;
-            top: 82%;
-          }
-        }
+        /* Planetary Celestial Elliptical Orbits (Hành tinh bay theo đúng quỹ đạo elip đồng tâm) */
+${ORBIT_KEYFRAMES_CSS}
 
         /* Streaking Comets (Sao chổi bay) across the cosmos */
         /* Comet 1: Streaking from Top-Left to Bottom-Right (Head leads at 46deg, tail trails behind) */
@@ -174,11 +167,15 @@ export function CosmicDecorations() {
       `}</style>
 
       {/* ================= FAINT SOLAR SYSTEM ORBIT RINGS ================= */}
-      <svg className="absolute inset-0 h-full w-full opacity-20 pointer-events-none" style={{ animation: "celestialOrbitPulse 8s ease-in-out infinite" }}>
-        {/* Giant Elliptical Orbit Paths framing the center command deck */}
-        <ellipse cx="50%" cy="50%" rx="48vw" ry="46vh" fill="none" stroke="#7dfce7" strokeWidth="1" strokeDasharray="6 12" />
-        <ellipse cx="50%" cy="50%" rx="38vw" ry="36vh" fill="none" stroke="#ffd23e" strokeWidth="0.8" strokeDasharray="4 16" />
-        <ellipse cx="50%" cy="50%" rx="58vw" ry="54vh" fill="none" stroke="#ff7a1a" strokeWidth="0.8" strokeDasharray="8 20" />
+      <svg className="absolute inset-0 h-full w-full opacity-25 pointer-events-none" style={{ animation: "celestialOrbitPulse 8s ease-in-out infinite" }}>
+        {/* Orbit 1: Magma Inner Elliptical Path (Amber / Lava) */}
+        <ellipse cx="50%" cy="50%" rx="36vw" ry="34vh" fill="none" stroke="#ff7a1a" strokeWidth="0.9" strokeDasharray="6 14" opacity="0.85" />
+        {/* Orbit 2: Terra Mid-Inner Elliptical Path (Cyan / Ocean) */}
+        <ellipse cx="50%" cy="50%" rx="44vw" ry="41vh" fill="none" stroke="#38bdf8" strokeWidth="0.9" strokeDasharray="5 15" opacity="0.8" />
+        {/* Orbit 3: Saturn Mid-Outer Elliptical Path (Starlight Gold) */}
+        <ellipse cx="50%" cy="50%" rx="52vw" ry="48vh" fill="none" stroke="#ffd23e" strokeWidth="1" strokeDasharray="6 16" opacity="0.85" />
+        {/* Orbit 4: Ice Crystal Outer Elliptical Path (Ice Cyan) */}
+        <ellipse cx="50%" cy="50%" rx="60vw" ry="55vh" fill="none" stroke="#7dfce7" strokeWidth="0.9" strokeDasharray="5 18" opacity="0.8" />
       </svg>
 
       {/* ================= STREAKING COMETS (SAO CHỔI BAY) ================= */}
@@ -256,10 +253,10 @@ export function CosmicDecorations() {
 
       {/* ================= PLANETARY BODIES (HỆ HÀNH TINH QUAY QUANH MENU) ================= */}
 
-      {/* 1. PLANET 1: SATURN / RINGED GAS GIANT (Sao Thổ - Chuyển động theo Quỹ Đạo Ngoài) */}
+      {/* 1. PLANET 1: SATURN / RINGED GAS GIANT (Sao Thổ - Chuyển động theo Quỹ Đạo Vàng) */}
       <div
         className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
-        style={{ animation: "celestialOrbitOuter 110s ease-in-out infinite" }}
+        style={{ left: "50%", top: "50%", animation: "orbitSaturn 135s linear infinite" }}
       >
         <div className="relative flex items-center justify-center">
           {/* Orbiting Moon */}
@@ -338,10 +335,10 @@ export function CosmicDecorations() {
         </div>
       </div>
 
-      {/* 2. PLANET 2: TERRA / OCEAN LIFE WORLD (Hành tinh Xanh - Chuyển động theo Quỹ Đạo Trong) */}
+      {/* 2. PLANET 2: TERRA / OCEAN LIFE WORLD (Hành tinh Xanh - Chuyển động theo Quỹ Đạo Lam) */}
       <div
         className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
-        style={{ animation: "celestialOrbitInner 80s ease-in-out infinite" }}
+        style={{ left: "50%", top: "50%", animation: "orbitTerra 100s linear infinite" }}
       >
         <div className="relative flex items-center justify-center">
           {/* Moon orbiting Terra */}
@@ -404,11 +401,13 @@ export function CosmicDecorations() {
         </div>
       </div>
 
-      {/* 3. PLANET 3: MOLTEN VOID MAGMA WORLD (Hành tinh Lửa - Quỹ Đạo Trong, Lệch Pha 180 độ) */}
+      {/* 3. PLANET 3: MOLTEN VOID MAGMA WORLD (Hành tinh Lửa - Chuyển động theo Quỹ Đạo Lửa) */}
       <div
         className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
         style={{
-          animation: "celestialOrbitInner 80s ease-in-out infinite -40s, magmaPulse 4s ease-in-out infinite",
+          left: "50%",
+          top: "50%",
+          animation: "orbitMagma 75s linear infinite, magmaPulse 4s ease-in-out infinite",
         }}
       >
         <svg viewBox="0 0 100 100" className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 overflow-visible">
@@ -445,11 +444,13 @@ export function CosmicDecorations() {
         </svg>
       </div>
 
-      {/* 4. PLANET 4: ICE CRYSTAL EXOPLANET (Hành tinh Băng - Quỹ Đạo Ngoài, Lệch Pha 180 độ) */}
+      {/* 4. PLANET 4: ICE CRYSTAL EXOPLANET (Hành tinh Băng - Chuyển động theo Quỹ Đạo Băng) */}
       <div
         className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
         style={{
-          animation: "celestialOrbitOuter 110s ease-in-out infinite -55s, iceGlowPulse 4.5s ease-in-out infinite",
+          left: "50%",
+          top: "50%",
+          animation: "orbitIce 175s linear infinite, iceGlowPulse 4.5s ease-in-out infinite",
         }}
       >
         <svg viewBox="0 0 100 100" className="h-14 w-14 sm:h-18 sm:w-18 md:h-22 md:w-22 overflow-visible">
