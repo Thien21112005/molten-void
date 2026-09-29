@@ -90,6 +90,8 @@ function evaluateSpline(progress: number): { x: number; y: number; angle: number
 
 export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
   const shipRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
   const [boosted, setBoosted] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
@@ -124,6 +126,9 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
     // Evaluate smooth Catmull-Rom spline position & heading
     const { x, y, angle } = evaluateSpline(progressRef.current);
 
+    // Check if ship is heading left (cos < 0) so we can keep decals and star right-side up!
+    const isHeadingLeft = Math.cos(angle * (Math.PI / 180)) < 0;
+
     // Subtle micro-float weightlessness wobble
     const wobbleY = Math.sin(now * 0.0035) * 4;
 
@@ -131,6 +136,17 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
       shipRef.current.style.left = `${x}vw`;
       shipRef.current.style.top = `${y}vh`;
       shipRef.current.style.transform = `translate(-50%, -50%) translateY(${wobbleY}px) rotate(${angle}deg)`;
+
+      if (isHeadingLeft) {
+        shipRef.current.classList.add("is-heading-left");
+      } else {
+        shipRef.current.classList.remove("is-heading-left");
+      }
+    }
+
+    // Counter-rotate the hover tooltip so it is ALWAYS 100% horizontal and right-side up!
+    if (tooltipRef.current) {
+      tooltipRef.current.style.transform = `translate(-50%, -100%) translateY(-18px) rotate(${-angle}deg)`;
     }
 
     animFrameRef.current = requestAnimationFrame(updateMotion);
@@ -184,7 +200,7 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
 
   return (
     <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
-      {/* Inline styles for pulse, flares, and equalizer bars */}
+      {/* Inline styles for pulse, flares, equalizer bars, and upright decal flips */}
       <style>{`
         @keyframes vnFlamePulse {
           0%, 100% {
@@ -222,6 +238,19 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
         @keyframes eqBarPulse {
           0%, 100% { height: 4px; }
           50% { height: 14px; }
+        }
+
+        /* When ship travels leftward, counter-rotate decals & star so they ALWAYS remain right-side up! */
+        .is-heading-left .vn-text-flip {
+          transform-box: fill-box;
+          transform-origin: center center;
+          transform: rotate(180deg);
+        }
+
+        .is-heading-left .vn-star-flip {
+          transform-box: fill-box;
+          transform-origin: center center;
+          transform: rotate(180deg);
         }
       `}</style>
 
@@ -287,10 +316,13 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
         title={lang === "vi" ? "Tàu phi hành gia Việt Nam VN-01 (Nhấp để tăng tốc!)" : "Vietnam Astronaut Shuttle VN-01 (Click to boost!)"}
       >
         <div className="relative flex flex-col items-center">
-          {/* Interactive Hover Click-Me Indicator */}
-          <div className="absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-            <span className="rounded-md border border-amber-400/70 bg-void-950/90 px-2 py-0.5 text-[9px] font-bold tracking-wider text-amber-300 shadow-md backdrop-blur-sm">
-              {lang === "vi" ? "🇻🇳 Nhấn để tăng tốc tàu VN-01!" : "🇻🇳 Click to boost VN-01 shuttle!"}
+          {/* Interactive Hover Click-Me Indicator (Always strictly horizontal & upright!) */}
+          <div
+            ref={tooltipRef}
+            className="absolute top-0 left-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 will-change-transform"
+          >
+            <span className="rounded-md border border-amber-400/80 bg-void-950/95 px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold tracking-wider text-amber-300 shadow-[0_0_12px_rgba(255,210,62,0.4)] backdrop-blur-md">
+              {lang === "vi" ? "🚀 Nhấn để tăng tốc tàu VN-01!" : "🚀 Click to boost VN-01 shuttle!"}
             </span>
           </div>
 
@@ -494,6 +526,7 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
                 />
 
                 <polygon
+                  className="vn-star-flip"
                   points="
                     18,4.8 
                     20.2,10.2 
@@ -511,8 +544,9 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
                 />
               </g>
 
-              {/* Tactical Aerospace Typography Markings */}
+              {/* Tactical Aerospace Typography Markings (Auto-flips to stay right-side up!) */}
               <text
+                className="vn-text-flip"
                 x="60"
                 y="21"
                 fill="#ffd23e"
@@ -525,6 +559,7 @@ export function VietnameseSpaceship({ lang }: VietnameseSpaceshipProps) {
                 VIỆT NAM
               </text>
               <text
+                className="vn-text-flip"
                 x="60"
                 y="61"
                 fill="#7dfce7"

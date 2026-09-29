@@ -1,20 +1,39 @@
 import React from "react";
-import { cn } from "../utils/cn";
 
 export function CosmicDecorations() {
   return (
     <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden select-none">
-      {/* Dynamic CSS styles for rotating planets, orbiting moons, and streaking comets */}
+      {/* Dynamic CSS styles for rotating planets, orbiting moons, celestial orbits, and comets */}
       <style>{`
-        /* Planet cloud & surface rotations */
-        @keyframes planetSpinSlow {
+        /* Planetary Surface & Atmosphere Rotations (Hành tinh tự xoay quanh trục) */
+        @keyframes terraContinentSpin {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-64px); }
+        }
+
+        @keyframes terraCloudSpin {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-64px); }
+        }
+
+        @keyframes magmaCrustSpin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
 
-        @keyframes planetCloudDrift {
+        @keyframes saturnBandsSpin {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-40px); }
+          100% { transform: translateX(-80px); }
+        }
+
+        @keyframes icePlanetSpin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(-360deg); }
+        }
+
+        @keyframes asteroidRingSpin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
         @keyframes magmaPulse {
@@ -37,20 +56,59 @@ export function CosmicDecorations() {
 
         /* Moon orbital revolutions */
         @keyframes moonOrbitSaturn {
-          0% {
-            transform: rotate(0deg) translateX(58px) rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg) translateX(58px) rotate(-360deg);
-          }
+          0% { transform: rotate(0deg) translateX(58px) rotate(0deg); }
+          100% { transform: rotate(360deg) translateX(58px) rotate(-360deg); }
         }
 
         @keyframes moonOrbitEarth {
+          0% { transform: rotate(0deg) translateX(46px) rotate(0deg); }
+          100% { transform: rotate(360deg) translateX(46px) rotate(-360deg); }
+        }
+
+        /* Planetary Celestial Orbit around the Menu Modal (Các hành tinh chuyển động quanh menu) */
+        @keyframes celestialOrbitInner {
           0% {
-            transform: rotate(0deg) translateX(46px) rotate(0deg);
+            left: 9%;
+            top: 13%;
+          }
+          25% {
+            left: 88%;
+            top: 15%;
+          }
+          50% {
+            left: 90%;
+            top: 83%;
+          }
+          75% {
+            left: 8%;
+            top: 81%;
           }
           100% {
-            transform: rotate(360deg) translateX(46px) rotate(-360deg);
+            left: 9%;
+            top: 13%;
+          }
+        }
+
+        @keyframes celestialOrbitOuter {
+          0% {
+            left: 91%;
+            top: 82%;
+          }
+          25% {
+            left: 8%;
+            top: 85%;
+          }
+          50% {
+            left: 7%;
+            top: 11%;
+          }
+          75% {
+            left: 90%;
+            top: 13%;
+          }
+          100% {
+            left: 91%;
+            top: 82%;
           }
         }
 
@@ -196,11 +254,13 @@ export function CosmicDecorations() {
         <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-ice-300 to-white shadow-[0_0_8px_#fff]" />
       </div>
 
-      {/* ================= PLANETARY BODIES (HỆ HÀNH TINH QUANH MENU) ================= */}
+      {/* ================= PLANETARY BODIES (HỆ HÀNH TINH QUAY QUANH MENU) ================= */}
 
-      {/* 1. PLANET 1: SATURN / RINGED GAS GIANT (Sao Thổ Khổng Lồ với Vành Đai Tỏa Sáng) */}
-      {/* Positioned at Lower-Right Corner */}
-      <div className="absolute -bottom-8 -right-6 sm:bottom-4 sm:right-6 md:bottom-8 md:right-10 pointer-events-none">
+      {/* 1. PLANET 1: SATURN / RINGED GAS GIANT (Sao Thổ - Chuyển động theo Quỹ Đạo Ngoài) */}
+      <div
+        className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
+        style={{ animation: "celestialOrbitOuter 110s ease-in-out infinite" }}
+      >
         <div className="relative flex items-center justify-center">
           {/* Orbiting Moon */}
           <div
@@ -210,9 +270,8 @@ export function CosmicDecorations() {
             <div className="h-2 w-2 rounded-full bg-ice-300 shadow-[0_0_8px_rgba(46,230,201,0.8)]" />
           </div>
 
-          <svg viewBox="0 0 180 180" className="h-28 w-28 sm:h-36 sm:w-36 md:h-44 md:w-44 overflow-visible filter drop-shadow-[0_0_30px_rgba(255,160,46,0.35)]">
+          <svg viewBox="0 0 180 180" className="h-26 w-26 sm:h-34 sm:w-34 md:h-42 md:w-42 overflow-visible filter drop-shadow-[0_0_30px_rgba(255,160,46,0.35)]">
             <defs>
-              {/* Gas giant surface gradient */}
               <linearGradient id="saturnBody" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#4c1d95" />
                 <stop offset="25%" stopColor="#7c2d12" />
@@ -222,7 +281,6 @@ export function CosmicDecorations() {
                 <stop offset="100%" stopColor="#1e1b4b" />
               </linearGradient>
 
-              {/* Rings gradient */}
               <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#ffd23e" stopOpacity="0.85" />
                 <stop offset="35%" stopColor="#f59e0b" stopOpacity="0.6" />
@@ -237,6 +295,9 @@ export function CosmicDecorations() {
               <clipPath id="saturnFrontClip">
                 <rect x="0" y="90" width="180" height="90" />
               </clipPath>
+              <clipPath id="saturnSphereClip">
+                <circle cx="90" cy="90" r="38" />
+              </clipPath>
             </defs>
 
             {/* Back half of the ring (behind the planet) */}
@@ -245,15 +306,25 @@ export function CosmicDecorations() {
               <ellipse cx="90" cy="90" rx="88" ry="26" fill="none" stroke="#7dfce7" strokeWidth="1.8" transform="rotate(-25 90 90)" opacity="0.8" />
             </g>
 
-            {/* Planet Sphere */}
-            <circle cx="90" cy="90" r="38" fill="url(#saturnBody)" />
-            {/* Atmospheric cloud bands */}
-            <g opacity="0.35" transform="rotate(-15 90 90)">
-              <ellipse cx="90" cy="80" rx="36" ry="6" fill="#ffd23e" />
-              <ellipse cx="90" cy="95" rx="37" ry="8" fill="#ff7a1a" />
-              <ellipse cx="90" cy="110" rx="34" ry="5" fill="#f43f5e" />
+            {/* Planet Sphere with Rotating Gas Storm Bands */}
+            <g clipPath="url(#saturnSphereClip)">
+              <circle cx="90" cy="90" r="38" fill="url(#saturnBody)" />
+              {/* Seamless horizontally drifting cloud bands */}
+              <g opacity="0.4" style={{ animation: "saturnBandsSpin 22s linear infinite" }}>
+                <g transform="rotate(-15 90 90)">
+                  <ellipse cx="90" cy="78" rx="42" ry="6" fill="#ffd23e" />
+                  <ellipse cx="90" cy="92" rx="44" ry="7" fill="#ff7a1a" />
+                  <ellipse cx="90" cy="106" rx="40" ry="5" fill="#f43f5e" />
+                </g>
+                <g transform="translate(80, 0) rotate(-15 90 90)">
+                  <ellipse cx="90" cy="78" rx="42" ry="6" fill="#ffd23e" />
+                  <ellipse cx="90" cy="92" rx="44" ry="7" fill="#ff7a1a" />
+                  <ellipse cx="90" cy="106" rx="40" ry="5" fill="#f43f5e" />
+                </g>
+              </g>
             </g>
-            {/* Planet Shadow / 3D Specular curve */}
+
+            {/* Specular 3D Lighting */}
             <ellipse cx="76" cy="76" rx="34" ry="34" fill="#ffffff" opacity="0.1" />
             <circle cx="90" cy="90" r="38" fill="none" stroke="rgba(255,210,62,0.4)" strokeWidth="1" />
 
@@ -267,9 +338,11 @@ export function CosmicDecorations() {
         </div>
       </div>
 
-      {/* 2. PLANET 2: TERRA / OCEAN LIFE WORLD (Hành tinh Xanh Sự Sống với Khí Quyển Hào Quang) */}
-      {/* Positioned at Upper-Left Corner */}
-      <div className="absolute top-4 left-3 sm:top-6 sm:left-8 md:top-8 md:left-12 pointer-events-none">
+      {/* 2. PLANET 2: TERRA / OCEAN LIFE WORLD (Hành tinh Xanh - Chuyển động theo Quỹ Đạo Trong) */}
+      <div
+        className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
+        style={{ animation: "celestialOrbitInner 80s ease-in-out infinite" }}
+      >
         <div className="relative flex items-center justify-center">
           {/* Moon orbiting Terra */}
           <div
@@ -296,15 +369,33 @@ export function CosmicDecorations() {
             <circle cx="50" cy="50" r="35" fill="none" stroke="#38bdf8" strokeWidth="2" opacity="0.6" className="animate-pulse" />
             <circle cx="50" cy="50" r="32" fill="url(#terraOcean)" />
 
-            {/* Continents & Landmasses (clipped) */}
-            <g clipPath="url(#terraClip)" opacity="0.85">
-              {/* Green continents */}
-              <path d="M 35 30 Q 42 22 52 28 Q 62 35 55 45 Q 45 52 35 45 Z" fill="#10b981" />
-              <path d="M 52 50 Q 64 45 70 55 Q 68 68 58 65 Q 48 62 52 50 Z" fill="#059669" />
-              <path d="M 28 55 Q 38 52 36 68 Q 25 72 26 60 Z" fill="#10b981" />
-              {/* Swirling white cloud layers */}
-              <path d="M 20 40 Q 40 35 60 42 Q 80 48 90 40" stroke="#ffffff" strokeWidth="3" fill="none" opacity="0.65" strokeLinecap="round" />
-              <path d="M 30 60 Q 55 58 75 66" stroke="#ffffff" strokeWidth="2.5" fill="none" opacity="0.5" strokeLinecap="round" />
+            {/* Continents & Landmasses with 3D Globe Rotation */}
+            <g clipPath="url(#terraClip)">
+              {/* Seamless rotating continents */}
+              <g style={{ animation: "terraContinentSpin 20s linear infinite" }} opacity="0.85">
+                <g transform="translate(0, 0)">
+                  <path d="M 20 30 Q 28 22 38 28 Q 48 35 42 45 Q 32 52 22 45 Z" fill="#10b981" />
+                  <path d="M 40 50 Q 52 45 58 55 Q 56 68 46 65 Q 36 62 40 50 Z" fill="#059669" />
+                  <path d="M 12 55 Q 22 52 20 68 Q 10 72 11 60 Z" fill="#10b981" />
+                </g>
+                <g transform="translate(64, 0)">
+                  <path d="M 20 30 Q 28 22 38 28 Q 48 35 42 45 Q 32 52 22 45 Z" fill="#10b981" />
+                  <path d="M 40 50 Q 52 45 58 55 Q 56 68 46 65 Q 36 62 40 50 Z" fill="#059669" />
+                  <path d="M 12 55 Q 22 52 20 68 Q 10 72 11 60 Z" fill="#10b981" />
+                </g>
+              </g>
+
+              {/* Seamless rotating cloud layers */}
+              <g style={{ animation: "terraCloudSpin 14s linear infinite" }}>
+                <g transform="translate(0, 0)">
+                  <path d="M 10 40 Q 30 35 50 42 Q 70 48 80 40" stroke="#ffffff" strokeWidth="3" fill="none" opacity="0.65" strokeLinecap="round" />
+                  <path d="M 20 60 Q 45 58 65 66" stroke="#ffffff" strokeWidth="2.5" fill="none" opacity="0.5" strokeLinecap="round" />
+                </g>
+                <g transform="translate(64, 0)">
+                  <path d="M 10 40 Q 30 35 50 42 Q 70 48 80 40" stroke="#ffffff" strokeWidth="3" fill="none" opacity="0.65" strokeLinecap="round" />
+                  <path d="M 20 60 Q 45 58 65 66" stroke="#ffffff" strokeWidth="2.5" fill="none" opacity="0.5" strokeLinecap="round" />
+                </g>
+              </g>
             </g>
 
             {/* Sunlight Specular Highlight */}
@@ -313,11 +404,12 @@ export function CosmicDecorations() {
         </div>
       </div>
 
-      {/* 3. PLANET 3: MOLTEN VOID MAGMA WORLD (Hành tinh Lửa Dung Nham Rực Cháy) */}
-      {/* Positioned at Lower-Left Corner */}
+      {/* 3. PLANET 3: MOLTEN VOID MAGMA WORLD (Hành tinh Lửa - Quỹ Đạo Trong, Lệch Pha 180 độ) */}
       <div
-        className="absolute bottom-5 left-3 sm:bottom-8 sm:left-8 md:bottom-12 md:left-14 pointer-events-none"
-        style={{ animation: "magmaPulse 4s ease-in-out infinite" }}
+        className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
+        style={{
+          animation: "celestialOrbitInner 80s ease-in-out infinite -40s, magmaPulse 4s ease-in-out infinite",
+        }}
       >
         <svg viewBox="0 0 100 100" className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 overflow-visible">
           <defs>
@@ -337,27 +429,28 @@ export function CosmicDecorations() {
           <circle cx="50" cy="50" r="33" fill="none" stroke="#ff7a1a" strokeWidth="2.5" opacity="0.8" />
           <circle cx="50" cy="50" r="30" fill="url(#magmaCore)" />
 
-          {/* Molten Surface Fissures & Lava Veins */}
+          {/* Molten Surface Fissures with Swirling Crust */}
           <g clipPath="url(#magmaClip)">
-            {/* Dark cooling basalt crust plates */}
-            <circle cx="32" cy="42" r="12" fill="#1c0707" opacity="0.8" />
-            <circle cx="64" cy="36" r="15" fill="#1c0707" opacity="0.8" />
-            <circle cx="52" cy="68" r="14" fill="#1c0707" opacity="0.85" />
-            {/* Glowing glowing lava rivers */}
-            <path d="M 20 50 Q 40 45 50 35 Q 60 25 80 30" stroke="#ffd23e" strokeWidth="2" fill="none" opacity="0.95" />
-            <path d="M 45 35 Q 55 55 45 75 Q 40 85 30 80" stroke="#ff7a1a" strokeWidth="2" fill="none" opacity="0.9" />
-            <path d="M 55 55 Q 75 60 85 70" stroke="#ffd23e" strokeWidth="1.5" fill="none" opacity="0.85" />
+            <g style={{ transformOrigin: "50px 50px", animation: "magmaCrustSpin 28s linear infinite" }}>
+              <circle cx="32" cy="42" r="12" fill="#1c0707" opacity="0.8" />
+              <circle cx="64" cy="36" r="15" fill="#1c0707" opacity="0.8" />
+              <circle cx="52" cy="68" r="14" fill="#1c0707" opacity="0.85" />
+              <path d="M 20 50 Q 40 45 50 35 Q 60 25 80 30" stroke="#ffd23e" strokeWidth="2" fill="none" opacity="0.95" />
+              <path d="M 45 35 Q 55 55 45 75 Q 40 85 30 80" stroke="#ff7a1a" strokeWidth="2" fill="none" opacity="0.9" />
+              <path d="M 55 55 Q 75 60 85 70" stroke="#ffd23e" strokeWidth="1.5" fill="none" opacity="0.85" />
+            </g>
           </g>
 
           <circle cx="40" cy="40" r="12" fill="#fff" opacity="0.2" />
         </svg>
       </div>
 
-      {/* 4. PLANET 4: ICE CRYSTAL EXOPLANET (Hành tinh Băng Thanh Lam với Đai Tiểu Hành Tinh) */}
-      {/* Positioned at Upper-Right Corner */}
+      {/* 4. PLANET 4: ICE CRYSTAL EXOPLANET (Hành tinh Băng - Quỹ Đạo Ngoài, Lệch Pha 180 độ) */}
       <div
-        className="absolute top-14 right-3 sm:top-16 sm:right-8 md:top-20 md:right-12 pointer-events-none"
-        style={{ animation: "iceGlowPulse 4.5s ease-in-out infinite" }}
+        className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
+        style={{
+          animation: "celestialOrbitOuter 110s ease-in-out infinite -55s, iceGlowPulse 4.5s ease-in-out infinite",
+        }}
       >
         <svg viewBox="0 0 100 100" className="h-14 w-14 sm:h-18 sm:w-18 md:h-22 md:w-22 overflow-visible">
           <defs>
@@ -374,19 +467,24 @@ export function CosmicDecorations() {
 
           {/* Ice Aura */}
           <circle cx="50" cy="50" r="29" fill="none" stroke="#7dfce7" strokeWidth="1.8" opacity="0.8" />
-          <circle cx="50" cy="50" r="26" fill="url(#iceCore)" />
+          <circle cx="50" cy="26" r="26" fill="url(#iceCore)" />
 
-          {/* Glacial Ridges & Crystalline Crags */}
+          {/* Glacial Ridges with Rotating Crystalline Facets */}
           <g clipPath="url(#iceClip)" opacity="0.7">
-            <polygon points="40 28 55 35 48 48 35 42" fill="#ffffff" opacity="0.8" />
-            <polygon points="52 45 68 40 65 60 50 56" fill="#a5f3fc" opacity="0.7" />
-            <polygon points="32 55 45 62 38 75 26 68" fill="#ffffff" opacity="0.6" />
+            <g style={{ transformOrigin: "50px 50px", animation: "icePlanetSpin 24s linear infinite" }}>
+              <polygon points="40 28 55 35 48 48 35 42" fill="#ffffff" opacity="0.8" />
+              <polygon points="52 45 68 40 65 60 50 56" fill="#a5f3fc" opacity="0.7" />
+              <polygon points="32 55 45 62 38 75 26 68" fill="#ffffff" opacity="0.6" />
+            </g>
           </g>
 
-          {/* Miniature orbiting asteroid specks */}
-          <circle cx="16" cy="46" r="1.5" fill="#7dfce7" className="animate-ping" style={{ animationDuration: "3s" }} />
-          <circle cx="82" cy="56" r="1.8" fill="#bae6fd" />
-          <circle cx="50" cy="82" r="1.4" fill="#ffffff" />
+          {/* Miniature orbiting asteroid specks revolving around the planet */}
+          <g style={{ transformOrigin: "50px 50px", animation: "asteroidRingSpin 14s linear infinite" }}>
+            <circle cx="16" cy="46" r="1.6" fill="#7dfce7" />
+            <circle cx="84" cy="54" r="1.8" fill="#bae6fd" />
+            <circle cx="50" cy="82" r="1.5" fill="#ffffff" />
+            <circle cx="50" cy="18" r="1.3" fill="#2ee6c9" />
+          </g>
         </svg>
       </div>
     </div>
