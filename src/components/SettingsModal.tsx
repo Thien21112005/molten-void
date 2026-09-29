@@ -36,7 +36,11 @@ export function SettingsModal({
   const [activePreview, setActivePreview] = useState<TrackPreviewId | null>(null);
 
   useEffect(() => {
+    const unbind = audio.onMuteChange((muted) => {
+      setSettings((prev) => ({ ...prev, muted }));
+    });
     return () => {
+      unbind();
       audio.stopPreview();
     };
   }, []);
@@ -65,17 +69,43 @@ export function SettingsModal({
   const handleMuteToggle = () => {
     audio.ensure();
     audio.click();
-    updateSetting("muted", !settings.muted);
+    const nextMuted = !settings.muted;
+    let nextMusicVol = settings.musicVolume;
+    let nextSfxVol = settings.sfxVolume;
+    if (!nextMuted) {
+      if (nextMusicVol <= 0) nextMusicVol = 0.8;
+      if (nextSfxVol <= 0) nextSfxVol = 0.8;
+    }
+    const next: GameSettings = {
+      ...settings,
+      muted: nextMuted,
+      musicVolume: nextMusicVol,
+      sfxVolume: nextSfxVol,
+    };
+    setSettings(next);
+    applySettings(next);
   };
 
   const handleMusicSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
-    updateSetting("musicVolume", val);
+    if (settings.muted && val > 0) {
+      const next: GameSettings = { ...settings, muted: false, musicVolume: val };
+      setSettings(next);
+      applySettings(next);
+    } else {
+      updateSetting("musicVolume", val);
+    }
   };
 
   const handleSfxSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
-    updateSetting("sfxVolume", val);
+    if (settings.muted && val > 0) {
+      const next: GameSettings = { ...settings, muted: false, sfxVolume: val };
+      setSettings(next);
+      applySettings(next);
+    } else {
+      updateSetting("sfxVolume", val);
+    }
     audio.click();
   };
 
@@ -174,10 +204,10 @@ export function SettingsModal({
             <button
               onClick={handleMuteToggle}
               className={cn(
-                "flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-bold transition",
+                "flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-bold transition cursor-pointer active:scale-95",
                 settings.muted
-                  ? "border-rose-alert/50 bg-rose-950/40 text-rose-alert"
-                  : "border-emerald-500/40 bg-emerald-950/40 text-emerald-300",
+                  ? "border-rose-alert/50 bg-rose-950/40 text-rose-alert shadow-[0_0_12px_rgba(255,77,109,0.3)]"
+                  : "border-emerald-500/40 bg-emerald-950/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]",
               )}
             >
               {settings.muted ? t.off : t.on}
@@ -196,8 +226,8 @@ export function SettingsModal({
                   </svg>
                   {t.musicVolume}
                 </span>
-                <span className="font-display text-amber-300">
-                  {Math.round(settings.musicVolume * 100)}%
+                <span className={cn("font-display transition-colors", settings.muted ? "font-bold text-rose-alert" : "text-amber-300")}>
+                  {settings.muted ? `0% (${t.off})` : `${Math.round(settings.musicVolume * 100)}%`}
                 </span>
               </div>
               <input
@@ -205,10 +235,12 @@ export function SettingsModal({
                 min="0"
                 max="1"
                 step="0.05"
-                value={settings.musicVolume}
+                value={settings.muted ? 0 : settings.musicVolume}
                 onChange={handleMusicSlider}
-                disabled={settings.muted}
-                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-void-950 accent-ember-400 disabled:opacity-40"
+                className={cn(
+                  "h-2 w-full cursor-pointer appearance-none rounded-lg bg-void-950 accent-ember-400 transition-opacity",
+                  settings.muted && "opacity-50 accent-rose-alert",
+                )}
               />
 
               {/* BGM Soundtracks: 3 Dedicated Themes with Independent Previews */}
@@ -327,8 +359,8 @@ export function SettingsModal({
                   </svg>
                   {t.sfxVolume}
                 </span>
-                <span className="font-display text-cyan-300">
-                  {Math.round(settings.sfxVolume * 100)}%
+                <span className={cn("font-display transition-colors", settings.muted ? "font-bold text-rose-alert" : "text-cyan-300")}>
+                  {settings.muted ? `0% (${t.off})` : `${Math.round(settings.sfxVolume * 100)}%`}
                 </span>
               </div>
               <input
@@ -336,10 +368,12 @@ export function SettingsModal({
                 min="0"
                 max="1"
                 step="0.05"
-                value={settings.sfxVolume}
+                value={settings.muted ? 0 : settings.sfxVolume}
                 onChange={handleSfxSlider}
-                disabled={settings.muted}
-                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-void-950 accent-cyan-400 disabled:opacity-40"
+                className={cn(
+                  "h-2 w-full cursor-pointer appearance-none rounded-lg bg-void-950 accent-cyan-400 transition-opacity",
+                  settings.muted && "opacity-50 accent-rose-alert",
+                )}
               />
             </div>
           </div>

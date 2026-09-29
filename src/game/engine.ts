@@ -155,6 +155,7 @@ export class Engine {
   private t = 0;
   private levelScore = 0;
   private victoryData: VictoryData | null = null;
+  private unsubMute?: () => void;
 
   // world
   private gems: Gem[] = [];
@@ -238,11 +239,15 @@ export class Engine {
     this.resize();
     this.buildLevel(1);
     sfx.setMusicMode("menu");
+    this.unsubMute = sfx.onMuteChange(() => {
+      this.pushUI();
+    });
     this.pushUI();
     this.raf = requestAnimationFrame(this.loop);
   }
 
   destroy() {
+    this.unsubMute?.();
     sfx.setMusicMode("off");
     cancelAnimationFrame(this.raf);
     window.removeEventListener("keydown", this.onKeyDown);

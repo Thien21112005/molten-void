@@ -33,7 +33,7 @@ export function loadSettings(): GameSettings {
     const data = JSON.parse(raw) as Partial<GameSettings>;
     return {
       language: data.language === "en" ? "en" : "vi",
-      muted: typeof data.muted === "boolean" ? data.muted : def.muted,
+      muted: audio.muted,
       musicVolume: typeof data.musicVolume === "number" ? data.musicVolume : def.musicVolume,
       sfxVolume: typeof data.sfxVolume === "number" ? data.sfxVolume : def.sfxVolume,
       musicTrack: data.musicTrack === "cyber" ? "cyber" : "odyssey",

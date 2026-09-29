@@ -149,12 +149,28 @@ export class SoundEngine {
     this.updateMusicPlayback();
   }
 
+  private muteListeners: Set<(muted: boolean) => void> = new Set();
+
+  onMuteChange(listener: (muted: boolean) => void): () => void {
+    this.muteListeners.add(listener);
+    return () => {
+      this.muteListeners.delete(listener);
+    };
+  }
+
   /* ================= VOLUME & CHANNELS ================= */
 
   setMuted(m: boolean) {
     this.muted = m;
     try {
       localStorage.setItem("mv_muted", m ? "1" : "0");
+      // Keep mv_settings_v1 in sync so settings never has stale muted state
+      const raw = localStorage.getItem("mv_settings_v1");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        parsed.muted = m;
+        localStorage.setItem("mv_settings_v1", JSON.stringify(parsed));
+      }
     } catch {
       /* ignore */
     }
@@ -165,6 +181,13 @@ export class SoundEngine {
       this.bgmAudio.muted = m;
     }
     this.updateMusicPlayback();
+    this.muteListeners.forEach((fn) => {
+      try {
+        fn(m);
+      } catch {
+        /* ignore */
+      }
+    });
   }
 
   setSfxVolume(vol: number) {
