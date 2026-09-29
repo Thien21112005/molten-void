@@ -8,7 +8,7 @@ import { CampaignIntel } from "./components/CampaignIntel";
 import { loadProgress, getTotalStars, MAX_POSSIBLE_STARS } from "./game/levels/progress";
 import { TRANSLATIONS, loadLanguage, type Language, type Translations } from "./game/i18n";
 import { audio } from "./game/audio";
-import { IconTacticalTarget, IconStar } from "./components/Icons";
+import { IconTacticalTarget, IconStar, IconSparkle } from "./components/Icons";
 import { VietnameseSpaceship } from "./components/VietnameseSpaceship";
 import { VietnameseAstronaut } from "./components/VietnameseAstronaut";
 import { CosmicDecorations } from "./components/CosmicDecorations";
@@ -16,6 +16,7 @@ import { OnboardingDragHint } from "./components/OnboardingDragHint";
 import { CoreSelector } from "./components/CoreSelector";
 import { AchievementsModal } from "./components/AchievementsModal";
 import { AchievementToast } from "./components/AchievementToast";
+import { SkinsModal } from "./components/SkinsModal";
 
 const initialUI: UIState = {
   screen: "menu",
@@ -227,9 +228,10 @@ export default function App() {
   const engineRef = useRef<Engine | null>(null);
   const [ui, setUi] = useState<UIState>(initialUI);
 
-  // Settings & Localization & Achievements state
+  // Settings & Localization & Customization state
   const [showSettings, setShowSettings] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showSkins, setShowSkins] = useState(false);
   const [lang, setLang] = useState<Language>(() => loadLanguage());
   const [refreshKey, setRefreshKey] = useState(0);
   const t = TRANSLATIONS[lang];
@@ -517,27 +519,35 @@ export default function App() {
                     {t.playCampaign}
                   </ChunkBtn>
 
-                  <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+                  <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                     <ChunkBtn
                       onClick={() => eng()?.openRoadmap()}
-                      className="py-2.5 sm:py-3 text-[11px] sm:text-xs"
-                      icon={<IconMap className="h-4 w-4" />}
+                      className="py-2.5 sm:py-3 text-xs sm:text-sm font-bold"
+                      icon={<IconMap className="h-4.5 w-4.5" />}
                     >
                       {t.roadmap}
                     </ChunkBtn>
 
                     <ChunkBtn
+                      onClick={() => setShowSkins(true)}
+                      className="py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-cyan-300 border-cyan-500/50 hover:border-cyan-400 bg-cyan-950/20 hover:bg-cyan-900/40"
+                      icon={<IconSparkle size={18} className="text-cyan-300" />}
+                    >
+                      {t.skins}
+                    </ChunkBtn>
+
+                    <ChunkBtn
                       onClick={() => setShowAchievements(true)}
-                      className="py-2.5 sm:py-3 text-[11px] sm:text-xs text-amber-300 border-amber-500/50 hover:border-amber-400 bg-amber-950/20 hover:bg-amber-900/40"
-                      icon={<IconMedal className="h-4 w-4 text-amber-300" />}
+                      className="py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-amber-300 border-amber-500/50 hover:border-amber-400 bg-amber-950/20 hover:bg-amber-900/40"
+                      icon={<IconMedal className="h-4.5 w-4.5 text-amber-300" />}
                     >
                       {t.achievements}
                     </ChunkBtn>
 
                     <ChunkBtn
                       onClick={() => setShowSettings(true)}
-                      className="py-2.5 sm:py-3 text-[11px] sm:text-xs"
-                      icon={<IconGear className="h-4 w-4" />}
+                      className="py-2.5 sm:py-3 text-xs sm:text-sm font-bold"
+                      icon={<IconGear className="h-4.5 w-4.5" />}
                     >
                       {t.settings}
                     </ChunkBtn>
@@ -771,6 +781,19 @@ export default function App() {
         <Overlay dim={true}>
           <AchievementsModal
             onClose={() => setShowAchievements(false)}
+            lang={lang}
+            t={t}
+          />
+        </Overlay>
+      )}
+
+      {/* ---- SKINS MODAL ---- */}
+      {showSkins && (
+        <Overlay dim={true}>
+          <SkinsModal
+            totalStars={totalCampaignStars}
+            onClose={() => setShowSkins(false)}
+            onSkinSelect={(skinId) => eng()?.setSkin(skinId)}
             lang={lang}
             t={t}
           />

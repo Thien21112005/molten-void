@@ -142,6 +142,11 @@ export interface Translations {
   achievementUnlockedToast: string;
   allBadgesCollected: string;
   lockedBadge: string;
+  skins: string;
+  equip: string;
+  equipped: string;
+  unlockAtStars: string;
+  stardustTrails: string;
 }
 
 export const TRANSLATIONS: Record<Language, Translations> = {
@@ -282,6 +287,11 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     achievementUnlockedToast: "THÀNH TỰU MỚI MỞ KHÓA!",
     allBadgesCollected: "Đại Sư Vũ Trụ",
     lockedBadge: "Chưa mở khóa",
+    skins: "Trang Phục Sao Chổi",
+    equip: "Trang Bị",
+    equipped: "Đang Dùng",
+    unlockAtStars: "Cần {stars}⭐",
+    stardustTrails: "Vệt Bụi Sao",
   },
   en: {
     menu: "Main Menu",
@@ -420,6 +430,11 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     achievementUnlockedToast: "NEW ACHIEVEMENT UNLOCKED!",
     allBadgesCollected: "Cosmic Grandmaster",
     lockedBadge: "Locked",
+    skins: "Comet Skins",
+    equip: "Equip",
+    equipped: "Equipped",
+    unlockAtStars: "Requires {stars}⭐",
+    stardustTrails: "Stardust Trails",
   },
 };
 

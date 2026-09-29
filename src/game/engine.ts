@@ -13,6 +13,8 @@ import {
   unlockAchievement,
   checkCampaignMilestoneAchievements,
 } from "./achievements/achievementsData";
+import { SKINS, loadEquippedSkin } from "./skins/skinsData";
+import type { SkinId } from "./skins/types";
 
 export type Screen = "menu" | "playing" | "paused" | "gameover" | "victory" | "roadmap";
 
@@ -211,6 +213,7 @@ export class Engine {
   public get hasActiveOrb(): boolean {
     return this.orbsList.some((o) => o.alive);
   }
+  private equippedSkin: SkinId = loadEquippedSkin();
   private coreSprites: Partial<Record<CoreType, HTMLCanvasElement>> = {};
   private launcher = { x: 100, y: 500 };
   private padR = 24;
@@ -404,6 +407,13 @@ export class Engine {
     this.selectedCore = type;
     sfx.click();
     haptics.tick(10);
+    this.pushUI();
+  }
+
+  setSkin(skinId: SkinId) {
+    this.equippedSkin = skinId;
+    this.coreSprites = {};
+    this.orbSprite = this.makeOrbSprite();
     this.pushUI();
   }
 
@@ -795,12 +805,13 @@ export class Engine {
       glow.addColorStop(0.65, "rgba(30,58,138,0.3)");
       glow.addColorStop(1, "rgba(30,58,138,0)");
     } else {
-      // standard
-      glow.addColorStop(0, "rgba(255,240,200,0.95)");
-      glow.addColorStop(0.18, "rgba(255,210,62,0.95)");
-      glow.addColorStop(0.34, "rgba(255,122,26,0.8)");
-      glow.addColorStop(0.6, "rgba(255,80,20,0.22)");
-      glow.addColorStop(1, "rgba(255,80,20,0)");
+      // standard with equipped skin customization
+      const skin = SKINS.find((s) => s.id === this.equippedSkin) || SKINS[0];
+      glow.addColorStop(0, skin.palette.core);
+      glow.addColorStop(0.2, skin.palette.mid);
+      glow.addColorStop(0.45, skin.palette.outer);
+      glow.addColorStop(0.7, skin.palette.ambient);
+      glow.addColorStop(1, "rgba(0,0,0,0)");
     }
 
     g.fillStyle = glow;
@@ -2004,7 +2015,8 @@ export class Engine {
       if (!o.alive) continue;
       const sprite = this.getOrbSprite(o.coreType);
       ctx.globalCompositeOperation = "lighter";
-      let trailColor = "255,150,50";
+      const skin = SKINS.find((s) => s.id === this.equippedSkin) || SKINS[0];
+      let trailColor = skin.trailColor;
       if (o.coreType === "cluster") trailColor = "125,252,231";
       else if (o.coreType === "blast") trailColor = "255,80,20";
       else if (o.coreType === "heavy") trailColor = "56,189,248";
