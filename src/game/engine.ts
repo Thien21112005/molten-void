@@ -156,6 +156,7 @@ export class Engine {
   private best = 0;
   private firstShot = false;
   private t = 0;
+  private slowMo = 0;
   private levelScore = 0;
   private victoryData: VictoryData | null = null;
   private unsubMute?: () => void;
@@ -284,6 +285,7 @@ export class Engine {
     this.orb = null;
     this.firstShot = false;
     this.victoryData = null;
+    this.slowMo = 0;
     this.buildLevel(this.level);
     const cfg = getLevelConfig(this.level);
     this.banner(`LEVEL ${this.level}`, cfg.name.toUpperCase());
@@ -340,6 +342,7 @@ export class Engine {
     this.aimMode = "none";
     this.charging = false;
     this.victoryData = null;
+    this.slowMo = 0;
     this.buildLevel(1);
     this.pushUI();
   }
@@ -876,8 +879,32 @@ export class Engine {
       });
     }
 
-    if (this.gems.every((q) => q.dead) && !this.pending) {
-      this.pending = { type: "clear", t: 0.75 };
+    const isFinalGem = this.gems.every((q) => q.dead);
+    if (isFinalGem && !this.pending) {
+      this.pending = { type: "clear", t: 1.1 };
+      this.slowMo = 0.85; // Matrix cinematic slow-motion effect
+      this.shake = Math.min(28, this.shake + 11);
+      this.flash = 0.65;
+
+      // Expand 3 giant celestial shockwave rings from final crystal epicenter
+      const minDim = Math.min(this.W, this.H);
+      for (let i = 0; i < 3; i++) {
+        this.particles.push({
+          kind: 3,
+          x: g.x,
+          y: g.y,
+          vx: 0,
+          vy: 0,
+          life: 0.75 + i * 0.18,
+          tl: 0.75 + i * 0.18,
+          size: minDim * (0.65 + i * 0.35),
+          rot: 0,
+          vr: 0,
+          col: i === 0 ? "255,210,62" : i === 1 ? "46,230,201" : "255,255,255",
+          grav: 0,
+          drag: 0,
+        });
+      }
     }
     this.pushUI();
   }
@@ -1054,9 +1081,15 @@ export class Engine {
 
     if (this.screen === "paused") return;
 
+    let simDt = dt;
+    if (this.slowMo > 0) {
+      this.slowMo -= dt;
+      simDt = dt * 0.22; // 4.5x Matrix cinematic slow-motion
+    }
+
     // fx update (also during menu / gameover)
-    this.updateParticles(dt);
-    this.updateTexts(dt);
+    this.updateParticles(simDt);
+    this.updateTexts(simDt);
     this.shake = Math.max(0, this.shake - this.shake * 7 * dt - 10 * dt);
     this.flash = Math.max(0, this.flash - this.flash * 5 * dt);
 
@@ -1084,7 +1117,7 @@ export class Engine {
     // orb physics (2 substeps)
     if (this.orb?.alive) {
       const o = this.orb;
-      const sdt = dt / 2;
+      const sdt = simDt / 2;
       for (let s = 0; s < 2; s++) {
         o.t += sdt;
         o.vy += this.G * sdt;
