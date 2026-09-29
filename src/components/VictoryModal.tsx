@@ -1,6 +1,8 @@
+import React, { useState } from "react";
 import type { VictoryData } from "../game/engine";
 import type { Translations } from "../game/i18n";
 import { StarRating } from "./StarRating";
+import { audio } from "../game/audio";
 
 export interface VictoryModalProps {
   data: VictoryData;
@@ -19,6 +21,40 @@ export function VictoryModal({
   onOpenRoadmap,
   t,
 }: VictoryModalProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    audio.ensure();
+    audio.click();
+    const template =
+      t?.shareTextTemplate ??
+      "🌌 Tôi vừa chinh phục Molten Void màn {level} với {stars}⭐ (Tổng {totalStars}/45⭐)! Bạn có phá được kỷ lục này không? https://thien21112005.github.io/molten-void/";
+    const text = template
+      .replace("{level}", String(data.level))
+      .replace("{stars}", String(data.stars))
+      .replace("{totalStars}", String(data.totalStars));
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2600);
+    } catch {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2600);
+    }
+  };
+
   return (
     <div className="animate-pop-in m-auto flex w-[min(92vw,24rem)] flex-col items-center rounded-2xl border-2 border-ember-500/50 bg-void-950/95 p-6 shadow-[0_0_50px_rgba(255,122,26,0.25)] backdrop-blur-md">
       <p className="text-[11px] font-bold tracking-[0.4em] text-ember-300/80 uppercase">
@@ -69,8 +105,40 @@ export function VictoryModal({
         )}
       </div>
 
+      {/* Share to Clipboard Button */}
+      <div className="mt-4 w-full">
+        <button
+          onClick={handleShare}
+          className={`flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-bold tracking-wider transition active:scale-95 cursor-pointer ${
+            copied
+              ? "border-emerald-400/80 bg-emerald-950/70 text-emerald-300 shadow-[0_0_15px_rgba(52,211,153,0.35)]"
+              : "border-cyan-500/50 bg-cyan-950/30 text-cyan-300 hover:border-cyan-400 hover:bg-cyan-950/60 hover:text-white shadow-[0_0_12px_rgba(46,230,201,0.15)]"
+          }`}
+        >
+          {copied ? (
+            <>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4 text-emerald-400">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span>{t?.shareCopied ?? "Đã sao chép vào bộ nhớ tạm!"}</span>
+            </>
+          ) : (
+            <>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-4 w-4">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+              <span>{t?.shareResult ?? "Chia Sẻ Thành Tích"}</span>
+            </>
+          )}
+        </button>
+      </div>
+
       {/* Buttons */}
-      <div className="mt-5 flex w-full flex-col gap-2">
+      <div className="mt-3 flex w-full flex-col gap-2">
         {hasNextLevel ? (
           <button
             onClick={onNextLevel}
