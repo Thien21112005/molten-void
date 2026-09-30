@@ -5,7 +5,6 @@ import { audio } from "../game/audio";
 import type { Language, Translations } from "../game/i18n";
 import { cn } from "../utils/cn";
 import { IconStar } from "./Icons";
-import { VietnameseAstronaut } from "./VietnameseAstronaut";
 
 interface SkinsModalProps {
   totalStars: number;
@@ -96,7 +95,7 @@ export function SkinsModal({
                   ? "border-amber-400 bg-gradient-to-b from-amber-950/40 via-void-900/80 to-void-950 shadow-[0_0_25px_rgba(251,191,36,0.3)]"
                   : unlocked
                     ? "border-void-700/80 bg-void-900/60 hover:border-void-500 hover:bg-void-900/90"
-                    : "border-void-800/80 bg-void-950/40 opacity-60 grayscale",
+                    : "border-void-800/80 bg-void-950/60 hover:border-void-700 hover:bg-void-950/80",
               )}
             >
               {/* Top Row: Preview Orb & Meta */}
@@ -106,7 +105,7 @@ export function SkinsModal({
                   className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/10 shadow-inner overflow-hidden"
                   style={{ backgroundColor: "rgba(10, 6, 24, 0.9)" }}
                 >
-                  <CometPreviewOrb skin={skin} />
+                  <CometPreviewOrb skin={skin} unlocked={unlocked} />
                   {isEquipped && (
                     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-[10px] text-void-950 font-black shadow">
                       ★
@@ -116,7 +115,12 @@ export function SkinsModal({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <h3 className="font-display text-base font-bold text-white tracking-wide truncate">
+                    <h3
+                      className={cn(
+                        "font-display text-base font-bold tracking-wide truncate",
+                        unlocked ? "text-white" : "text-white/70",
+                      )}
+                    >
                       {name}
                     </h3>
                     {skin.requiredStars > 0 && (
@@ -126,8 +130,17 @@ export function SkinsModal({
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-white/65 line-clamp-2 leading-relaxed">
-                    {desc}
+                  <p
+                    className={cn(
+                      "mt-1 text-xs line-clamp-2 leading-relaxed",
+                      unlocked ? "text-white/65" : "text-white/45 italic",
+                    )}
+                  >
+                    {unlocked
+                      ? desc
+                      : (lang === "vi"
+                          ? "Bí ẩn chưa giải mã. Đạt số sao yêu cầu để lộ diện hiệu ứng vệt sao đặc biệt."
+                          : "Unrevealed enigma. Reach required stars to unveil unique cosmic trail effects.")}
                   </p>
                 </div>
               </div>
@@ -156,7 +169,7 @@ export function SkinsModal({
                     ? (t?.equipped ?? "Đang Dùng")
                     : unlocked
                       ? (t?.equip ?? "Trang Bị")
-                      : "Khóa"}
+                      : (lang === "vi" ? "🔒 Chưa Mở" : "🔒 Locked")}
                 </button>
               </div>
             </div>
@@ -165,14 +178,20 @@ export function SkinsModal({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-void-800/90 bg-void-950 px-5 py-3 text-xs text-white/50">
-        <div className="flex items-center gap-2">
-          <VietnameseAstronaut lang={lang} className="h-8 w-8 shrink-0" reaction="cheer" />
-          <span>Thu thập thêm sao để mở khóa các vệt bụi sao huyền thoại.</span>
+      <div className="flex items-center justify-between border-t border-void-800/90 bg-void-950/80 px-5 py-3.5 text-xs text-white/60 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-950/40 text-amber-400">
+            <IconStar size={14} className="text-amber-400" />
+          </div>
+          <span className="font-medium text-white/75">
+            {lang === "vi"
+              ? "Chinh phục thêm nhiều sao để mở khóa toàn bộ trang phục sao chổi huyền thoại."
+              : "Collect more stars to unlock all legendary celestial skins."}
+          </span>
         </div>
         <button
           onClick={onClose}
-          className="rounded-xl border border-void-700 bg-void-900 px-4 py-1.5 font-bold text-white transition hover:bg-void-800 cursor-pointer active:scale-95"
+          className="rounded-xl border border-void-700/80 bg-void-900/90 px-5 py-2 font-display text-xs font-bold text-white transition hover:border-ice-400 hover:bg-void-800 cursor-pointer active:scale-95 shadow-sm"
         >
           {t?.close ?? "Đóng"}
         </button>
@@ -181,7 +200,44 @@ export function SkinsModal({
   );
 }
 
-function CometPreviewOrb({ skin }: { skin: SkinDef }) {
+function CometPreviewOrb({ skin, unlocked }: { skin: SkinDef; unlocked: boolean }) {
+  if (!unlocked) {
+    return (
+      <div className="relative flex items-center justify-center">
+        {/* Subtle mysterious aura */}
+        <div
+          className="absolute h-10 w-10 rounded-full animate-pulse opacity-30 blur-sm"
+          style={{ backgroundColor: skin.glowColor }}
+        />
+        {/* Mysterious neon silhouette circle */}
+        <div
+          className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed transition-all"
+          style={{
+            borderColor: skin.glowColor,
+            background: "radial-gradient(circle, rgba(20, 12, 38, 0.95) 0%, rgba(7, 3, 18, 0.98) 100%)",
+            boxShadow: `0 0 14px ${skin.glowColor}55, inset 0 0 8px rgba(0, 0, 0, 0.8)`,
+          }}
+        >
+          {/* Faint orbiting stardust particle */}
+          <div
+            className="absolute -top-0.5 left-1 h-1 w-1 rounded-full animate-ping"
+            style={{ backgroundColor: skin.glowColor }}
+          />
+          {/* Glowing mysterious question mark */}
+          <span
+            className="font-display text-sm font-black tracking-tight select-none"
+            style={{
+              color: skin.glowColor,
+              textShadow: `0 0 8px ${skin.glowColor}, 0 0 16px ${skin.glowColor}`,
+            }}
+          >
+            ?
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex items-center justify-center">
       {/* Outer ambient glow */}
