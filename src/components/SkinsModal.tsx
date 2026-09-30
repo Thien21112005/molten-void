@@ -100,7 +100,7 @@ export function SkinsModal({
             >
               {/* Top Row: Preview Orb & Meta */}
               <div className="flex items-start gap-3.5">
-                {/* Visual Orb Preview */}
+                {/* Visual Custom Celestial Orb Preview */}
                 <div
                   className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/10 shadow-inner overflow-hidden"
                   style={{ backgroundColor: "rgba(10, 6, 24, 0.9)" }}
@@ -139,8 +139,8 @@ export function SkinsModal({
                     {unlocked
                       ? desc
                       : (lang === "vi"
-                          ? "Bí ẩn chưa giải mã. Đạt số sao yêu cầu để lộ diện hiệu ứng vệt sao đặc biệt."
-                          : "Unrevealed enigma. Reach required stars to unveil unique cosmic trail effects.")}
+                          ? "Bí ẩn chưa giải mã. Đạt mốc sao để kích hoạt hiệu ứng lõi và vệt bụi sao độc quyền."
+                          : "Unrevealed enigma. Reach star milestone to unleash unique celestial core & trail fx.")}
                   </p>
                 </div>
               </div>
@@ -169,7 +169,7 @@ export function SkinsModal({
                     ? (t?.equipped ?? "Đang Dùng")
                     : unlocked
                       ? (t?.equip ?? "Trang Bị")
-                      : (lang === "vi" ? "🔒 Chưa Mở" : "🔒 Locked")}
+                      : (lang === "vi" ? "Chưa Mở" : "Locked")}
                 </button>
               </div>
             </div>
@@ -201,58 +201,412 @@ export function SkinsModal({
 }
 
 function CometPreviewOrb({ skin, unlocked }: { skin: SkinDef; unlocked: boolean }) {
+  const shape = skin.coreShape;
+
+  // Render locked state: Mysterious glowing neon contour of that SPECIFIC celestial shape, with stardust and center glowing question mark!
   if (!unlocked) {
     return (
-      <div className="relative flex items-center justify-center">
-        {/* Subtle mysterious aura */}
+      <div className="relative flex h-12 w-12 items-center justify-center">
+        {/* Mysterious Ambient Aura */}
         <div
-          className="absolute h-10 w-10 rounded-full animate-pulse opacity-30 blur-sm"
+          className="absolute h-10 w-10 rounded-full animate-pulse opacity-30 blur-md"
           style={{ backgroundColor: skin.glowColor }}
         />
-        {/* Mysterious neon silhouette circle */}
-        <div
-          className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed transition-all"
-          style={{
-            borderColor: skin.glowColor,
-            background: "radial-gradient(circle, rgba(20, 12, 38, 0.95) 0%, rgba(7, 3, 18, 0.98) 100%)",
-            boxShadow: `0 0 14px ${skin.glowColor}55, inset 0 0 8px rgba(0, 0, 0, 0.8)`,
-          }}
+
+        {/* Custom Shape Silhouette Outline with Neon Glow */}
+        <svg
+          viewBox="0 0 48 48"
+          className="h-12 w-12 drop-shadow-[0_0_8px_var(--glow)]"
+          style={{ "--glow": skin.glowColor } as React.CSSProperties}
         >
-          {/* Faint orbiting stardust particle */}
-          <div
-            className="absolute -top-0.5 left-1 h-1 w-1 rounded-full animate-ping"
-            style={{ backgroundColor: skin.glowColor }}
-          />
-          {/* Glowing mysterious question mark */}
-          <span
-            className="font-display text-sm font-black tracking-tight select-none"
-            style={{
-              color: skin.glowColor,
-              textShadow: `0 0 8px ${skin.glowColor}, 0 0 16px ${skin.glowColor}`,
-            }}
+          {shape === "molten_flame" && (
+            <g opacity="0.9">
+              {/* Fiery Corona Flare Lobes */}
+              <path
+                d="M 24 5 C 29 11, 29 16, 24 18 C 19 16, 19 11, 24 5 Z"
+                fill="none"
+                stroke={skin.glowColor}
+                strokeWidth="1.5"
+                strokeDasharray="2.5 2"
+              />
+              <path
+                d="M 43 24 C 37 29, 32 29, 30 24 C 32 19, 37 19, 43 24 Z"
+                fill="none"
+                stroke={skin.glowColor}
+                strokeWidth="1.5"
+                strokeDasharray="2.5 2"
+              />
+              <path
+                d="M 24 43 C 19 37, 19 32, 24 30 C 29 32, 29 37, 24 43 Z"
+                fill="none"
+                stroke={skin.glowColor}
+                strokeWidth="1.5"
+                strokeDasharray="2.5 2"
+              />
+              <path
+                d="M 5 24 C 11 19, 16 19, 18 24 C 16 29, 11 29, 5 24 Z"
+                fill="none"
+                stroke={skin.glowColor}
+                strokeWidth="1.5"
+                strokeDasharray="2.5 2"
+              />
+              {/* Volcanic Magma Core Outline */}
+              <circle
+                cx="24"
+                cy="24"
+                r="12"
+                fill="rgba(20, 10, 5, 0.95)"
+                stroke={skin.glowColor}
+                strokeWidth="1.6"
+                strokeDasharray="3 2"
+              />
+            </g>
+          )}
+
+          {shape === "spiral_galaxy" && (
+            <g opacity="0.9">
+              {/* Tilted Orbital Ion Ellipse Ring */}
+              <ellipse
+                cx="24"
+                cy="24"
+                rx="21"
+                ry="7.5"
+                transform="rotate(-25 24 24)"
+                fill="none"
+                stroke={skin.glowColor}
+                strokeWidth="1.5"
+                strokeDasharray="3 2"
+              />
+              {/* Central Galaxy Vortex Disc */}
+              <circle
+                cx="24"
+                cy="24"
+                r="11"
+                fill="rgba(5, 20, 18, 0.95)"
+                stroke={skin.glowColor}
+                strokeWidth="1.6"
+                strokeDasharray="2.5 2"
+              />
+            </g>
+          )}
+
+          {shape === "pulsar_rings" && (
+            <g opacity="0.9">
+              {/* Dual Intersecting Planetary Rings */}
+              <ellipse
+                cx="24"
+                cy="24"
+                rx="21"
+                ry="7.5"
+                transform="rotate(-30 24 24)"
+                fill="none"
+                stroke={skin.glowColor}
+                strokeWidth="1.4"
+                strokeDasharray="3 2"
+              />
+              <ellipse
+                cx="24"
+                cy="24"
+                rx="21"
+                ry="7.5"
+                transform="rotate(30 24 24)"
+                fill="none"
+                stroke={skin.glowColor}
+                strokeWidth="1.4"
+                strokeDasharray="3 2"
+              />
+              {/* Diamond Pulsar Core */}
+              <polygon
+                points="24,13 35,24 24,35 13,24"
+                fill="rgba(18, 8, 30, 0.95)"
+                stroke={skin.glowColor}
+                strokeWidth="1.6"
+                strokeDasharray="2.5 2"
+              />
+            </g>
+          )}
+
+          {shape === "ice_crystal" && (
+            <g opacity="0.9">
+              {/* 6 Radiating Outer Cryo Shards */}
+              <line x1="24" y1="2" x2="24" y2="10" stroke={skin.glowColor} strokeWidth="1.6" strokeLinecap="round" />
+              <line x1="43" y1="13" x2="36" y2="17" stroke={skin.glowColor} strokeWidth="1.6" strokeLinecap="round" />
+              <line x1="43" y1="35" x2="36" y2="31" stroke={skin.glowColor} strokeWidth="1.6" strokeLinecap="round" />
+              <line x1="24" y1="46" x2="24" y2="38" stroke={skin.glowColor} strokeWidth="1.6" strokeLinecap="round" />
+              <line x1="5" y1="35" x2="12" y2="31" stroke={skin.glowColor} strokeWidth="1.6" strokeLinecap="round" />
+              <line x1="5" y1="13" x2="12" y2="17" stroke={skin.glowColor} strokeWidth="1.6" strokeLinecap="round" />
+              {/* Hexagonal Glacial Prism */}
+              <polygon
+                points="24,11 35,17.5 35,30.5 24,37 13,30.5 13,17.5"
+                fill="rgba(8, 20, 32, 0.95)"
+                stroke={skin.glowColor}
+                strokeWidth="1.6"
+                strokeDasharray="2.5 2"
+              />
+            </g>
+          )}
+
+          {shape === "void_singularity" && (
+            <g opacity="0.9">
+              {/* Relativistic Accretion Disc */}
+              <ellipse
+                cx="24"
+                cy="24"
+                rx="22"
+                ry="8.5"
+                transform="rotate(22 24 24)"
+                fill="none"
+                stroke={skin.glowColor}
+                strokeWidth="1.5"
+                strokeDasharray="3 2"
+              />
+              {/* Spacetime Distortion Warping Ring */}
+              <ellipse
+                cx="24"
+                cy="24"
+                rx="15"
+                ry="15"
+                fill="rgba(5, 2, 12, 0.95)"
+                stroke={skin.glowColor}
+                strokeWidth="1.6"
+                strokeDasharray="2.5 2"
+              />
+            </g>
+          )}
+
+          {shape === "solar_crown" && (
+            <g opacity="0.9">
+              {/* 8-Pointed Solar Star Crown Rays */}
+              <polygon
+                points="24,4 27,17 38,10 31,21 44,24 31,27 38,38 27,31 24,44 21,31 10,38 17,27 4,24 17,21 10,10 21,17"
+                fill="rgba(25, 18, 5, 0.95)"
+                stroke={skin.glowColor}
+                strokeWidth="1.5"
+                strokeDasharray="2.5 2"
+              />
+            </g>
+          )}
+
+          {/* Central Glowing Holographic Question Mark */}
+          <text
+            x="24"
+            y="28.5"
+            textAnchor="middle"
+            fill={skin.glowColor}
+            fontSize="14"
+            fontWeight="900"
+            fontFamily="monospace"
+            filter={`drop-shadow(0 0 6px ${skin.glowColor})`}
           >
             ?
-          </span>
-        </div>
+          </text>
+        </svg>
+
+        {/* Orbiting Stardust Sparkle */}
+        <div
+          className="absolute -top-0.5 right-1.5 h-1.5 w-1.5 rounded-full animate-ping"
+          style={{ backgroundColor: skin.glowColor }}
+        />
       </div>
     );
   }
 
+  // Render UNLOCKED state: Rich, vibrant, full-detail custom celestial vector artwork!
   return (
-    <div className="relative flex items-center justify-center">
-      {/* Outer ambient glow */}
+    <div className="relative flex h-12 w-12 items-center justify-center">
+      {/* Outer ambient radiant aura */}
       <div
-        className="absolute h-10 w-10 rounded-full animate-ping opacity-35"
+        className="absolute h-10 w-10 rounded-full animate-pulse opacity-45 blur-md"
         style={{ backgroundColor: skin.glowColor }}
       />
-      {/* Core orb */}
-      <div
-        className="h-8 w-8 rounded-full shadow-lg transition-transform hover:scale-110"
-        style={{
-          background: `radial-gradient(circle at 35% 35%, ${skin.palette.core} 0%, ${skin.palette.mid} 40%, ${skin.palette.outer} 75%, ${skin.palette.ambient} 100%)`,
-          boxShadow: `0 0 15px ${skin.glowColor}`,
-        }}
-      />
+
+      <svg viewBox="0 0 48 48" className="h-12 w-12 drop-shadow-md">
+        <defs>
+          {/* Gradients tailored to each skin */}
+          <radialGradient id={`core-grad-${skin.id}`} cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stopColor={skin.palette.core} />
+            <stop offset="45%" stopColor={skin.palette.mid} />
+            <stop offset="80%" stopColor={skin.palette.outer} />
+            <stop offset="100%" stopColor={skin.palette.ambient} />
+          </radialGradient>
+        </defs>
+
+        {shape === "molten_flame" && (
+          <g>
+            {/* Blazing Coronal Flame Tongues */}
+            <path d="M 24 4 C 29 11, 28 17, 24 18 C 20 17, 19 11, 24 4 Z" fill="#ff4d1a" opacity="0.9" />
+            <path d="M 44 24 C 37 29, 31 28, 30 24 C 31 20, 37 19, 44 24 Z" fill="#ff4d1a" opacity="0.9" />
+            <path d="M 24 44 C 19 37, 20 31, 24 30 C 28 31, 29 37, 24 44 Z" fill="#ff4d1a" opacity="0.9" />
+            <path d="M 4 24 C 11 19, 17 20, 18 24 C 17 28, 11 29, 4 24 Z" fill="#ff4d1a" opacity="0.9" />
+            {/* Secondary fire embers */}
+            <circle cx="35" cy="13" r="2.5" fill="#ffd23e" className="animate-ping" />
+            <circle cx="13" cy="35" r="2.2" fill="#ff7a1a" />
+            {/* Main Molten Sphere */}
+            <circle cx="24" cy="24" r="13" fill={`url(#core-grad-${skin.id})`} stroke="#ff9f43" strokeWidth="1.2" />
+            {/* Magma Fissures */}
+            <path d="M 17 19 L 22 23 L 28 18 M 22 23 L 26 29" stroke="#fff3b0" strokeWidth="1.6" strokeLinecap="round" />
+            <circle cx="20" cy="20" r="1.8" fill="#ffffff" />
+          </g>
+        )}
+
+        {shape === "spiral_galaxy" && (
+          <g>
+            {/* Outer Emerald Ion Orbital Ring */}
+            <ellipse
+              cx="24"
+              cy="24"
+              rx="21"
+              ry="8"
+              transform="rotate(-25 24 24)"
+              fill="none"
+              stroke="#2ee6c9"
+              strokeWidth="2.2"
+              opacity="0.85"
+            />
+            <ellipse
+              cx="24"
+              cy="24"
+              rx="21"
+              ry="8"
+              transform="rotate(-25 24 24)"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="0.8"
+              strokeDasharray="5 15"
+              opacity="0.9"
+            />
+            {/* Orbiting Stardust Beads */}
+            <circle cx="7" cy="16" r="2" fill="#7dfce7" />
+            <circle cx="41" cy="32" r="2.2" fill="#ffd23e" />
+            {/* Central Galaxy Vortex Core */}
+            <circle cx="24" cy="24" r="12" fill={`url(#core-grad-${skin.id})`} stroke="#2ee6c9" strokeWidth="1.4" />
+            {/* Spiral Vortex Arms */}
+            <path
+              d="M 24 16 C 29 18, 30 24, 26 28 C 22 30, 18 26, 20 22 C 22 19, 26 20, 24 24"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+            <circle cx="24" cy="24" r="2.5" fill="#ffffff" />
+          </g>
+        )}
+
+        {shape === "pulsar_rings" && (
+          <g>
+            {/* Dual Crossing Planetary Plasma Rings */}
+            <ellipse
+              cx="24"
+              cy="24"
+              rx="21"
+              ry="7.5"
+              transform="rotate(-30 24 24)"
+              fill="none"
+              stroke="#c084fc"
+              strokeWidth="2.2"
+              opacity="0.85"
+            />
+            <ellipse
+              cx="24"
+              cy="24"
+              rx="21"
+              ry="7.5"
+              transform="rotate(30 24 24)"
+              fill="none"
+              stroke="#e879f9"
+              strokeWidth="2.2"
+              opacity="0.8"
+            />
+            {/* Energy Beads on Rings */}
+            <circle cx="6" cy="14" r="1.8" fill="#ffffff" />
+            <circle cx="42" cy="14" r="1.8" fill="#ffffff" />
+            {/* Diamond Hyper-Charged Pulsar Core */}
+            <polygon
+              points="24,11 36,24 24,37 12,24"
+              fill={`url(#core-grad-${skin.id})`}
+              stroke="#f0abfc"
+              strokeWidth="1.4"
+            />
+            {/* Electric Lightning Arcs */}
+            <path d="M 20 18 L 24 24 L 21 26 L 27 30" fill="none" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" />
+            <circle cx="24" cy="24" r="2.5" fill="#ffffff" />
+          </g>
+        )}
+
+        {shape === "ice_crystal" && (
+          <g>
+            {/* 6 Radiating Outer Glacial Shards */}
+            <polygon points="24,1 26,9 22,9" fill="#7dd3fc" />
+            <polygon points="44,12 36,16 38,20" fill="#38bdf8" />
+            <polygon points="44,36 38,28 36,32" fill="#38bdf8" />
+            <polygon points="24,47 22,39 26,39" fill="#7dd3fc" />
+            <polygon points="4,36 12,32 10,28" fill="#38bdf8" />
+            <polygon points="4,12 10,20 12,16" fill="#38bdf8" />
+            {/* Hexagonal Glacial Prism Body */}
+            <polygon
+              points="24,10 36,17 36,31 24,38 12,31 12,17"
+              fill={`url(#core-grad-${skin.id})`}
+              stroke="#bae6fd"
+              strokeWidth="1.5"
+            />
+            {/* Crystal Facet Refraction Lines */}
+            <path d="M 24 10 L 24 38 M 12 17 L 36 31 M 12 31 L 36 17" stroke="#ffffff" strokeWidth="1" opacity="0.75" />
+            <circle cx="21" cy="17" r="1.8" fill="#ffffff" />
+          </g>
+        )}
+
+        {shape === "void_singularity" && (
+          <g>
+            {/* Relativistic Accretion Disc */}
+            <ellipse
+              cx="24"
+              cy="24"
+              rx="22"
+              ry="9"
+              transform="rotate(22 24 24)"
+              fill="none"
+              stroke="#a855f7"
+              strokeWidth="3.2"
+              opacity="0.85"
+            />
+            <ellipse
+              cx="24"
+              cy="24"
+              rx="22"
+              ry="9"
+              transform="rotate(22 24 24)"
+              fill="none"
+              stroke="#38bdf8"
+              strokeWidth="1.2"
+              strokeDasharray="4 8"
+              opacity="0.9"
+            />
+            {/* Pure Black Event Horizon Core */}
+            <circle cx="24" cy="24" r="12" fill="#04020a" stroke="#a855f7" strokeWidth="1.8" />
+            {/* Radiant Photon Ring */}
+            <circle cx="24" cy="24" r="9" fill="none" stroke="#e879f9" strokeWidth="1.3" opacity="0.85" />
+            <circle cx="24" cy="24" r="4.5" fill="#000000" />
+            <circle cx="21" cy="21" r="1.2" fill="#38bdf8" />
+          </g>
+        )}
+
+        {shape === "solar_crown" && (
+          <g>
+            {/* Divine 8-Pointed Solar Star Crown Rays */}
+            <polygon
+              points="24,3 27,16 39,9 32,21 45,24 32,27 39,39 27,32 24,45 21,32 9,39 16,27 3,24 16,21 9,9 21,16"
+              fill={`url(#core-grad-${skin.id})`}
+              stroke="#fef08a"
+              strokeWidth="1.2"
+            />
+            {/* Sacred Concentric Sun Halo */}
+            <circle cx="24" cy="24" r="10" fill="#facc15" stroke="#ffffff" strokeWidth="1.4" />
+            {/* Thermonuclear Pure White Core */}
+            <circle cx="24" cy="24" r="5.5" fill="#ffffff" />
+            <circle cx="22" cy="22" r="1.8" fill="#fef9c3" />
+          </g>
+        )}
+      </svg>
     </div>
   );
 }
