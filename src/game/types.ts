@@ -22,7 +22,7 @@ export interface VictoryData {
 
 export type CoreType = "standard" | "cluster" | "blast" | "heavy";
 
-export type MascotReaction = "idle" | "aiming" | "cheer" | "sad" | "victory";
+export type MascotReaction = "idle" | "aiming" | "cheer" | "sad" | "victory" | "angry";
 
 export interface MascotState {
   reaction: MascotReaction;

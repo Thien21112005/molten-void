@@ -19,6 +19,7 @@ import {
   type HighScore,
   type VictoryData,
   type CoreType,
+  type MascotReaction,
   type MascotState,
   type UIState,
   type Gem,
@@ -344,7 +345,7 @@ export class Engine {
   }
 
   public setMascot(
-    reaction: "idle" | "aiming" | "cheer" | "sad" | "victory",
+    reaction: MascotReaction,
     key: string,
     params?: Record<string, string | number>,
     durationMs = 2200
@@ -942,7 +943,7 @@ export class Engine {
       this.currentShotPath = [];
       if (this.combo === 0) {
         if (this.orbs === 1) {
-          this.setMascot("sad", "mascotLastCore", undefined, 2600);
+          this.setMascot("angry", "mascotLastCore", undefined, 2600);
         } else {
           this.setMascot("sad", "mascotMiss", undefined, 2400);
         }

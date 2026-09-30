@@ -158,6 +158,7 @@ export interface Translations {
   mascotLastCore: string;
   mascotVictory: string;
   mascotGameOver: string;
+  mascotAngry: string;
 }
 
 export const TRANSLATIONS: Record<Language, Translations> = {
@@ -314,6 +315,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     mascotLastCore: "⚠️ Phát bắn quyết định!",
     mascotVictory: "🇻🇳 Vẻ vang! Chiến thắng!",
     mascotGameOver: "🚀 Đừng nản lòng, làm lại nào!",
+    mascotAngry: "💢 Tập trung cao độ! Quyết tâm bắn trúng!",
   },
   en: {
     menu: "Main Menu",
@@ -468,6 +470,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     mascotLastCore: "⚠️ Critical final core!",
     mascotVictory: "🇻🇳 Victorious! Magnificent!",
     mascotGameOver: "🚀 Don't give up, try again!",
+    mascotAngry: "💢 Hyper-focus! Determination at 100%!",
   },
 };
 

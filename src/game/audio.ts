@@ -744,6 +744,10 @@ export class SoundEngine {
   cancel() {
     this.tone(220, 0.08, "sine", 0.07, 0, 140);
   }
+
+  laser() {
+    this.tone(980, 0.14, "sawtooth", 0.09, 0, 160);
+  }
 }
 
 export const sfx = new SoundEngine();

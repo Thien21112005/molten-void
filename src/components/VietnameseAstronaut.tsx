@@ -4,7 +4,7 @@ import type { Language } from "../game/i18n";
 import { cn } from "../utils/cn";
 import "./VietnameseAstronaut.css";
 
-export type AstronautReaction = "idle" | "aiming" | "tracking" | "cheer" | "sad" | "victory";
+export type AstronautReaction = "idle" | "aiming" | "tracking" | "cheer" | "sad" | "victory" | "angry";
 
 interface VietnameseAstronautProps {
   lang: Language;
@@ -22,6 +22,7 @@ const REACTION_TEXTS = {
     cheer: "⭐ Tuyệt đỉnh!",
     sad: "⚡ Cố lên nào!",
     victory: "🇻🇳 Vẻ vang!",
+    angry: "💢 Tập trung cao độ!",
   },
   en: {
     aiming: "🎯 Locking coords...",
@@ -29,6 +30,7 @@ const REACTION_TEXTS = {
     cheer: "⭐ Splendid shot!",
     sad: "⚡ You got this!",
     victory: "🇻🇳 Victorious!",
+    angry: "💢 Super focused!",
   },
 };
 
@@ -40,12 +42,24 @@ const RADIO_QUOTES_VI = [
   "✨ 'Một bước chân nhỏ giữa hư vô, một niềm tự hào lớn!'",
 ];
 
+const RADIO_QUOTES_ANGRY_VI = [
+  "💢 'Đừng chọc nữa cơ trưởng ơi! Tập trung căn góc bắn đi!'",
+  "😤 'Cảnh báo: Áp suất buồng lái tăng vọt vì bị chọc lét!'",
+  "⚡ 'Năng lượng cực đại! Phóng đạn ngay thôi nào!'",
+];
+
 const RADIO_QUOTES_EN = [
   "🇻🇳 'Proudly raising the Vietnam flag across the deep cosmos!'",
   "🚀 'VNSC Mission Control ready! Conquering the Molten Void!'",
   "⭐ 'Proudly carrying the Vietnamese spirit to the stars!'",
   "⚡ 'Ion thrusters at 100%, all systems green!'",
   "✨ 'A brave leap into the void, a great pride for Vietnam!'",
+];
+
+const RADIO_QUOTES_ANGRY_EN = [
+  "💢 'Stop poking me, Commander! Focus on your shot!'",
+  "😤 'Warning: Cabin pressure spike from excessive tickling!'",
+  "⚡ 'Full capacitor charge! Fire the orb already!'",
 ];
 
 export function VietnameseAstronaut({
@@ -57,25 +71,49 @@ export function VietnameseAstronaut({
   quotePlacement = "top",
 }: VietnameseAstronautProps) {
   const [quoteIndex, setQuoteIndex] = useState(0);
+  const [angryQuoteIndex, setAngryQuoteIndex] = useState(0);
   const [showQuote, setShowQuote] = useState(false);
   const [boostEffect, setBoostEffect] = useState(false);
   const [localReaction, setLocalReaction] = useState<AstronautReaction | null>(null);
   const hideTimeoutRef = useRef<number | null>(null);
+  const clickCountRef = useRef(0);
+  const clickResetTimerRef = useRef<number | null>(null);
+
+  const effectiveReaction: AstronautReaction =
+    reaction !== "idle" ? reaction : localReaction ?? "idle";
 
   const handleClick = useCallback(() => {
-    // Sound effect
     audio.ensure();
-    if (boostEffect) {
+    clickCountRef.current += 1;
+
+    if (clickResetTimerRef.current) {
+      window.clearTimeout(clickResetTimerRef.current);
+    }
+    clickResetTimerRef.current = window.setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 2000);
+
+    const isRapidPoking = clickCountRef.current >= 3;
+
+    if (isRapidPoking) {
+      audio.laser();
+      setBoostEffect(true);
+      setShowQuote(true);
+      setLocalReaction("angry");
+      setAngryQuoteIndex((prev) => (prev + 1) % RADIO_QUOTES_ANGRY_VI.length);
+    } else if (boostEffect) {
       audio.thrusterBoost();
+      setBoostEffect(true);
+      setShowQuote(true);
+      setLocalReaction("cheer");
+      setQuoteIndex((prev) => (prev + 1) % RADIO_QUOTES_VI.length);
     } else {
       audio.spaceChime();
+      setBoostEffect(true);
+      setShowQuote(true);
+      setLocalReaction("cheer");
+      setQuoteIndex((prev) => (prev + 1) % RADIO_QUOTES_VI.length);
     }
-
-    // Toggle boost animation and cycle through heroic radio quotes
-    setBoostEffect(true);
-    setShowQuote(true);
-    setLocalReaction("cheer");
-    setQuoteIndex((prev) => (prev + 1) % RADIO_QUOTES_VI.length);
 
     if (hideTimeoutRef.current) {
       window.clearTimeout(hideTimeoutRef.current);
@@ -87,10 +125,10 @@ export function VietnameseAstronaut({
     }, 4500);
   }, [boostEffect]);
 
-  const activeQuote = (lang === "vi" ? RADIO_QUOTES_VI : RADIO_QUOTES_EN)[quoteIndex];
-
-  const effectiveReaction: AstronautReaction =
-    reaction !== "idle" ? reaction : localReaction ?? "idle";
+  const activeQuote =
+    effectiveReaction === "angry"
+      ? (lang === "vi" ? RADIO_QUOTES_ANGRY_VI : RADIO_QUOTES_ANGRY_EN)[angryQuoteIndex]
+      : (lang === "vi" ? RADIO_QUOTES_VI : RADIO_QUOTES_EN)[quoteIndex];
 
   const reactionClass =
     effectiveReaction === "aiming"
@@ -103,7 +141,9 @@ export function VietnameseAstronaut({
             ? "vn-astronaut-sad"
             : effectiveReaction === "victory"
               ? "vn-astronaut-victory"
-              : "vn-zero-g-float";
+              : effectiveReaction === "angry"
+                ? "vn-astronaut-angry"
+                : "vn-zero-g-float";
 
   const helmetClass =
     effectiveReaction === "aiming"
@@ -116,7 +156,9 @@ export function VietnameseAstronaut({
             ? "vn-helmet-sad"
             : effectiveReaction === "victory"
               ? "vn-helmet-victory"
-              : "vn-helmet-idle";
+              : effectiveReaction === "angry"
+                ? "vn-helmet-angry"
+                : "vn-helmet-idle";
 
   return (
     <div
@@ -326,6 +368,10 @@ export function VietnameseAstronaut({
 
           {/* ================= PUFFY SPACESUIT TORSO (WEIGHTLESS ANGLE) ================= */}
           <g id="vn-torso" transform="rotate(-5 145 120)">
+            {/* Airtight Suit Collar Socket (anchored firmly to torso) */}
+            <ellipse cx="145" cy="95" rx="21" ry="6.5" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1.5" />
+            <ellipse cx="145" cy="94" rx="18" ry="5" fill="#1e293b" />
+
             {/* Soft Rounded Puffy Body */}
             <path
               d="M 130 96 
@@ -372,7 +418,22 @@ export function VietnameseAstronaut({
           </g>
 
           {/* ================= DYNAMIC RIGHT ARM GESTURES ================= */}
-          {(effectiveReaction === "cheer" || effectiveReaction === "victory") ? (
+          {effectiveReaction === "angry" ? (
+            /* Clenched Determined Fist with Trembling Anger */
+            <g id="vn-right-arm-angry" className="vn-arm-angry">
+              <path
+                d="M 158 100 C 168 92, 172 82, 168 70"
+                fill="none"
+                stroke="url(#vnPuffySuit)"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+              <rect x="163" y="85" width="10" height="7" rx="1.5" fill="#da251d" stroke="#ffd23e" strokeWidth="0.7" transform="rotate(-15 168 88)" />
+              <circle cx="168" cy="66" r="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.2" />
+              <rect x="164" y="63" width="8" height="5.5" rx="2" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1" />
+              <circle cx="176" cy="64" r="1.5" fill="#ef4444" className="vn-anger-spark" />
+            </g>
+          ) : (effectiveReaction === "cheer" || effectiveReaction === "victory") ? (
             /* Joyful Raised Fist Pump Arm Celebrating Victory */
             <g id="vn-right-arm-pump" className="vn-fist-pump">
               {/* Puffy Arm Reaching High into the Sky */}
@@ -590,11 +651,220 @@ export function VietnameseAstronaut({
                   <ellipse cx="150" cy="67" rx="2" ry="3" fill="#ffffff" />
                 </g>
               )}
+
+              {/* 7. ANGRY: Sharp Angled Eyes \ / & Gritted Teeth */}
+              {effectiveReaction === "angry" && (
+                <g className="vn-visor-angry">
+                  <path d="M 132 62 L 140 68" stroke="#ef4444" strokeWidth="2.4" strokeLinecap="round" />
+                  <path d="M 154 62 L 146 68" stroke="#ef4444" strokeWidth="2.4" strokeLinecap="round" />
+                  <circle cx="137" cy="66" r="2.2" fill="#ffd23e" />
+                  <circle cx="149" cy="66" r="2.2" fill="#ffd23e" />
+                  <circle cx="137" cy="66" r="1.1" fill="#fff" />
+                  <circle cx="149" cy="66" r="1.1" fill="#fff" />
+                  <path d="M 139 74 L 147 74" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+                  <ellipse cx="131" cy="73" rx="3.5" ry="2" fill="#ef4444" opacity="0.9" />
+                  <ellipse cx="155" cy="73" rx="3.5" ry="2" fill="#ef4444" opacity="0.9" />
+                </g>
+              )}
             </g>
 
             {/* Vocoder Chin Vent */}
             <rect x="139" y="86" width="12" height="5" rx="2.5" fill="#1e293b" stroke="#475569" strokeWidth="0.8" />
             <line x1="142" y1="88.5" x2="148" y2="88.5" stroke="#2ee6c9" strokeWidth="0.8" strokeLinecap="round" />
+          </g>
+
+          {/* ================= FLOATING EMOJIS & MOOD PARTICLES FX ================= */}
+          <g id="vn-floating-emotions" className="pointer-events-none">
+            {/* CHEER / HAPPY: Floating Stars ⭐, Sparkles ✨ & Joy Badge */}
+            {effectiveReaction === "cheer" && (
+              <g className="vn-emotions-cheer">
+                {/* Floating Star 1 */}
+                <polygon
+                  points="110,24 111.5,28 116,28 112.5,30.5 114,34.5 110,32 106,34.5 107.5,30.5 104,28 108.5,28"
+                  fill="#ffd23e"
+                  stroke="#ffffff"
+                  strokeWidth="0.5"
+                  className="vn-mood-star-1"
+                />
+                {/* Floating Star 2 */}
+                <polygon
+                  points="176,26 177.5,30 182,30 178.5,32.5 180,36.5 176,34 172,36.5 173.5,32.5 170,30 174.5,30"
+                  fill="#ffd23e"
+                  stroke="#ffffff"
+                  strokeWidth="0.5"
+                  className="vn-mood-star-2"
+                />
+                {/* Sparkle Glints */}
+                <path
+                  d="M 143 14 Q 143 20 149 20 Q 143 20 143 26 Q 143 20 137 20 Q 143 20 143 14 Z"
+                  fill="#7dfce7"
+                  className="vn-mood-sparkle"
+                />
+                <circle cx="124" cy="28" r="1.5" fill="#ffd23e" className="vn-mood-sparkle-delayed" />
+                <circle cx="162" cy="24" r="1.5" fill="#ffd23e" className="vn-mood-sparkle" />
+                {/* Cheerful Emoji Badge */}
+                <g className="vn-mood-badge-cheer">
+                  <circle cx="143" cy="18" r="8" fill="#f59e0b" stroke="#ffffff" strokeWidth="1" filter="drop-shadow(0 0 6px rgba(245,158,11,0.65))" />
+                  <text x="143" y="21.5" textAnchor="middle" fontSize="9" fill="#ffffff">⭐</text>
+                </g>
+              </g>
+            )}
+
+            {/* VICTORY: Golden Crown 👑, Celebratory Confetti 🎉 & Trophy Badge */}
+            {effectiveReaction === "victory" && (
+              <g className="vn-emotions-victory">
+                {/* Radiant Golden Victory Crown */}
+                <g className="vn-victory-crown">
+                  <path
+                    d="M 134 22 L 136 13 L 140 17 L 143 11 L 146 17 L 150 13 L 152 22 Z"
+                    fill="url(#vnGoldStar)"
+                    stroke="#d97706"
+                    strokeWidth="0.9"
+                    strokeLinejoin="round"
+                  />
+                  <circle cx="136" cy="12" r="1.3" fill="#ffffff" />
+                  <circle cx="143" cy="10" r="1.5" fill="#ffffff" />
+                  <circle cx="150" cy="12" r="1.3" fill="#ffffff" />
+                  <circle cx="143" cy="19" r="1.4" fill="#da251d" />
+                </g>
+                {/* Twin Victory Stars */}
+                <polygon
+                  points="110,20 111.5,23.5 115,23.5 112,25.5 113.5,29 110,27 106.5,29 108,25.5 105,23.5 108.5,23.5"
+                  fill="#ffd23e"
+                  className="vn-mood-star-1"
+                />
+                <polygon
+                  points="176,20 177.5,23.5 181,23.5 178,25.5 179.5,29 176,27 172.5,29 174,25.5 171,23.5 174.5,23.5"
+                  fill="#ffd23e"
+                  className="vn-mood-star-2"
+                />
+                {/* Confetti & Particle Sparks */}
+                <rect x="120" y="14" width="3" height="3" rx="0.6" fill="#da251d" className="vn-confetti-1" />
+                <rect x="166" y="16" width="3" height="3" rx="0.6" fill="#2ee6c9" className="vn-confetti-2" />
+                <rect x="130" y="7" width="2.5" height="2.5" rx="0.5" fill="#ffd23e" className="vn-confetti-3" />
+                <rect x="156" y="9" width="2.5" height="2.5" rx="0.5" fill="#f43f5e" className="vn-confetti-1" />
+                {/* Victory Emoji Badge */}
+                <g className="vn-mood-badge-victory">
+                  <circle cx="143" cy="17" r="8.5" fill="#da251d" stroke="#ffd23e" strokeWidth="1.2" filter="drop-shadow(0 0 8px rgba(218,37,29,0.75))" />
+                  <text x="143" y="20.8" textAnchor="middle" fontSize="9" fill="#ffffff">🏆</text>
+                </g>
+              </g>
+            )}
+
+            {/* SAD: Gloom Cloud 🌧️, Dripping Sweat/Tears 💧 & Sad Badge */}
+            {effectiveReaction === "sad" && (
+              <g className="vn-emotions-sad">
+                {/* Mini Melancholy Gloom Cloud */}
+                <g className="vn-gloom-cloud">
+                  <path
+                    d="M 134 22 C 131 22, 129 19, 131 16 C 132 13, 136 12, 138 14 C 140 11, 146 11, 148 14 C 151 13, 155 15, 154 18 C 156 20, 154 22, 151 22 Z"
+                    fill="#475569"
+                    stroke="#64748b"
+                    strokeWidth="0.8"
+                    opacity="0.9"
+                  />
+                  <line x1="138" y1="24" x2="137" y2="28" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" className="vn-rain-drop-1" />
+                  <line x1="144" y1="25" x2="143" y2="30" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" className="vn-rain-drop-2" />
+                  <line x1="149" y1="24" x2="148" y2="28" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" className="vn-rain-drop-1" />
+                </g>
+                {/* Falling Sweat Tears */}
+                <g className="vn-tear-drop-left">
+                  <path
+                    d="M 116 46 C 116 46, 120 50, 120 54 C 120 56.5, 118 58.5, 116 58.5 C 114 58.5, 112 56.5, 112 54 C 112 50, 116 46, 116 46 Z"
+                    fill="#38bdf8"
+                    stroke="#bae6fd"
+                    strokeWidth="0.7"
+                  />
+                </g>
+                <g className="vn-tear-drop-right">
+                  <path
+                    d="M 172 44 C 172 44, 176 48, 176 52 C 176 54.5, 174 56.5, 172 56.5 C 170 56.5, 168 54.5, 168 52 C 168 48, 172 44, 172 44 Z"
+                    fill="#38bdf8"
+                    stroke="#bae6fd"
+                    strokeWidth="0.7"
+                  />
+                </g>
+                {/* Sad Mood Badge */}
+                <g className="vn-mood-badge-sad">
+                  <circle cx="168" cy="22" r="7.5" fill="#0369a1" stroke="#7dd3fc" strokeWidth="0.9" />
+                  <text x="168" y="25" textAnchor="middle" fontSize="8" fill="#ffffff">💧</text>
+                </g>
+              </g>
+            )}
+
+            {/* ANGRY / FIERCE DETERMINATION: Anime Anger Mark 💢, Steam Puffs 💨 & Anger Sparks ⚡ */}
+            {effectiveReaction === "angry" && (
+              <g className="vn-emotions-angry">
+                {/* Iconic Anime Anger Vein Mark 💢 */}
+                <g className="vn-anger-mark">
+                  <path
+                    d="M 166 32 Q 170 36 174 32 M 174 32 Q 178 36 174 40 M 174 40 Q 170 36 166 40 M 166 40 Q 162 36 166 32"
+                    fill="none"
+                    stroke="#ef4444"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="170" cy="36" r="1.3" fill="#f87171" />
+                </g>
+                {/* Steam Puffs from Helmet Vents */}
+                <g className="vn-steam-puff-left">
+                  <ellipse cx="108" cy="68" rx="4.5" ry="2.8" fill="#ffffff" opacity="0.8" />
+                  <ellipse cx="104" cy="66" rx="2.8" ry="2" fill="#ffffff" opacity="0.6" />
+                </g>
+                <g className="vn-steam-puff-right">
+                  <ellipse cx="180" cy="68" rx="4.5" ry="2.8" fill="#ffffff" opacity="0.8" />
+                  <ellipse cx="184" cy="66" rx="2.8" ry="2" fill="#ffffff" opacity="0.6" />
+                </g>
+                {/* Electric Anger Sparks */}
+                <path
+                  d="M 120 28 L 116 34 L 120 34 L 117 40"
+                  stroke="#f59e0b"
+                  strokeWidth="1.8"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="vn-anger-spark"
+                />
+                {/* Anger Emoji Badge */}
+                <g className="vn-mood-badge-angry">
+                  <circle cx="143" cy="18" r="8" fill="#b91c1c" stroke="#fca5a5" strokeWidth="1" filter="drop-shadow(0 0 6px rgba(185,28,28,0.7))" />
+                  <text x="143" y="21.5" textAnchor="middle" fontSize="9" fill="#ffffff">💢</text>
+                </g>
+              </g>
+            )}
+
+            {/* AIMING: Crosshair 🎯 & Tactical Spark */}
+            {effectiveReaction === "aiming" && (
+              <g className="vn-emotions-aiming">
+                {/* Floating Crosshair */}
+                <g className="vn-mood-crosshair">
+                  <circle cx="176" cy="40" r="6" fill="none" stroke="#2ee6c9" strokeWidth="1.2" strokeDasharray="2 2" className="vn-reticle-spin" style={{ transformOrigin: "176px 40px" }} />
+                  <circle cx="176" cy="40" r="2.2" fill="#ff4d6d" />
+                  <line x1="176" y1="32" x2="176" y2="35" stroke="#2ee6c9" strokeWidth="1" />
+                  <line x1="176" y1="45" x2="176" y2="48" stroke="#2ee6c9" strokeWidth="1" />
+                  <line x1="168" y1="40" x2="171" y2="40" stroke="#2ee6c9" strokeWidth="1" />
+                  <line x1="181" y1="40" x2="184" y2="40" stroke="#2ee6c9" strokeWidth="1" />
+                </g>
+                <path d="M 118 24 L 114 30 L 118 30 L 115 36" stroke="#ffd23e" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" className="vn-focus-spark" />
+                <g className="vn-mood-badge-aim">
+                  <circle cx="143" cy="18" r="7.5" fill="#0f766e" stroke="#2ee6c9" strokeWidth="1" />
+                  <text x="143" y="21.2" textAnchor="middle" fontSize="8" fill="#ffffff">🎯</text>
+                </g>
+              </g>
+            )}
+
+            {/* TRACKING: Orbiting Comet Star 💫 & Tracking Badge */}
+            {effectiveReaction === "tracking" && (
+              <g className="vn-emotions-tracking">
+                <g className="vn-orbit-star">
+                  <polygon points="172,24 173.5,27.5 177,27.5 174,29.5 175.5,33 172,31 168.5,33 170,29.5 167,27.5 170.5,27.5" fill="#7dfce7" stroke="#2ee6c9" strokeWidth="0.5" />
+                </g>
+                <g className="vn-mood-badge-track">
+                  <circle cx="143" cy="18" r="7.5" fill="#1e293b" stroke="#7dfce7" strokeWidth="1" />
+                  <text x="143" y="21.2" textAnchor="middle" fontSize="8" fill="#ffffff">👀</text>
+                </g>
+              </g>
+            )}
           </g>
 
           {/* ================= FLOATING FLAGPOLE (DIAGONALLY ANGLE IN ZERO-G) ================= */}

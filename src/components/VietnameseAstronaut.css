@@ -17,93 +17,127 @@
 }
 @keyframes vnCheer {
   0%, 100% {
-    transform: translate3d(0, -6px, 0) rotate(-2deg) scale(1.08);
+    transform: translate3d(0, -3px, 0) rotate(-2deg) scale(1.05);
   }
   50% {
-    transform: translate3d(0, -14px, 0) rotate(4deg) scale(1.14);
+    transform: translate3d(0, -9px, 0) rotate(2deg) scale(1.08);
   }
 }
 @keyframes vnSad {
   0%, 100% {
-    transform: translate3d(0, 4px, 0) rotate(3deg) scale(0.96);
+    transform: translate3d(0, 3px, 0) rotate(2deg) scale(0.97);
   }
   50% {
-    transform: translate3d(0, 8px, 0) rotate(5deg) scale(0.93);
+    transform: translate3d(0, 6px, 0) rotate(4deg) scale(0.95);
   }
 }
 @keyframes vnVictory {
   0%, 100% {
-    transform: translate3d(0, -8px, 0) rotate(-3deg) scale(1.1);
+    transform: translate3d(0, -4px, 0) rotate(-2deg) scale(1.06);
   }
   50% {
-    transform: translate3d(0, -18px, 0) rotate(5deg) scale(1.16);
+    transform: translate3d(0, -11px, 0) rotate(3deg) scale(1.1);
+  }
+}
+@keyframes vnAngry {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(-1deg) scale(1.03);
+  }
+  25% {
+    transform: translate3d(1px, -1px, 0) rotate(2deg) scale(1.04);
+  }
+  50% {
+    transform: translate3d(-1px, 1px, 0) rotate(-2deg) scale(1.05);
+  }
+  75% {
+    transform: translate3d(1px, 0, 0) rotate(1deg) scale(1.04);
   }
 }
 
-/* Head Tracking & Emotional Tilts */
+/* Head Tracking & Emotional Tilts (Anchored firmly at neck pivot 143px 94px - zero detachment) */
 @keyframes vnHeadAim {
   0%, 100% {
-    transform: rotate(-10deg) translate(-2px, 1px);
+    transform: rotate(-5deg);
   }
   50% {
-    transform: rotate(-14deg) translate(-4px, 2px);
+    transform: rotate(-9deg);
   }
 }
 @keyframes vnHeadTracking {
   0%, 100% {
-    transform: rotate(-16deg) translate(-3px, -4px);
+    transform: rotate(-5deg);
   }
   50% {
-    transform: rotate(-21deg) translate(-5px, -6px);
+    transform: rotate(-10deg);
   }
 }
 @keyframes vnHeadCheer {
   0%, 100% {
-    transform: rotate(-3deg) translateY(0);
+    transform: rotate(-3deg);
   }
   50% {
-    transform: rotate(5deg) translateY(-5px);
+    transform: rotate(3deg);
   }
 }
 @keyframes vnHeadSad {
   0%, 100% {
-    transform: rotate(6deg) translateY(3px);
+    transform: rotate(-1deg);
   }
   50% {
-    transform: rotate(10deg) translateY(6px);
+    transform: rotate(5deg);
   }
 }
 @keyframes vnHeadVictory {
   0%, 100% {
-    transform: rotate(-6deg) translateY(-2px);
+    transform: rotate(-4deg);
   }
   50% {
-    transform: rotate(6deg) translateY(-8px);
+    transform: rotate(4deg);
   }
 }
+@keyframes vnHeadAngry {
+  0%, 100% {
+    transform: rotate(-5deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(-8deg);
+  }
+  75% {
+    transform: rotate(-3deg);
+  }
+}
+.vn-helmet-aiming,
+.vn-helmet-tracking,
+.vn-helmet-cheer,
+.vn-helmet-sad,
+.vn-helmet-victory,
+.vn-helmet-angry,
+.vn-helmet-idle {
+  transform-origin: 143px 94px;
+}
 .vn-helmet-aiming {
-  transform-origin: 145px 68px;
   animation: vnHeadAim 2s ease-in-out infinite;
 }
 .vn-helmet-tracking {
-  transform-origin: 145px 68px;
   animation: vnHeadTracking 1.8s ease-in-out infinite;
 }
 .vn-helmet-cheer {
-  transform-origin: 145px 68px;
   animation: vnHeadCheer 0.9s ease-in-out infinite;
 }
 .vn-helmet-sad {
-  transform-origin: 145px 68px;
   animation: vnHeadSad 2.2s ease-in-out infinite;
 }
 .vn-helmet-victory {
-  transform-origin: 145px 68px;
   animation: vnHeadVictory 1.1s ease-in-out infinite;
 }
+.vn-helmet-angry {
+  animation: vnHeadAngry 0.3s ease-in-out infinite;
+}
 .vn-helmet-idle {
-  transform-origin: 145px 68px;
-  transform: rotate(-4deg);
+  transform: rotate(-5deg);
 }
 
 /* Arm Gesture Keyframes */
@@ -112,7 +146,7 @@
     transform: translate(0, 0) rotate(0deg);
   }
   50% {
-    transform: translate(2px, -10px) rotate(8deg);
+    transform: translate(2px, -8px) rotate(6deg);
   }
 }
 .vn-fist-pump {
@@ -130,6 +164,24 @@
 .vn-arm-aim {
   transform-origin: 158px 100px;
   animation: vnPointingAimAnim 1.8s ease-in-out infinite;
+}
+@keyframes vnArmAngryAnim {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(1px, -1px) rotate(2deg);
+  }
+  50% {
+    transform: translate(-1px, 1px) rotate(-2deg);
+  }
+  75% {
+    transform: translate(1px, 0px) rotate(1deg);
+  }
+}
+.vn-arm-angry {
+  transform-origin: 158px 100px;
+  animation: vnArmAngryAnim 0.15s ease-in-out infinite;
 }
 
 /* Facial Expression FX */
@@ -296,6 +348,9 @@
 .vn-astronaut-victory {
   animation: vnVictory 1.4s ease-in-out infinite;
 }
+.vn-astronaut-angry {
+  animation: vnAngry 0.25s ease-in-out infinite;
+}
 .vn-legs-sway {
   transform-origin: 145px 141px;
   animation: vnLegsZeroG 8.2s ease-in-out infinite;
@@ -326,4 +381,245 @@
 }
 .vn-drifting-particle-2 {
   animation: vnFloatingParticle 2.6s linear infinite 0.8s;
+}
+
+/* ================= FLOATING EMOJIS & MOOD FX ================= */
+@keyframes vnMoodFloat1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(-3deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(-3px, -7px) scale(1.18) rotate(6deg);
+    opacity: 1;
+  }
+}
+@keyframes vnMoodFloat2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(4deg);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(3px, -8px) scale(1.22) rotate(-5deg);
+    opacity: 1;
+  }
+}
+.vn-mood-star-1 {
+  transform-origin: 110px 32px;
+  animation: vnMoodFloat1 1.6s ease-in-out infinite;
+}
+.vn-mood-star-2 {
+  transform-origin: 174px 30px;
+  animation: vnMoodFloat2 1.9s ease-in-out infinite 0.3s;
+}
+
+/* Floating Emoji Badges */
+@keyframes vnMoodBadgePop {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translateY(-4px) scale(1.12);
+    opacity: 1;
+  }
+}
+.vn-mood-badge-cheer,
+.vn-mood-badge-victory,
+.vn-mood-badge-sad,
+.vn-mood-badge-angry,
+.vn-mood-badge-aim,
+.vn-mood-badge-track {
+  transform-origin: 143px 18px;
+  animation: vnMoodBadgePop 1.5s ease-in-out infinite;
+}
+
+/* Victory Golden Crown */
+@keyframes vnCrownGleam {
+  0%, 100% {
+    transform: translateY(0) rotate(-2deg) scale(1);
+    filter: drop-shadow(0 0 4px rgba(255, 210, 62, 0.7));
+  }
+  50% {
+    transform: translateY(-5px) rotate(3deg) scale(1.12);
+    filter: drop-shadow(0 0 10px rgba(255, 210, 62, 1));
+  }
+}
+.vn-victory-crown {
+  transform-origin: 143px 16px;
+  animation: vnCrownGleam 1.2s ease-in-out infinite;
+}
+
+/* Victory Confetti Sparkles */
+@keyframes vnConfettiFloat {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(0.8);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(2px, -6px) rotate(45deg) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-2px, -12px) rotate(90deg) scale(0.7);
+    opacity: 0.4;
+  }
+}
+.vn-confetti-1 {
+  transform-origin: center;
+  animation: vnConfettiFloat 1.8s ease-in-out infinite;
+}
+.vn-confetti-2 {
+  transform-origin: center;
+  animation: vnConfettiFloat 1.5s ease-in-out infinite 0.4s;
+}
+.vn-confetti-3 {
+  transform-origin: center;
+  animation: vnConfettiFloat 2.1s ease-in-out infinite 0.7s;
+}
+
+/* Sad Gloom Cloud & Raindrops */
+@keyframes vnGloomDrift {
+  0%, 100% {
+    transform: translate(0, 0) rotate(-2deg);
+  }
+  50% {
+    transform: translate(0, 3px) rotate(2deg);
+  }
+}
+.vn-gloom-cloud {
+  transform-origin: 143px 18px;
+  animation: vnGloomDrift 2.4s ease-in-out infinite;
+}
+@keyframes vnRainDropAnim {
+  0% {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+}
+.vn-rain-drop-1 {
+  animation: vnRainDropAnim 0.8s linear infinite;
+}
+.vn-rain-drop-2 {
+  animation: vnRainDropAnim 0.8s linear infinite 0.4s;
+}
+
+/* Dripping Sweat Tears */
+@keyframes vnTearDripAnim {
+  0% {
+    transform: translateY(0) scale(0.7);
+    opacity: 0.3;
+  }
+  30% {
+    transform: translateY(2px) scale(1.1);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(9px) scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(14px) scale(0.5);
+    opacity: 0;
+  }
+}
+.vn-tear-drop-left {
+  transform-origin: 116px 46px;
+  animation: vnTearDripAnim 1.7s ease-in infinite;
+}
+.vn-tear-drop-right {
+  transform-origin: 172px 44px;
+  animation: vnTearDripAnim 1.7s ease-in infinite 0.8s;
+}
+
+/* Anime Anger Vein Mark 💢 */
+@keyframes vnAngerVeinPulse {
+  0%, 100% {
+    transform: scale(0.88) rotate(0deg);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.25) rotate(7deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.8));
+  }
+}
+.vn-anger-mark {
+  transform-origin: 170px 36px;
+  animation: vnAngerVeinPulse 0.65s ease-in-out infinite;
+}
+
+/* Angry Steam Puffs */
+@keyframes vnSteamPuffLeftAnim {
+  0% {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-6px, -4px) scale(1.3);
+    opacity: 0;
+  }
+}
+@keyframes vnSteamPuffRightAnim {
+  0% {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(6px, -4px) scale(1.3);
+    opacity: 0;
+  }
+}
+.vn-steam-puff-left {
+  transform-origin: 108px 68px;
+  animation: vnSteamPuffLeftAnim 0.7s ease-out infinite;
+}
+.vn-steam-puff-right {
+  transform-origin: 180px 68px;
+  animation: vnSteamPuffRightAnim 0.7s ease-out infinite 0.15s;
+}
+
+/* Anger & Focus Sparks */
+@keyframes vnSparkFlicker {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3) rotate(8deg);
+  }
+}
+.vn-anger-spark {
+  transform-origin: center;
+  animation: vnSparkFlicker 0.4s ease-in-out infinite;
+}
+.vn-focus-spark {
+  transform-origin: 116px 30px;
+  animation: vnSparkFlicker 0.8s ease-in-out infinite;
+}
+
+/* Orbiting Comet Star */
+@keyframes vnOrbitStarFloat {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(0.9);
+  }
+  50% {
+    transform: translate(3px, -5px) rotate(180deg) scale(1.2);
+  }
+}
+.vn-orbit-star {
+  transform-origin: 172px 28px;
+  animation: vnOrbitStarFloat 2s ease-in-out infinite;
+}
+
+.vn-mood-sparkle {
+  animation: vnStarSparkle 1.4s ease-in-out infinite;
+}
+.vn-mood-sparkle-delayed {
+  animation: vnStarSparkle 1.8s ease-in-out infinite 0.5s;
 }
