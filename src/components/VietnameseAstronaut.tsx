@@ -330,13 +330,6 @@ export function VietnameseAstronaut({
         </div>
       )}
 
-      {/* Hover Information Tooltip */}
-      {!showQuote && (
-        <div className="pointer-events-none absolute -bottom-6 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-md border border-ice-500/40 bg-void-950/90 px-2 py-0.5 text-[9px] font-bold tracking-wider text-ice-300 opacity-0 shadow-[0_0_12px_rgba(46,230,201,0.3)] backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 sm:text-[10px]">
-          🇻🇳 {lang === "vi" ? "Phi Hành Gia Việt Nam • Không Trọng Lực" : "Vietnamese Astronaut • Zero-G Float"}
-        </div>
-      )}
-
       {/* Main Astronaut SVG Artwork (Authentic Zero-G Weightless Floating Posture) */}
       <svg
         viewBox="0 0 215 220"

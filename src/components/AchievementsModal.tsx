@@ -141,7 +141,7 @@ export function AchievementsModal({ onClose, lang = "vi", t }: AchievementsModal
       {/* Footer debrief with Astronaut Mascot */}
       <div className="flex items-center justify-between border-t border-void-800/90 bg-void-950 px-5 py-3 text-xs text-white/50">
         <div className="flex items-center gap-2">
-          <VietnameseAstronaut lang={lang} className="h-8 w-8" reaction="cheer" />
+          <VietnameseAstronaut lang={lang} className="h-8 w-8 shrink-0" reaction="cheer" />
           <span>
             {unlockedCount === totalCount
               ? (t?.allBadgesCollected ?? "Đại Sư Vũ Trụ! Đã sưu tập trọn bộ huy hiệu!")
