@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { VictoryData } from "../game/engine";
 import type { Translations } from "../game/i18n";
-import { StarRating } from "./StarRating";
 import { audio } from "../game/audio";
 import { VietnameseAstronaut } from "./VietnameseAstronaut";
+import { cn } from "../utils/cn";
 
 export interface VictoryModalProps {
   data: VictoryData;
@@ -12,6 +12,48 @@ export interface VictoryModalProps {
   onRetry: () => void;
   onOpenRoadmap: () => void;
   t?: Translations;
+}
+
+function useCountUp(target: number, durationMs = 1000, delayMs = 200, playTicks = false) {
+  const [val, setVal] = useState(0);
+
+  useEffect(() => {
+    let animId: number;
+    let startTimestamp: number | null = null;
+    let lastTickTime = 0;
+
+    const timer = setTimeout(() => {
+      const step = (now: number) => {
+        if (!startTimestamp) startTimestamp = now;
+        const elapsed = now - startTimestamp;
+        const progress = Math.min(elapsed / durationMs, 1);
+        
+        // Fast cubic ease-out
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(ease * target);
+        setVal(current);
+
+        if (playTicks && progress < 1 && now - lastTickTime > 65) {
+          audio.scoreTick();
+          lastTickTime = now;
+        }
+
+        if (progress < 1) {
+          animId = requestAnimationFrame(step);
+        } else {
+          setVal(target);
+        }
+      };
+      animId = requestAnimationFrame(step);
+    }, delayMs);
+
+    return () => {
+      clearTimeout(timer);
+      cancelAnimationFrame(animId);
+    };
+  }, [target, durationMs, delayMs, playTicks]);
+
+  return val;
 }
 
 export function VictoryModal({
@@ -23,6 +65,42 @@ export function VictoryModal({
   t,
 }: VictoryModalProps) {
   const [copied, setCopied] = useState(false);
+  const [revealedStars, setRevealedStars] = useState(0);
+
+  const baseScore = Math.max(0, data.levelScore - data.coresBonus);
+  const displayLevelScore = useCountUp(baseScore, 850, 150, false);
+  const displayBonus = useCountUp(data.coresBonus, 950, 300, false);
+  const displayTotalScore = useCountUp(data.score, 1200, 450, true);
+
+  // Sequential Star Reveal Animation
+  useEffect(() => {
+    const t1 = setTimeout(() => {
+      if (data.stars >= 1) {
+        setRevealedStars(1);
+        audio.starPop(0);
+      }
+    }, 350);
+
+    const t2 = setTimeout(() => {
+      if (data.stars >= 2) {
+        setRevealedStars(2);
+        audio.starPop(1);
+      }
+    }, 750);
+
+    const t3 = setTimeout(() => {
+      if (data.stars >= 3) {
+        setRevealedStars(3);
+        audio.starPop(2);
+      }
+    }, 1150);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [data.stars]);
 
   const handleShare = async () => {
     audio.ensure();
@@ -58,6 +136,15 @@ export function VictoryModal({
 
   return (
     <div className="animate-pop-in m-auto flex w-[min(92vw,24rem)] flex-col items-center rounded-2xl border-2 border-ember-500/50 bg-void-950/95 p-6 shadow-[0_0_50px_rgba(255,122,26,0.25)] backdrop-blur-md">
+      <style>{`
+        @keyframes victoryStarPop {
+          0% { transform: scale(0) rotate(-35deg); opacity: 0; }
+          60% { transform: scale(1.4) rotate(8deg); opacity: 1; }
+          80% { transform: scale(0.92) rotate(-3deg); }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+      `}</style>
+
       <p className="text-[11px] font-bold tracking-[0.4em] text-ember-300/80 uppercase">
         {t?.levelClearedHeader ?? "LEVEL CLEARED"} {data.level}
       </p>
@@ -74,37 +161,74 @@ export function VictoryModal({
         showReactionBadge
       />
 
-      {/* 3 Stars display */}
+      {/* 3 Stars display with sequential pop */}
       <div className="my-3 flex flex-col items-center">
-        <StarRating stars={data.stars} size="xl" animate />
-        <p className="mt-2 text-xs font-bold tracking-widest text-ice-300">
-          {data.stars === 3
-            ? (t?.perfectRun3Stars ?? "PERFECT RUN — 3 STARS!")
-            : data.stars === 2
-              ? (t?.greatShot2Stars ?? "GREAT SHOT — 2 STARS")
-              : (t?.cleared1Star ?? "CLEARED — 1 STAR")}
+        <div className="flex items-center gap-2">
+          {[1, 2, 3].map((starNum) => {
+            const isRevealed = starNum <= revealedStars;
+
+            return (
+              <div
+                key={starNum}
+                className={cn(
+                  "relative flex items-center justify-center transition-all duration-300",
+                  isRevealed && "animate-[victoryStarPop_0.45s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]"
+                )}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill={isRevealed ? "#ffb326" : "rgba(255, 255, 255, 0.12)"}
+                  stroke={isRevealed ? "#ffe480" : "rgba(255, 255, 255, 0.25)"}
+                  strokeWidth="1.2"
+                  className={cn(
+                    "h-11 w-11 transition-all duration-300",
+                    isRevealed
+                      ? "drop-shadow-[0_0_14px_rgba(255,179,38,0.9)] scale-105"
+                      : "opacity-30 scale-95"
+                  )}
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+
+                {/* Stardust sparkle flash when revealed */}
+                {isRevealed && (
+                  <span className="pointer-events-none absolute -top-1 -right-1 h-3 w-3 rounded-full bg-amber-200 animate-ping opacity-75" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="mt-2 text-xs font-bold tracking-widest text-ice-300 transition-opacity duration-300">
+          {revealedStars >= data.stars
+            ? data.stars === 3
+              ? (t?.perfectRun3Stars ?? "PERFECT RUN — 3 STARS!")
+              : data.stars === 2
+                ? (t?.greatShot2Stars ?? "GREAT SHOT — 2 STARS")
+                : (t?.cleared1Star ?? "CLEARED — 1 STAR")
+            : "..."}
         </p>
       </div>
 
-      {/* Score Summary Box */}
+      {/* Score Summary Box with rapid counting */}
       <div className="w-full space-y-2 rounded-xl border border-void-700/80 bg-void-900/80 p-3.5 text-xs font-semibold">
         <div className="flex justify-between text-white/70">
           <span>{t?.levelScore ?? "Level Score"}</span>
           <span className="font-display tracking-wider text-white">
-            {(data.levelScore - data.coresBonus).toLocaleString("en-US")}
+            {displayLevelScore.toLocaleString("en-US")}
           </span>
         </div>
         <div className="flex justify-between text-white/70">
           <span>{t?.coreReserveBonus ?? "Core Reserve Bonus"}</span>
           <span className="font-display tracking-wider text-ice-300">
-            +{data.coresBonus.toLocaleString("en-US")}
+            +{displayBonus.toLocaleString("en-US")}
           </span>
         </div>
         <div className="my-1 border-t border-void-700/60" />
         <div className="flex items-center justify-between text-sm font-bold text-ember-300">
           <span>{t?.totalRunScore ?? "Total Run Score"}</span>
           <span className="font-display text-lg tracking-wide text-ember-400">
-            {data.score.toLocaleString("en-US")}
+            {displayTotalScore.toLocaleString("en-US")}
           </span>
         </div>
         {data.isNewBestScore && (
