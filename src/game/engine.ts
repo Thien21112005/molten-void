@@ -41,6 +41,13 @@ import { ParticleSystem } from "./fx/particleSystem";
 import { FloatTextSystem } from "./fx/floatTextSystem";
 import { AmbientEnvironment } from "./fx/ambientEnvironment";
 import { SpriteFactory } from "./renderers/spriteFactory";
+import { simulateTrajectory } from "./physics/trajectorySimulator";
+import { applyGravityWells, applyWormholes } from "./physics/forces";
+import {
+  resolveWallCollision,
+  resolveBlockCollision,
+  resolveRotatorCollision,
+} from "./physics/collisions";
 
 export type {
   Screen,
@@ -1266,108 +1273,47 @@ export class Engine {
           o.vy += this.G * sdt;
 
           // Gravity Wells pull
-          for (const gw of this.gravityWells) {
-            const gdx = gw.x - o.x;
-            const gdy = gw.y - o.y;
-            const distSq = gdx * gdx + gdy * gdy;
-            if (distSq < gw.radius * gw.radius) {
-              o.gravityInfluenced = true;
-              const dist = Math.sqrt(distSq);
-              const force = (gw.strength * 450) / (distSq + 900);
-              o.vx += (gdx / (dist + 0.001)) * force * sdt;
-              o.vy += (gdy / (dist + 0.001)) * force * sdt;
-            }
-          }
+          applyGravityWells(o, this.gravityWells, sdt);
 
           // Wormhole Portals
-          if ((o.portalCooldown ?? 0) > 0) {
-            o.portalCooldown = Math.max(0, (o.portalCooldown ?? 0) - sdt);
-          } else {
-            for (const wh of this.wormholes) {
-              const d1Sq = (o.x - wh.x1) ** 2 + (o.y - wh.y1) ** 2;
-              const d2Sq = (o.x - wh.x2) ** 2 + (o.y - wh.y2) ** 2;
-              const sp = Math.hypot(o.vx, o.vy) || 120;
-              let entered = false;
-              let tx = 0, ty = 0;
+          applyWormholes(o, this.wormholes, sdt, (tx, ty, r) => {
+            unlockAchievement("wormhole_voyager");
+            sfx.spaceChime();
+            haptics.fire();
+            this.shake = Math.min(26, this.shake + 3);
 
-              if (d1Sq < (wh.r + o.r * 0.4) ** 2) {
-                entered = true;
-                tx = wh.x2;
-                ty = wh.y2;
-              } else if (d2Sq < (wh.r + o.r * 0.4) ** 2) {
-                entered = true;
-                tx = wh.x1;
-                ty = wh.y1;
-              }
+            this.particles.push({
+              kind: 3,
+              x: tx,
+              y: ty,
+              vx: 0,
+              vy: 0,
+              life: 0.35,
+              tl: 0.35,
+              size: r * 2.4,
+              rot: 0,
+              vr: 0,
+              col: "46,230,201",
+              grav: 0,
+              drag: 0,
+            });
 
-              if (entered) {
-                unlockAchievement("wormhole_voyager");
-                o.x = tx + (o.vx / sp) * (wh.r + 4);
-                o.y = ty + (o.vy / sp) * (wh.r + 4);
-                o.portalCooldown = 0.4;
-                sfx.spaceChime();
-                haptics.fire();
-                this.shake = Math.min(26, this.shake + 3);
-
-                this.particles.push({
-                  kind: 3,
-                  x: tx,
-                  y: ty,
-                  vx: 0,
-                  vy: 0,
-                  life: 0.35,
-                  tl: 0.35,
-                  size: wh.r * 2.4,
-                  rot: 0,
-                  vr: 0,
-                  col: "46,230,201",
-                  grav: 0,
-                  drag: 0,
-                });
-
-                this.texts.push({
-                  x: tx,
-                  y: ty - wh.r - 12,
-                  t: 0,
-                  life: 0.8,
-                  str: "WARP!",
-                  size: 15,
-                  col: "#2ee6c9",
-                });
-                break;
-              }
-            }
-          }
+            this.texts.push({
+              x: tx,
+              y: ty - r - 12,
+              t: 0,
+              life: 0.8,
+              str: "WARP!",
+              size: 15,
+              col: "#2ee6c9",
+            });
+          });
 
           o.x += o.vx * sdt;
           o.y += o.vy * sdt;
 
-          const rest = 0.56;
-          let impact = 0;
-          if (o.x - o.r < 0) {
-            o.x = o.r;
-            impact = Math.abs(o.vx);
-            o.vx = Math.abs(o.vx) * rest;
-          } else if (o.x + o.r > this.W) {
-            o.x = this.W - o.r;
-            impact = Math.abs(o.vx);
-            o.vx = -Math.abs(o.vx) * rest;
-          }
-          if (o.y - o.r < 0) {
-            o.y = o.r;
-            impact = Math.max(impact, Math.abs(o.vy));
-            o.vy = Math.abs(o.vy) * rest;
-          } else if (o.y + o.r > this.H) {
-            o.y = this.H - o.r;
-            impact = Math.max(impact, Math.abs(o.vy));
-            o.vy = -Math.abs(o.vy) * rest;
-            if (Math.abs(o.vy) < 55) o.vy = 0;
-          }
-          // ground friction so the orb comes to rest
-          if (o.y >= this.H - o.r - 0.5) {
-            o.vx *= Math.max(0, 1 - 2.4 * sdt);
-            if (Math.abs(o.vx) < 4) o.vx = 0;
-          }
+          // Wall collision & boundaries
+          const { impact } = resolveWallCollision(o, this.W, this.H, sdt);
           if (impact > 150) {
             o.bounces = (o.bounces ?? 0) + 1;
             const n = Math.min(8, 2 + Math.floor(impact / 220));
@@ -1393,161 +1339,90 @@ export class Engine {
             this.shake = Math.min(26, this.shake + Math.min(4, impact / 400));
           }
 
-          // blocks
-          for (const b of this.blocks) {
-            if (o.piercedBlocks?.has(b)) continue;
-            const cx = clamp(o.x, b.x, b.x + b.w);
-            const cy = clamp(o.y, b.y, b.y + b.h);
-            let dx = o.x - cx;
-            let dy = o.y - cy;
-            const d2 = dx * dx + dy * dy;
-            if (d2 < o.r * o.r) {
-              // Heavy core pierce check:
-              if (o.coreType === "heavy" && (o.piercesLeft ?? 0) > 0) {
-                if (!o.piercedBlocks) o.piercedBlocks = new Set();
-                o.piercedBlocks.add(b);
-                o.piercesLeft = (o.piercesLeft ?? 1) - 1;
-                o.vx *= 0.86;
-                o.vy *= 0.86;
-                sfx.thud(1.0);
-                haptics.shatter(2);
-                this.shake = Math.min(26, this.shake + 5);
-                for (let pi = 0; pi < 10; pi++) {
-                  this.particles.push({
-                    kind: 0,
-                    x: cx,
-                    y: cy,
-                    vx: rand(-160, 160),
-                    vy: rand(-160, 160),
-                    life: rand(0.25, 0.5),
-                    tl: 0.5,
-                    size: 4,
-                    rot: rand(0, TAU),
-                    vr: rand(-5, 5),
-                    col: "180,200,230",
-                    grav: 500,
-                    drag: 1.2,
-                  });
-                }
-                this.texts.push({
+          // Blocks collision & pierce
+          resolveBlockCollision(
+            o,
+            this.blocks,
+            (b, cx, cy) => {
+              sfx.thud(1.0);
+              haptics.shatter(2);
+              this.shake = Math.min(26, this.shake + 5);
+              for (let pi = 0; pi < 10; pi++) {
+                this.particles.push({
+                  kind: 0,
                   x: cx,
-                  y: cy - 14,
-                  t: 0,
-                  life: 0.8,
-                  str: "PIERCE!",
-                  size: 16,
-                  col: "#38bdf8",
+                  y: cy,
+                  vx: rand(-160, 160),
+                  vy: rand(-160, 160),
+                  life: rand(0.25, 0.5),
+                  tl: 0.5,
+                  size: 4,
+                  rot: rand(0, TAU),
+                  vr: rand(-5, 5),
+                  col: "180,200,230",
+                  grav: 500,
+                  drag: 1.2,
                 });
-                break;
               }
-
-              const d = Math.sqrt(d2);
-              if (d < 0.001) {
-                dx = 0;
-                dy = -1;
-              } else {
-                dx /= d;
-                dy /= d;
-              }
-              o.x = cx + dx * o.r;
-              o.y = cy + dy * o.r;
-              const vn = o.vx * dx + o.vy * dy;
-              if (vn < 0) {
-                o.bounces = (o.bounces ?? 0) + 1;
-                o.vx -= 1.62 * vn * dx;
-                o.vy -= 1.62 * vn * dy;
-                if (-vn > 160) {
-                  sfx.thud(-vn / this.maxSpeed);
-                  haptics.bounce();
-                  this.shake = Math.min(26, this.shake + Math.min(4, -vn / 420));
-                  for (let i = 0; i < 6; i++) {
-                    this.particles.push({
-                      kind: 1,
-                      x: cx,
-                      y: cy,
-                      vx: rand(-140, 140),
-                      vy: rand(-180, 60),
-                      life: rand(0.1, 0.25),
-                      tl: 0.25,
-                      size: 2,
-                      rot: 0,
-                      vr: 0,
-                      col: "180,170,255",
-                      grav: 300,
-                      drag: 2,
-                    });
-                  }
-                }
-              }
-            }
-          }
-
-          // rotators
-          for (const rot of this.rotators) {
-            const cosA = Math.cos(rot.angle);
-            const sinA = Math.sin(rot.angle);
-            const halfL = rot.len / 2;
-            const p1x = rot.x - cosA * halfL;
-            const p1y = rot.y - sinA * halfL;
-            const p2x = rot.x + cosA * halfL;
-            const p2y = rot.y + sinA * halfL;
-
-            const segDx = p2x - p1x;
-            const segDy = p2y - p1y;
-            const segLenSq = segDx * segDx + segDy * segDy;
-            const t_proj = segLenSq > 0 ? clamp(((o.x - p1x) * segDx + (o.y - p1y) * segDy) / segLenSq, 0, 1) : 0;
-            const cx = p1x + t_proj * segDx;
-            const cy = p1y + t_proj * segDy;
-
-            let dx = o.x - cx;
-            let dy = o.y - cy;
-            const distSq = dx * dx + dy * dy;
-            const minR = o.r + rot.width / 2;
-
-            if (distSq < minR * minR) {
-              const dist = Math.sqrt(distSq);
-              const nx = dist > 0.001 ? dx / dist : 0;
-              const ny = dist > 0.001 ? dy / dist : -1;
-              o.x = cx + nx * minR;
-              o.y = cy + ny * minR;
-
-              const r_arm_x = cx - rot.x;
-              const r_arm_y = cy - rot.y;
-              const barVx = -rot.speed * r_arm_y;
-              const barVy = rot.speed * r_arm_x;
-
-              const relVx = o.vx - barVx;
-              const relVy = o.vy - barVy;
-              const vn = relVx * nx + relVy * ny;
-
-              if (vn < 0) {
-                o.bounces = (o.bounces ?? 0) + 1;
-                const restitution = 1.35;
-                o.vx = barVx + (relVx - (1 + restitution) * vn * nx);
-                o.vy = barVy + (relVy - (1 + restitution) * vn * ny);
-                sfx.thud(1.0);
+              this.texts.push({
+                x: cx,
+                y: cy - 14,
+                t: 0,
+                life: 0.8,
+                str: "PIERCE!",
+                size: 16,
+                col: "#38bdf8",
+              });
+            },
+            (vn, cx, cy) => {
+              if (-vn > 160) {
+                sfx.thud(-vn / this.maxSpeed);
                 haptics.bounce();
-                this.shake = Math.min(26, this.shake + 3.5);
+                this.shake = Math.min(26, this.shake + Math.min(4, -vn / 420));
                 for (let i = 0; i < 6; i++) {
                   this.particles.push({
                     kind: 1,
                     x: cx,
                     y: cy,
-                    vx: rand(-120, 120),
-                    vy: rand(-120, 120),
-                    life: rand(0.12, 0.28),
-                    tl: 0.28,
-                    size: 2.2,
+                    vx: rand(-140, 140),
+                    vy: rand(-180, 60),
+                    life: rand(0.1, 0.25),
+                    tl: 0.25,
+                    size: 2,
                     rot: 0,
                     vr: 0,
-                    col: "255,210,62",
-                    grav: 200,
+                    col: "180,170,255",
+                    grav: 300,
                     drag: 2,
                   });
                 }
               }
             }
-          }
+          );
+
+          // Rotators collision
+          resolveRotatorCollision(o, this.rotators, (cx, cy) => {
+            sfx.thud(1.0);
+            haptics.bounce();
+            this.shake = Math.min(26, this.shake + 3.5);
+            for (let i = 0; i < 6; i++) {
+              this.particles.push({
+                kind: 1,
+                x: cx,
+                y: cy,
+                vx: rand(-120, 120),
+                vy: rand(-120, 120),
+                life: rand(0.12, 0.28),
+                tl: 0.28,
+                size: 2.2,
+                rot: 0,
+                vr: 0,
+                col: "255,210,62",
+                grav: 200,
+                drag: 2,
+              });
+            }
+          });
 
           // gems
           for (const g of this.gems) {
@@ -1600,72 +1475,22 @@ export class Engine {
   // ---------- trajectory sim ----------
 
   private simTraj(angle: number, power: number) {
-    const sp = (0.2 + 0.8 * power) * this.maxSpeed;
-    let x = this.launcher.x;
-    let y = this.launcher.y;
-    let vx = Math.cos(angle) * sp;
-    let vy = Math.sin(angle) * sp;
-    const dt = 1 / 50;
-    const pts: { x: number; y: number }[] = [];
-    let hit: { x: number; y: number } | null = null;
     const cfg = loadSettings();
     const maxSteps = cfg.trajectoryGuide === "minimal" ? 22 : 70;
-    for (let i = 0; i < maxSteps; i++) {
-      vy += this.G * dt;
-      // Gravity well trajectory bending
-      for (const gw of this.gravityWells) {
-        const gdx = gw.x - x;
-        const gdy = gw.y - y;
-        const distSq = gdx * gdx + gdy * gdy;
-        if (distSq < gw.radius * gw.radius) {
-          const dist = Math.sqrt(distSq);
-          const force = (gw.strength * 450) / (distSq + 900);
-          vx += (gdx / (dist + 0.001)) * force * dt;
-          vy += (gdy / (dist + 0.001)) * force * dt;
-        }
-      }
-      x += vx * dt;
-      y += vy * dt;
-      // Wormhole trajectory jump
-      for (const wh of this.wormholes) {
-        const d1Sq = (x - wh.x1) ** 2 + (y - wh.y1) ** 2;
-        const d2Sq = (x - wh.x2) ** 2 + (y - wh.y2) ** 2;
-        const s = Math.hypot(vx, vy) || 120;
-        if (d1Sq < wh.r * wh.r) {
-          x = wh.x2 + (vx / s) * (wh.r + 4);
-          y = wh.y2 + (vy / s) * (wh.r + 4);
-          break;
-        } else if (d2Sq < wh.r * wh.r) {
-          x = wh.x1 + (vx / s) * (wh.r + 4);
-          y = wh.y1 + (vy / s) * (wh.r + 4);
-          break;
-        }
-      }
-      if (i % 3 === 0) pts.push({ x, y });
-      if (x < 0 || x > this.W || y > this.H || y < 0) {
-        hit = { x: clamp(x, 0, this.W), y: clamp(y, 0, this.H) };
-        break;
-      }
-      let blocked = false;
-      for (const b of this.blocks) {
-        if (x > b.x - 6 && x < b.x + b.w + 6 && y > b.y - 6 && y < b.y + b.h + 6) {
-          blocked = true;
-          break;
-        }
-      }
-      if (!blocked)
-        for (const g of this.gems) {
-          if (!g.dead && (x - g.x) ** 2 + (y - g.y) ** 2 < (g.r + 4) ** 2) {
-            blocked = true;
-            break;
-          }
-        }
-      if (blocked) {
-        hit = { x, y };
-        break;
-      }
-    }
-    return { pts, hit };
+    return simulateTrajectory(
+      this.launcher,
+      angle,
+      power,
+      this.maxSpeed,
+      this.G,
+      this.W,
+      this.H,
+      this.gravityWells,
+      this.wormholes,
+      this.blocks,
+      this.gems,
+      maxSteps
+    );
   }
 
   private powerColor(p: number) {
