@@ -3,7 +3,7 @@ import { audio } from "../game/audio";
 import type { Language } from "../game/i18n";
 import { cn } from "../utils/cn";
 
-export type AstronautReaction = "idle" | "aiming" | "cheer" | "sad" | "victory";
+export type AstronautReaction = "idle" | "aiming" | "tracking" | "cheer" | "sad" | "victory";
 
 interface VietnameseAstronautProps {
   lang: Language;
@@ -17,12 +17,14 @@ interface VietnameseAstronautProps {
 const REACTION_TEXTS = {
   vi: {
     aiming: "🎯 Khóa tọa độ...",
+    tracking: "👀 Theo dõi đường đạn...",
     cheer: "⭐ Tuyệt đỉnh!",
     sad: "⚡ Cố lên nào!",
     victory: "🇻🇳 Vẻ vang!",
   },
   en: {
     aiming: "🎯 Locking coords...",
+    tracking: "👀 Tracking comet...",
     cheer: "⭐ Splendid shot!",
     sad: "⚡ You got this!",
     victory: "🇻🇳 Victorious!",
@@ -56,6 +58,7 @@ export function VietnameseAstronaut({
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [showQuote, setShowQuote] = useState(false);
   const [boostEffect, setBoostEffect] = useState(false);
+  const [localReaction, setLocalReaction] = useState<AstronautReaction | null>(null);
   const hideTimeoutRef = useRef<number | null>(null);
 
   const handleClick = useCallback(() => {
@@ -70,6 +73,7 @@ export function VietnameseAstronaut({
     // Toggle boost animation and cycle through heroic radio quotes
     setBoostEffect(true);
     setShowQuote(true);
+    setLocalReaction("cheer");
     setQuoteIndex((prev) => (prev + 1) % RADIO_QUOTES_VI.length);
 
     if (hideTimeoutRef.current) {
@@ -78,21 +82,40 @@ export function VietnameseAstronaut({
     hideTimeoutRef.current = window.setTimeout(() => {
       setShowQuote(false);
       setBoostEffect(false);
+      setLocalReaction(null);
     }, 4500);
   }, [boostEffect]);
 
   const activeQuote = (lang === "vi" ? RADIO_QUOTES_VI : RADIO_QUOTES_EN)[quoteIndex];
 
+  const effectiveReaction: AstronautReaction =
+    reaction !== "idle" ? reaction : localReaction ?? "idle";
+
   const reactionClass =
-    reaction === "aiming"
+    effectiveReaction === "aiming"
       ? "vn-astronaut-aiming"
-      : reaction === "cheer"
-        ? "vn-astronaut-cheer"
-        : reaction === "sad"
-          ? "vn-astronaut-sad"
-          : reaction === "victory"
-            ? "vn-astronaut-victory"
-            : "vn-zero-g-float";
+      : effectiveReaction === "tracking"
+        ? "vn-astronaut-tracking"
+        : effectiveReaction === "cheer"
+          ? "vn-astronaut-cheer"
+          : effectiveReaction === "sad"
+            ? "vn-astronaut-sad"
+            : effectiveReaction === "victory"
+              ? "vn-astronaut-victory"
+              : "vn-zero-g-float";
+
+  const helmetClass =
+    effectiveReaction === "aiming"
+      ? "vn-helmet-aiming"
+      : effectiveReaction === "tracking"
+        ? "vn-helmet-tracking"
+        : effectiveReaction === "cheer"
+          ? "vn-helmet-cheer"
+          : effectiveReaction === "sad"
+            ? "vn-helmet-sad"
+            : effectiveReaction === "victory"
+              ? "vn-helmet-victory"
+              : "vn-helmet-idle";
 
   return (
     <div
@@ -107,9 +130,9 @@ export function VietnameseAstronaut({
       )}
     >
       {/* Dynamic Floating Reaction Badge */}
-      {showReactionBadge && (reactionText || (reaction !== "idle" && REACTION_TEXTS[lang][reaction])) && (
+      {showReactionBadge && (reactionText || (effectiveReaction !== "idle" && REACTION_TEXTS[lang][effectiveReaction])) && (
         <div className="animate-pop-in pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-amber-400/80 bg-void-950/95 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 shadow-[0_0_16px_rgba(255,180,40,0.55)] backdrop-blur-md z-30">
-          {reactionText ?? REACTION_TEXTS[lang][reaction]}
+          {reactionText ?? REACTION_TEXTS[lang][effectiveReaction]}
         </div>
       )}
 
@@ -121,6 +144,14 @@ export function VietnameseAstronaut({
           }
           50% {
             transform: translate3d(-6px, 4px, 0) rotate(-7deg) scale(1.06);
+          }
+        }
+        @keyframes vnTracking {
+          0%, 100% {
+            transform: translate3d(-2px, -3px, 0) rotate(-6deg) scale(1.04);
+          }
+          50% {
+            transform: translate3d(-4px, -7px, 0) rotate(-9deg) scale(1.06);
           }
         }
         @keyframes vnCheer {
@@ -146,6 +177,141 @@ export function VietnameseAstronaut({
           50% {
             transform: translate3d(0, -18px, 0) rotate(5deg) scale(1.16);
           }
+        }
+
+        /* Head Tracking & Emotional Tilts */
+        @keyframes vnHeadAim {
+          0%, 100% {
+            transform: rotate(-10deg) translate(-2px, 1px);
+          }
+          50% {
+            transform: rotate(-14deg) translate(-4px, 2px);
+          }
+        }
+        @keyframes vnHeadTracking {
+          0%, 100% {
+            transform: rotate(-16deg) translate(-3px, -4px);
+          }
+          50% {
+            transform: rotate(-21deg) translate(-5px, -6px);
+          }
+        }
+        @keyframes vnHeadCheer {
+          0%, 100% {
+            transform: rotate(-3deg) translateY(0);
+          }
+          50% {
+            transform: rotate(5deg) translateY(-5px);
+          }
+        }
+        @keyframes vnHeadSad {
+          0%, 100% {
+            transform: rotate(6deg) translateY(3px);
+          }
+          50% {
+            transform: rotate(10deg) translateY(6px);
+          }
+        }
+        @keyframes vnHeadVictory {
+          0%, 100% {
+            transform: rotate(-6deg) translateY(-2px);
+          }
+          50% {
+            transform: rotate(6deg) translateY(-8px);
+          }
+        }
+        .vn-helmet-aiming {
+          transform-origin: 145px 68px;
+          animation: vnHeadAim 2s ease-in-out infinite;
+        }
+        .vn-helmet-tracking {
+          transform-origin: 145px 68px;
+          animation: vnHeadTracking 1.8s ease-in-out infinite;
+        }
+        .vn-helmet-cheer {
+          transform-origin: 145px 68px;
+          animation: vnHeadCheer 0.9s ease-in-out infinite;
+        }
+        .vn-helmet-sad {
+          transform-origin: 145px 68px;
+          animation: vnHeadSad 2.2s ease-in-out infinite;
+        }
+        .vn-helmet-victory {
+          transform-origin: 145px 68px;
+          animation: vnHeadVictory 1.1s ease-in-out infinite;
+        }
+        .vn-helmet-idle {
+          transform-origin: 145px 68px;
+          transform: rotate(-4deg);
+        }
+
+        /* Arm Gesture Keyframes */
+        @keyframes vnFistPumpAnim {
+          0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate(2px, -10px) rotate(8deg);
+          }
+        }
+        .vn-fist-pump {
+          transform-origin: 158px 100px;
+          animation: vnFistPumpAnim 0.75s ease-in-out infinite;
+        }
+        @keyframes vnPointingAimAnim {
+          0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate(-3px, -1px) rotate(-4deg);
+          }
+        }
+        .vn-arm-aim {
+          transform-origin: 158px 100px;
+          animation: vnPointingAimAnim 1.8s ease-in-out infinite;
+        }
+
+        /* Facial Expression FX */
+        @keyframes vnSweatDropAnim {
+          0% {
+            transform: translateY(0);
+            opacity: 0.95;
+          }
+          75% {
+            transform: translateY(7px);
+            opacity: 0.85;
+          }
+          100% {
+            transform: translateY(11px);
+            opacity: 0;
+          }
+        }
+        .vn-sweat-drop {
+          animation: vnSweatDropAnim 1.6s ease-in-out infinite;
+        }
+        @keyframes vnReticleSpinAnim {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+        .vn-reticle-spin {
+          animation: vnReticleSpinAnim 4s linear infinite;
+        }
+        @keyframes vnBlushPulseAnim {
+          0%, 100% {
+            opacity: 0.65;
+            transform: scale(0.9);
+          }
+          50% {
+            opacity: 0.95;
+            transform: scale(1.15);
+          }
+        }
+        .vn-blush-pulse {
+          animation: vnBlushPulseAnim 1.2s ease-in-out infinite;
         }
 
         /* Authentic Wandering 2D Zero-G Orbit Drift (Quỹ Đạo Lơ Lửng Bất Ổn - Không Bị Lên Xuống) */
@@ -256,6 +422,9 @@ export function VietnameseAstronaut({
         }
         .vn-astronaut-aiming {
           animation: vnAiming 1.8s ease-in-out infinite;
+        }
+        .vn-astronaut-tracking {
+          animation: vnTracking 2s ease-in-out infinite;
         }
         .vn-astronaut-cheer {
           animation: vnCheer 1.2s ease-in-out infinite;
@@ -531,39 +700,96 @@ export function VietnameseAstronaut({
             />
           </g>
 
-          {/* ================= RIGHT ARM (RELAXED WEIGHTLESS FLOAT) ================= */}
-          <g id="vn-right-arm" className="vn-arm-sway">
-            {/* Soft Puffy Arm Floating Gently in Zero-G */}
-            <path
-              d="M 158 100 C 172 105, 178 114, 172 126"
-              fill="none"
-              stroke="url(#vnPuffySuit)"
-              strokeWidth="12"
-              strokeLinecap="round"
-            />
-            {/* Fabric Wrinkle at Elbow */}
-            <path
-              d="M 171 112 C 173 115, 172 118, 169 120"
-              stroke="#cbd5e1"
-              strokeWidth="1.2"
-              fill="none"
-              strokeLinecap="round"
-            />
+          {/* ================= DYNAMIC RIGHT ARM GESTURES ================= */}
+          {(effectiveReaction === "cheer" || effectiveReaction === "victory") ? (
+            /* Joyful Raised Fist Pump Arm Celebrating Victory */
+            <g id="vn-right-arm-pump" className="vn-fist-pump">
+              {/* Puffy Arm Reaching High into the Sky */}
+              <path
+                d="M 158 100 C 168 86, 172 70, 168 54"
+                fill="none"
+                stroke="url(#vnPuffySuit)"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+              <path
+                d="M 166 76 C 168 74, 172 75, 172 78"
+                stroke="#cbd5e1"
+                strokeWidth="1.2"
+                fill="none"
+                strokeLinecap="round"
+              />
+              {/* Mission Patch */}
+              <rect x="163" y="85" width="10" height="7" rx="1.5" fill="#da251d" stroke="#ffd23e" strokeWidth="0.7" transform="rotate(-15 168 88)" />
+              {/* Clenched Victory Fist Glove */}
+              <circle cx="168" cy="50" r="6" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.2" />
+              <rect x="164" y="47" width="8" height="5.5" rx="2" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1" />
+              <path d="M 165 47 L 171 47" stroke="#64748b" strokeWidth="0.8" strokeLinecap="round" />
+              {/* Golden Victory Sparkle near fist */}
+              <polygon points="178,42 179,45 182,45 179.5,47 180.5,50 178,48 175.5,50 176.5,47 174,45 177,45" fill="#ffd23e" className="vn-sparkle-1" />
+            </g>
+          ) : effectiveReaction === "aiming" ? (
+            /* Tactical Pointing Arm Locking Onto Target */
+            <g id="vn-right-arm-aim" className="vn-arm-aim">
+              {/* Arm Stretched Forward */}
+              <path
+                d="M 158 100 C 172 96, 186 90, 198 84"
+                fill="none"
+                stroke="url(#vnPuffySuit)"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+              {/* Mission Patch */}
+              <rect x="165" y="94" width="10" height="7" rx="1.5" fill="#da251d" stroke="#ffd23e" strokeWidth="0.7" transform="rotate(-6 170 97)" />
+              {/* Pointing Glove */}
+              <circle cx="198" cy="84" r="5.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.1" />
+              <path d="M 199 83 L 206 80" stroke="#f8fafc" strokeWidth="3" strokeLinecap="round" />
+              <line x1="208" y1="79" x2="228" y2="71" stroke="#ff4d6d" strokeWidth="1.3" strokeDasharray="3 3" opacity="0.85" />
+            </g>
+          ) : effectiveReaction === "tracking" ? (
+            /* Tracking Arm Shading Visor / Reaching Skyward */
+            <g id="vn-right-arm-tracking" className="vn-arm-sway">
+              <path
+                d="M 158 100 C 170 92, 178 84, 175 72"
+                fill="none"
+                stroke="url(#vnPuffySuit)"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+              <rect x="163" y="90" width="10" height="7" rx="1.5" fill="#da251d" stroke="#ffd23e" strokeWidth="0.7" transform="rotate(-15 168 93)" />
+              <circle cx="174" cy="70" r="5.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.1" />
+              <path d="M 170 71 C 172 68, 176 69, 177 72" stroke="#94a3b8" strokeWidth="0.9" fill="none" strokeLinecap="round" />
+            </g>
+          ) : (
+            /* Relaxed Weightless Arm Sway */
+            <g id="vn-right-arm" className="vn-arm-sway">
+              <path
+                d="M 158 100 C 172 105, 178 114, 172 126"
+                fill="none"
+                stroke="url(#vnPuffySuit)"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+              <path
+                d="M 171 112 C 173 115, 172 118, 169 120"
+                stroke="#cbd5e1"
+                strokeWidth="1.2"
+                fill="none"
+                strokeLinecap="round"
+              />
+              {/* Mission Patch */}
+              <rect x="165" y="102" width="11" height="7.5" rx="1.5" fill="#da251d" stroke="#ffd23e" strokeWidth="0.7" />
+              <polygon
+                points="170.5,103.5 171.2,105 172.8,105 171.5,106 172,107.5 170.5,106.5 169,107.5 169.5,106 168.2,105 169.8,105"
+                fill="#ffd23e"
+              />
+              <circle cx="170" cy="130" r="5.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.1" />
+              <path d="M 168 128 C 170 126, 173 127, 174 130" stroke="#94a3b8" strokeWidth="0.9" fill="none" strokeLinecap="round" />
+            </g>
+          )}
 
-            {/* 🇻🇳 VIETNAMESE NATIONAL MISSION PATCH ON SHOULDER */}
-            <rect x="165" y="102" width="11" height="7.5" rx="1.5" fill="#da251d" stroke="#ffd23e" strokeWidth="0.7" />
-            <polygon
-              points="170.5,103.5 171.2,105 172.8,105 171.5,106 172,107.5 170.5,106.5 169,107.5 169.5,106 168.2,105 169.8,105"
-              fill="#ffd23e"
-            />
-
-            {/* Soft Rounded Astronaut Glove (Floating Relaxed) */}
-            <circle cx="170" cy="130" r="5.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.1" />
-            <path d="M 168 128 C 170 126, 173 127, 174 130" stroke="#94a3b8" strokeWidth="0.9" fill="none" strokeLinecap="round" />
-          </g>
-
-          {/* ================= HELMET & GLOSSY VISOR (SLIGHT ZERO-G TILT) ================= */}
-          <g id="vn-helmet" transform="rotate(-4 145 68)">
+          {/* ================= HELMET & GLOSSY VISOR WITH EMOTIONS ================= */}
+          <g id="vn-helmet" className={helmetClass}>
             {/* Padded Neck Ring */}
             <ellipse cx="145" cy="94" rx="20" ry="6" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.3" />
 
@@ -593,6 +819,107 @@ export function VietnameseAstronaut({
             {/* Starlight Reflection in Visor */}
             <circle cx="130" cy="67" r="2.5" fill="#ffffff" opacity="0.85" />
             <circle cx="155" cy="71" r="1.5" fill="#ffffff" opacity="0.65" />
+
+            {/* Dynamic Facial Expressions & Emotion Overlays */}
+            <g id="vn-visor-emotions" className="pointer-events-none">
+              {/* 1. AIMING: High-tech HUD Targeting Reticle */}
+              {effectiveReaction === "aiming" && (
+                <g className="vn-visor-hud">
+                  <circle
+                    cx="143"
+                    cy="67"
+                    r="8.5"
+                    fill="none"
+                    stroke="#2ee6c9"
+                    strokeWidth="1.2"
+                    strokeDasharray="3 2.5"
+                    className="vn-reticle-spin"
+                    style={{ transformOrigin: "143px 67px" }}
+                  />
+                  <circle cx="143" cy="67" r="4.2" fill="none" stroke="#ffd23e" strokeWidth="1" />
+                  <circle cx="143" cy="67" r="1.6" fill="#ff4d6d" className="animate-ping" style={{ transformOrigin: "143px 67px" }} />
+                  <line x1="143" y1="56" x2="143" y2="59" stroke="#2ee6c9" strokeWidth="1.2" />
+                  <line x1="143" y1="75" x2="143" y2="78" stroke="#2ee6c9" strokeWidth="1.2" />
+                  <line x1="132" y1="67" x2="135" y2="67" stroke="#2ee6c9" strokeWidth="1.2" />
+                  <line x1="151" y1="67" x2="154" y2="67" stroke="#2ee6c9" strokeWidth="1.2" />
+                  <text x="143" y="61.5" textAnchor="middle" fill="#ffd23e" fontSize="4.2" fontFamily="monospace" fontWeight="bold">LOCK</text>
+                </g>
+              )}
+
+              {/* 2. TRACKING: Wide Curious Anime Eyes Looking Up-Left */}
+              {effectiveReaction === "tracking" && (
+                <g className="vn-visor-tracking">
+                  {/* Left eye looking up-left */}
+                  <ellipse cx="136" cy="65" rx="4.2" ry="5.2" fill="#0f172a" stroke="#2ee6c9" strokeWidth="1" />
+                  <ellipse cx="134.5" cy="63.5" rx="2.4" ry="3" fill="#7dfce7" />
+                  <circle cx="133.5" cy="62" r="1.1" fill="#ffffff" />
+                  {/* Right eye looking up-left */}
+                  <ellipse cx="150" cy="65" rx="4.2" ry="5.2" fill="#0f172a" stroke="#2ee6c9" strokeWidth="1" />
+                  <ellipse cx="148.5" cy="63.5" rx="2.4" ry="3" fill="#7dfce7" />
+                  <circle cx="147.5" cy="62" r="1.1" fill="#ffffff" />
+                  {/* Focused determined mouth line */}
+                  <path d="M 141 73 Q 143 74.5 145 73" stroke="#2ee6c9" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+                </g>
+              )}
+
+              {/* 3. CHEER: Happy Anime Crescent Eyes ^ ^ & Rosy Blush Cheeks */}
+              {effectiveReaction === "cheer" && (
+                <g className="vn-visor-cheer">
+                  <path d="M 132 67 Q 137 60 142 67" stroke="#ffd23e" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+                  <path d="M 144 67 Q 149 60 154 67" stroke="#ffd23e" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+                  {/* Rosy blush cheeks */}
+                  <ellipse cx="131" cy="72" rx="3.5" ry="1.8" fill="#ff4d6d" opacity="0.8" className="vn-blush-pulse" />
+                  <ellipse cx="155" cy="72" rx="3.5" ry="1.8" fill="#ff4d6d" opacity="0.8" className="vn-blush-pulse" />
+                  {/* Joyful smile */}
+                  <path d="M 140 71 Q 143 75 146 71" stroke="#ffffff" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                </g>
+              )}
+
+              {/* 4. VICTORY: Radiant Golden Star Eyes ★ ★ & Proud Joy */}
+              {effectiveReaction === "victory" && (
+                <g className="vn-visor-victory">
+                  <polygon
+                    points="136,60 137.2,63.5 141,63.5 138,65.5 139.2,69 136,67 132.8,69 134,65.5 131,63.5 134.8,63.5"
+                    fill="#ffd23e"
+                    stroke="#fffde7"
+                    strokeWidth="0.6"
+                  />
+                  <polygon
+                    points="150,60 151.2,63.5 155,63.5 152,65.5 153.2,69 150,67 146.8,69 148,65.5 145,63.5 148.8,63.5"
+                    fill="#ffd23e"
+                    stroke="#fffde7"
+                    strokeWidth="0.6"
+                  />
+                  <path d="M 139 71 Q 143 77 147 71 Z" fill="#ffffff" stroke="#ffd23e" strokeWidth="0.9" />
+                  <ellipse cx="131" cy="73" rx="3.5" ry="2" fill="#ff4d6d" opacity="0.85" />
+                  <ellipse cx="155" cy="73" rx="3.5" ry="2" fill="#ff4d6d" opacity="0.85" />
+                </g>
+              )}
+
+              {/* 5. SAD: Downturned Wavy Eyes ⌒ ⌒ & Blue Sweat Drop */}
+              {effectiveReaction === "sad" && (
+                <g className="vn-visor-sad">
+                  <path d="M 133 66 Q 137 72 141 66" stroke="#7dfce7" strokeWidth="2.1" fill="none" strokeLinecap="round" />
+                  <path d="M 145 66 Q 149 72 153 66" stroke="#7dfce7" strokeWidth="2.1" fill="none" strokeLinecap="round" />
+                  <path d="M 140 75 Q 143 72.5 146 75" stroke="#ffffff" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+                  <path
+                    d="M 158 55 C 158 55, 161 58, 161 61 C 161 63, 159.5 64.5, 158 64.5 C 156.5 64.5, 155 63, 155 61 C 155 58, 158 55, 158 55 Z"
+                    fill="#38bdf8"
+                    stroke="#e0f2fe"
+                    strokeWidth="0.7"
+                    className="vn-sweat-drop"
+                  />
+                </g>
+              )}
+
+              {/* 6. IDLE: Calm Starlight Pupil Gleam */}
+              {effectiveReaction === "idle" && (
+                <g opacity="0.45">
+                  <ellipse cx="136" cy="67" rx="2" ry="3" fill="#ffffff" />
+                  <ellipse cx="150" cy="67" rx="2" ry="3" fill="#ffffff" />
+                </g>
+              )}
+            </g>
 
             {/* Vocoder Chin Vent */}
             <rect x="139" y="86" width="12" height="5" rx="2.5" fill="#1e293b" stroke="#475569" strokeWidth="0.8" />

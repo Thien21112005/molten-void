@@ -65,6 +65,7 @@ export interface UIState {
   progress?: PlayerProgress;
   isFromPaused?: boolean;
   mascot?: MascotState;
+  hasActiveOrb?: boolean;
 }
 
 const HS_KEY = "mv_hs_v1";
@@ -2509,6 +2510,7 @@ export class Engine {
       progress: loadProgress(),
       isFromPaused: this.previousScreen === "paused" || this.previousScreen === "playing",
       mascot: this.mascotState,
+      hasActiveOrb: this.hasActiveOrb,
     });
   }
 }

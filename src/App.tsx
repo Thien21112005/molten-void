@@ -418,9 +418,28 @@ export default function App() {
           <VietnameseAstronaut
             lang={lang}
             className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer drop-shadow-[0_0_16px_rgba(46,230,201,0.35)] hover:scale-105 active:scale-95 transition"
-            reaction={ui.mascot?.reaction ?? (ui.isAiming ? "aiming" : "idle")}
-            reactionText={getMascotText(ui.mascot, t)}
-            showReactionBadge={Boolean(ui.mascot?.reaction && ui.mascot.reaction !== "idle") || ui.isAiming}
+            reaction={
+              ui.mascot?.reaction && ui.mascot.reaction !== "idle"
+                ? ui.mascot.reaction
+                : ui.isAiming
+                  ? "aiming"
+                  : ui.hasActiveOrb
+                    ? "tracking"
+                    : "idle"
+            }
+            reactionText={
+              getMascotText(ui.mascot, t) ??
+              (ui.isAiming
+                ? (lang === "vi" ? "🎯 Ngắm bắn..." : "🎯 Aiming...")
+                : ui.hasActiveOrb
+                  ? (lang === "vi" ? "👀 Bay lên nào!" : "👀 In flight!")
+                  : undefined)
+            }
+            showReactionBadge={
+              Boolean(ui.mascot?.reaction && ui.mascot.reaction !== "idle") ||
+              Boolean(ui.isAiming) ||
+              Boolean(ui.hasActiveOrb)
+            }
           />
         </div>
       )}
