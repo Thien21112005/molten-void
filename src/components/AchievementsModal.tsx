@@ -2,7 +2,6 @@ import { ACHIEVEMENTS, loadAchievements } from "../game/achievements/achievement
 import type { AchievementDef, AchievementTier } from "../game/achievements/types";
 import type { Language, Translations } from "../game/i18n";
 import { cn } from "../utils/cn";
-import { VietnameseAstronaut } from "./VietnameseAstronaut";
 
 interface AchievementsModalProps {
   onClose: () => void;
@@ -97,9 +96,17 @@ export function AchievementsModal({ onClose, lang = "vi", t }: AchievementsModal
               >
                 <BadgeIcon iconType={ach.iconType} unlocked={isUnlocked} />
                 {isUnlocked && (
-                  <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] text-void-950 font-black shadow">
-                    ✓
-                  </span>
+                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-600 via-teal-400 to-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.7)] ring-2 ring-void-950">
+                    <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5 text-void-950 drop-shadow-sm">
+                      <path
+                        d="M3.5 8.5L6.5 11.5L12.5 4.5"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
                 )}
               </div>
 
@@ -137,19 +144,25 @@ export function AchievementsModal({ onClose, lang = "vi", t }: AchievementsModal
         })}
       </div>
 
-      {/* Footer debrief with Astronaut Mascot */}
-      <div className="flex items-center justify-between border-t border-void-800/90 bg-void-950 px-5 py-3 text-xs text-white/50">
-        <div className="flex items-center gap-2">
-          <VietnameseAstronaut lang={lang} className="h-8 w-8 shrink-0" reaction="cheer" />
-          <span>
+      {/* Footer debrief */}
+      <div className="flex items-center justify-between border-t border-void-800/90 bg-void-950/80 px-5 py-3.5 text-xs text-white/60 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-950/40 text-amber-400">
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <span className="font-medium text-white/75">
             {unlockedCount === totalCount
               ? (t?.allBadgesCollected ?? "Đại Sư Vũ Trụ! Đã sưu tập trọn bộ huy hiệu!")
-              : "Hoàn thành các chiến dịch để giải phóng huy hiệu danh dự."}
+              : (lang === "vi"
+                  ? "Hoàn thành các chiến dịch không gian để mở khóa toàn bộ huy hiệu danh dự."
+                  : "Complete cosmic campaigns to unlock all honor badges.")}
           </span>
         </div>
         <button
           onClick={onClose}
-          className="rounded-xl border border-void-700 bg-void-900 px-4 py-1.5 font-bold text-white transition hover:bg-void-800 cursor-pointer active:scale-95"
+          className="rounded-xl border border-void-700/80 bg-void-900/90 px-5 py-2 font-display text-xs font-bold text-white transition hover:border-ice-400 hover:bg-void-800 cursor-pointer active:scale-95 shadow-sm"
         >
           {t?.close ?? "Đóng"}
         </button>
