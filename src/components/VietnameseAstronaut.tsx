@@ -355,7 +355,8 @@ export function VietnameseAstronaut({
       {showReactionBadge && !showQuote && (reactionText || (effectiveReaction !== "idle" && REACTION_TEXTS[lang][effectiveReaction as keyof (typeof REACTION_TEXTS)["vi"]])) && (
         <div
           className={cn(
-            "animate-pop-in pointer-events-none absolute -top-8 whitespace-nowrap rounded-full border border-amber-400/80 bg-void-950/95 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 shadow-[0_0_16px_rgba(255,180,40,0.55)] backdrop-blur-md z-30 max-w-[min(88vw,16rem)] truncate",
+            "animate-pop-in pointer-events-none absolute whitespace-nowrap rounded-full border border-amber-400/80 bg-void-950/95 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 shadow-[0_0_16px_rgba(255,180,40,0.55)] backdrop-blur-md z-30 max-w-[min(88vw,16rem)] truncate",
+            computedQuotePlacement === "bottom" ? "-bottom-8" : "-top-8",
             computedDialogAlign === "right"
               ? "right-0"
               : computedDialogAlign === "left"

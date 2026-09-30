@@ -149,17 +149,20 @@ export function VictoryModal({
         {t?.levelClearedHeader ?? "LEVEL CLEARED"} {data.level}
       </p>
 
-      <h2 className="mt-1 font-display text-3xl tracking-wide text-ember-300 [text-shadow:0_0_24px_rgba(255,179,38,0.6)]">
+      <h2 className="mt-1 font-display text-2xl sm:text-3xl tracking-wide text-ember-300 [text-shadow:0_0_24px_rgba(255,179,38,0.6)] text-center">
         {data.levelName}
       </h2>
 
       {/* Celebrating Astronaut Mascot */}
-      <VietnameseAstronaut
-        lang={t?.menu === "Menu" ? "vi" : "en"}
-        className="h-20 w-20 sm:h-24 sm:w-24 -my-1 drop-shadow-[0_0_25px_rgba(255,210,62,0.45)]"
-        reaction="victory"
-        showReactionBadge
-      />
+      <div className="relative my-2 sm:my-2.5 flex items-center justify-center">
+        <VietnameseAstronaut
+          lang={t?.menu === "Menu" ? "vi" : "en"}
+          className="h-20 w-20 sm:h-24 sm:w-24 drop-shadow-[0_0_25px_rgba(255,210,62,0.45)]"
+          reaction="victory"
+          showReactionBadge={false}
+          quotePlacement="bottom"
+        />
+      </div>
 
       {/* 3 Stars display with sequential pop */}
       <div className="my-3 flex flex-col items-center">
