@@ -48,6 +48,15 @@ import {
   resolveBlockCollision,
   resolveRotatorCollision,
 } from "./physics/collisions";
+import {
+  drawBlocks,
+  drawGems,
+  drawGravityWells,
+  drawWormholes,
+  drawRotators,
+} from "./renderers/obstacleRenderer";
+import { drawGhostTrail, drawLauncher } from "./renderers/launcherRenderer";
+import { drawOrbs } from "./renderers/orbRenderer";
 
 export type {
   Screen,
@@ -1517,94 +1526,50 @@ export class Engine {
     this.ambient.draw(ctx, this.t);
 
     // gravity wells (accretion halos under structures)
-    this.drawGravityWells();
+    drawGravityWells(ctx, this.gravityWells, this.t);
 
     // wormholes
-    this.drawWormholes();
+    drawWormholes(ctx, this.wormholes, this.t);
 
     // blocks
-    for (const b of this.blocks) {
-      ctx.fillStyle = "#191433";
-      ctx.fillRect(b.x, b.y, b.w, b.h);
-      ctx.fillStyle = "#241c46";
-      ctx.fillRect(b.x, b.y, b.w, Math.min(4, b.h * 0.3));
-      ctx.strokeStyle = "rgba(140,128,220,0.55)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-      ctx.strokeStyle = "rgba(140,128,220,0.16)";
-      ctx.beginPath();
-      for (let yy = b.y + 14; yy < b.y + b.h; yy += 14) {
-        ctx.moveTo(b.x + 3, yy);
-        ctx.lineTo(b.x + b.w - 3, yy);
-      }
-      for (let xx = b.x + 14; xx < b.x + b.w; xx += 14) {
-        ctx.moveTo(xx, b.y + 3);
-        ctx.lineTo(xx, b.y + b.h - 3);
-      }
-      ctx.stroke();
-    }
+    drawBlocks(ctx, this.blocks);
 
     // rotators
-    this.drawRotators();
+    drawRotators(ctx, this.rotators);
 
     // gems
-    for (const g of this.gems) {
-      if (g.dead) continue;
-      const bob = Math.sin(this.t * 2 + g.phase) * 3;
-      const pulse = 1 + 0.05 * Math.sin(this.t * 3 + g.phase);
-      const spr = g.kind === "gold" ? this.goldSprite : this.iceSprite;
-      if (!spr) continue;
-      const size = g.r * 5 * pulse;
-      ctx.drawImage(spr, g.x - size / 2, g.y + bob - size / 2, size, size);
-      if (g.kind === "gold") {
-        const sa = this.t * 1.4 + g.phase;
-        ctx.globalCompositeOperation = "lighter";
-        ctx.strokeStyle = "rgba(255,243,176,0.8)";
-        ctx.lineWidth = 1.6;
-        const sr = g.r * (0.55 + 0.18 * Math.sin(sa * 2));
-        ctx.save();
-        ctx.translate(g.x, g.y + bob);
-        ctx.rotate(sa);
-        ctx.beginPath();
-        ctx.moveTo(-sr, 0);
-        ctx.lineTo(sr, 0);
-        ctx.moveTo(0, -sr);
-        ctx.lineTo(0, sr);
-        ctx.stroke();
-        ctx.restore();
-        ctx.globalCompositeOperation = "source-over";
-      }
-    }
+    drawGems(ctx, this.gems, this.t, this.goldSprite, this.iceSprite);
 
     // ghost trajectory trail of previous shot (Angry Birds style)
-    if (this.screen !== "menu") this.drawGhostTrail();
+    drawGhostTrail(ctx, this.ghostTrail, this.screen);
 
     // launcher + aim
-    if (this.screen !== "menu") this.drawLauncher();
+    if (this.screen !== "menu") {
+      drawLauncher(ctx, {
+        launcher: this.launcher,
+        padR: this.padR,
+        orbR: this.orbR,
+        t: this.t,
+        aimMode: this.aimMode,
+        pullStart: this.pullStart,
+        pullCur: this.pullCur,
+        maxDragDistance: this.maxDragDistance(),
+        kbAngle: this.kbAngle,
+        charging: this.charging,
+        chargePow: this.chargePow,
+        hasActiveOrb: this.hasActiveOrb,
+        orbs: this.orbs,
+        screen: this.screen,
+        selectedCore: this.selectedCore,
+        equippedSkin: this.equippedSkin,
+        spriteFactory: this.spriteFactory,
+        simTraj: (angle, power) => this.simTraj(angle, power),
+        powerColor: (p) => this.powerColor(p),
+      });
+    }
 
     // orbs + trails
-    for (const o of this.orbsList) {
-      if (!o.alive) continue;
-      const sprite = this.spriteFactory.getOrbSprite(o.coreType, this.equippedSkin);
-      ctx.globalCompositeOperation = "lighter";
-      const skin = SKINS.find((s) => s.id === this.equippedSkin) || SKINS[0];
-      let trailColor = skin.trailColor;
-      if (o.coreType === "cluster") trailColor = "125,252,231";
-      else if (o.coreType === "blast") trailColor = "255,80,20";
-      else if (o.coreType === "heavy") trailColor = "56,189,248";
-
-      for (let i = 0; i < o.trail.length; i++) {
-        const tr = o.trail[i];
-        const f = i / o.trail.length;
-        ctx.fillStyle = `rgba(${trailColor},${f * 0.35})`;
-        ctx.beginPath();
-        ctx.arc(tr.x, tr.y, o.r * (0.25 + 0.75 * f), 0, TAU);
-        ctx.fill();
-      }
-      ctx.globalCompositeOperation = "source-over";
-      const size = o.r * 5;
-      ctx.drawImage(sprite, o.x - size / 2, o.y - size / 2, size, size);
-    }
+    drawOrbs(ctx, this.orbsList, this.equippedSkin, this.spriteFactory);
 
     // particles
     this.particles.draw(ctx);
@@ -1621,352 +1586,6 @@ export class Engine {
       ctx.fillStyle = `rgba(255,190,90,${this.flash * 0.22})`;
       ctx.fillRect(0, 0, W, H);
       ctx.globalCompositeOperation = "source-over";
-    }
-  }
-
-  private drawGravityWells() {
-    const { ctx } = this;
-    for (const gw of this.gravityWells) {
-      const pulse = 1 + 0.08 * Math.sin(this.t * 3.5);
-      const r = gw.radius * pulse;
-
-      // Outer gravitational field halo
-      ctx.globalCompositeOperation = "lighter";
-      const g = ctx.createRadialGradient(gw.x, gw.y, 10, gw.x, gw.y, r);
-      g.addColorStop(0, "rgba(147, 51, 234, 0.45)");
-      g.addColorStop(0.4, "rgba(79, 70, 229, 0.2)");
-      g.addColorStop(0.8, "rgba(14, 165, 233, 0.08)");
-      g.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(gw.x, gw.y, r, 0, TAU);
-      ctx.fill();
-
-      // Accretion spiral lines
-      ctx.strokeStyle = "rgba(192, 132, 252, 0.6)";
-      ctx.lineWidth = 1.6;
-      ctx.save();
-      ctx.translate(gw.x, gw.y);
-      ctx.rotate(this.t * 2.2);
-      ctx.setLineDash([6, 12]);
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.55, 0, TAU);
-      ctx.stroke();
-      ctx.setLineDash([4, 8]);
-      ctx.strokeStyle = "rgba(56, 189, 248, 0.5)";
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.8, 0, TAU);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.restore();
-
-      ctx.globalCompositeOperation = "source-over";
-
-      // Event Horizon (Singularity Black Core)
-      const coreR = Math.max(10, gw.radius * 0.16);
-      ctx.fillStyle = "#020108";
-      ctx.beginPath();
-      ctx.arc(gw.x, gw.y, coreR, 0, TAU);
-      ctx.fill();
-
-      // Glowing photon sphere ring
-      ctx.strokeStyle = "rgba(238, 242, 255, 0.85)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(gw.x, gw.y, coreR, 0, TAU);
-      ctx.stroke();
-    }
-  }
-
-  private drawWormholes() {
-    const { ctx } = this;
-    for (const wh of this.wormholes) {
-      // Entanglement bridge dashed line between portals
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      ctx.strokeStyle = "rgba(46, 230, 201, 0.18)";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 8]);
-      ctx.lineDashOffset = -this.t * 20;
-      ctx.beginPath();
-      ctx.moveTo(wh.x1, wh.y1);
-      ctx.lineTo(wh.x2, wh.y2);
-      ctx.stroke();
-      ctx.restore();
-
-      const drawPortal = (px: number, py: number, isEntry: boolean) => {
-        const pulse = 1 + 0.07 * Math.sin(this.t * 4 + (isEntry ? 0 : Math.PI));
-        const pr = wh.r * pulse;
-        const colorPrimary = isEntry ? "46, 230, 201" : "217, 70, 239";
-        const colorSecondary = isEntry ? "14, 165, 233" : "168, 85, 247";
-
-        ctx.globalCompositeOperation = "lighter";
-        const grad = ctx.createRadialGradient(px, py, 2, px, py, pr * 1.8);
-        grad.addColorStop(0, `rgba(${colorPrimary}, 0.5)`);
-        grad.addColorStop(0.5, `rgba(${colorSecondary}, 0.25)`);
-        grad.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(px, py, pr * 1.8, 0, TAU);
-        ctx.fill();
-
-        // Swirling spiral rings
-        ctx.save();
-        ctx.translate(px, py);
-        ctx.rotate((isEntry ? 1 : -1) * this.t * 3.5);
-        ctx.strokeStyle = `rgba(${colorPrimary}, 0.85)`;
-        ctx.lineWidth = 2.2;
-        ctx.beginPath();
-        ctx.arc(0, 0, pr, 0, TAU * 0.7);
-        ctx.stroke();
-
-        ctx.strokeStyle = `rgba(${colorSecondary}, 0.7)`;
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.arc(0, 0, pr * 0.65, Math.PI * 0.5, TAU * 0.85);
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.globalCompositeOperation = "source-over";
-        // Void Core
-        ctx.fillStyle = "#030014";
-        ctx.beginPath();
-        ctx.arc(px, py, pr * 0.35, 0, TAU);
-        ctx.fill();
-        ctx.strokeStyle = `rgba(${colorPrimary}, 0.9)`;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      };
-
-      drawPortal(wh.x1, wh.y1, true);
-      drawPortal(wh.x2, wh.y2, false);
-    }
-  }
-
-  private drawRotators() {
-    const { ctx } = this;
-    for (const rot of this.rotators) {
-      ctx.save();
-      ctx.translate(rot.x, rot.y);
-      ctx.rotate(rot.angle);
-
-      const halfL = rot.len / 2;
-      const halfW = rot.width / 2;
-
-      // Outer kinetic energy glow
-      ctx.globalCompositeOperation = "lighter";
-      ctx.strokeStyle = "rgba(46, 230, 201, 0.4)";
-      ctx.lineWidth = 4;
-      ctx.strokeRect(-halfL - 2, -halfW - 2, rot.len + 4, rot.width + 4);
-
-      ctx.globalCompositeOperation = "source-over";
-      // Metallic beam body
-      ctx.fillStyle = "#1e1b4b";
-      ctx.fillRect(-halfL, -halfW, rot.len, rot.width);
-
-      // Neon energy core line
-      ctx.fillStyle = "#38bdf8";
-      ctx.fillRect(-halfL + 6, -1.5, rot.len - 12, 3);
-
-      // Edge border
-      ctx.strokeStyle = "rgba(125, 252, 231, 0.9)";
-      ctx.lineWidth = 1.8;
-      ctx.strokeRect(-halfL, -halfW, rot.len, rot.width);
-
-      // Center pivot hub
-      ctx.fillStyle = "#0f172a";
-      ctx.beginPath();
-      ctx.arc(0, 0, rot.width * 0.85, 0, TAU);
-      ctx.fill();
-      ctx.strokeStyle = "rgba(255, 210, 62, 0.95)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.fillStyle = "#ffd23e";
-      ctx.beginPath();
-      ctx.arc(0, 0, 3, 0, TAU);
-      ctx.fill();
-
-      ctx.restore();
-    }
-  }
-
-  private drawGhostTrail() {
-    if (this.ghostTrail.length < 2 || this.screen === "menu") return;
-    const { ctx } = this;
-    ctx.save();
-
-    // 1. Subtle stardust dashed flight path line
-    ctx.beginPath();
-    ctx.moveTo(this.ghostTrail[0].x, this.ghostTrail[0].y);
-    for (let i = 1; i < this.ghostTrail.length; i++) {
-      ctx.lineTo(this.ghostTrail[i].x, this.ghostTrail[i].y);
-    }
-    ctx.strokeStyle = "rgba(148, 163, 215, 0.22)";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 7]);
-    ctx.stroke();
-
-    // 2. Translucent stardust ghost beads
-    ctx.globalCompositeOperation = "lighter";
-    const total = this.ghostTrail.length;
-    const step = Math.max(1, Math.floor(total / 24));
-    for (let i = 0; i < total; i += step) {
-      const pt = this.ghostTrail[i];
-      const prog = i / total;
-      const alpha = 0.22 + 0.38 * (1 - prog * 0.45);
-
-      // Outer cyan-teal stardust halo
-      ctx.fillStyle = `rgba(46, 230, 201, ${alpha * 0.4})`;
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, 4.5, 0, TAU);
-      ctx.fill();
-
-      // Core white stardust pinprick
-      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.85})`;
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, 1.8, 0, TAU);
-      ctx.fill();
-    }
-
-    // 3. Terminal impact / expiry crosshair ring at final position
-    const last = this.ghostTrail[total - 1];
-    ctx.setLineDash([2, 3]);
-    ctx.strokeStyle = "rgba(255, 210, 62, 0.55)";
-    ctx.lineWidth = 1.6;
-    ctx.beginPath();
-    ctx.arc(last.x, last.y, 7.5, 0, TAU);
-    ctx.stroke();
-
-    ctx.setLineDash([]);
-    ctx.strokeStyle = "rgba(255, 210, 62, 0.45)";
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(last.x - 5, last.y);
-    ctx.lineTo(last.x + 5, last.y);
-    ctx.moveTo(last.x, last.y - 5);
-    ctx.lineTo(last.x, last.y + 5);
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  private drawLauncher() {
-    const { ctx } = this;
-    const { x, y } = this.launcher;
-    const pulse = 1 + 0.05 * Math.sin(this.t * 3.2);
-    const R = this.padR * pulse;
-
-    ctx.globalCompositeOperation = "lighter";
-    const glow = ctx.createRadialGradient(x, y, 0, x, y, R * 2.6);
-    glow.addColorStop(0, "rgba(255,130,40,0.3)");
-    glow.addColorStop(1, "rgba(255,130,40,0)");
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(x, y, R * 2.6, 0, TAU);
-    ctx.fill();
-    ctx.globalCompositeOperation = "source-over";
-
-    ctx.strokeStyle = "rgba(255,160,46,0.85)";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(x, y, R, 0, TAU);
-    ctx.stroke();
-    ctx.strokeStyle = "rgba(255,210,62,0.35)";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(x, y, R * 1.35, 0, TAU);
-    ctx.stroke();
-    for (let i = 0; i < 4; i++) {
-      const a = (i * TAU) / 4 + Math.PI / 4;
-      ctx.strokeStyle = "rgba(255,160,46,0.7)";
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(x + Math.cos(a) * R * 1.45, y + Math.sin(a) * R * 1.45);
-      ctx.lineTo(x + Math.cos(a) * R * 1.75, y + Math.sin(a) * R * 1.75);
-      ctx.stroke();
-    }
-
-    // aim preview
-    let angle: number | null = null;
-    let power = 0;
-    if (this.aimMode === "pull") {
-      const dx = this.pullStart.x - this.pullCur.x;
-      const dy = this.pullStart.y - this.pullCur.y;
-      const len = Math.hypot(dx, dy);
-      if (len > 10) {
-        angle = Math.atan2(dy, dx);
-        power = clamp(len / this.maxDragDistance(), 0, 1);
-      }
-    } else if (this.aimMode === "kb") {
-      angle = this.kbAngle;
-      power = this.charging ? this.chargePow : 0;
-    }
-
-    if (angle !== null && power > 0.02 && !this.hasActiveOrb) {
-      const { pts, hit } = this.simTraj(angle, power);
-      const pc = this.powerColor(power);
-      for (let i = 0; i < pts.length; i++) {
-        const f = 1 - i / pts.length;
-        ctx.fillStyle = `${pc}${0.15 + f * 0.6})`;
-        ctx.beginPath();
-        ctx.arc(pts[i].x, pts[i].y, 1.5 + f * 3.4, 0, TAU);
-        ctx.fill();
-      }
-      if (hit) {
-        ctx.strokeStyle = `${pc}0.9)`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(hit.x, hit.y, 9, 0, TAU);
-        ctx.moveTo(hit.x - 14, hit.y);
-        ctx.lineTo(hit.x - 5, hit.y);
-        ctx.moveTo(hit.x + 5, hit.y);
-        ctx.lineTo(hit.x + 14, hit.y);
-        ctx.moveTo(hit.x, hit.y - 14);
-        ctx.lineTo(hit.x, hit.y - 5);
-        ctx.moveTo(hit.x, hit.y + 5);
-        ctx.lineTo(hit.x, hit.y + 14);
-        ctx.stroke();
-      }
-    }
-
-    // loaded orb on pad (or pulled back)
-    if (
-      !this.hasActiveOrb &&
-      this.orbs > 0 &&
-      (this.screen === "playing" || this.screen === "paused")
-    ) {
-      const padSprite = this.spriteFactory.getOrbSprite(this.selectedCore, this.equippedSkin);
-      let ox = x;
-      let oy = y;
-      if (angle !== null && power > 0.02) {
-        const maxVisualPull = clamp(this.padR * 2.8, 55, 95);
-        const pull = 6 + power * maxVisualPull;
-        ox = x - Math.cos(angle) * pull;
-        oy = y - Math.sin(angle) * pull;
-        ctx.strokeStyle = "rgba(255,210,122,0.85)";
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.moveTo(x - Math.cos(angle + 1.3) * R, y - Math.sin(angle + 1.3) * R);
-        ctx.lineTo(ox, oy);
-        ctx.moveTo(x - Math.cos(angle - 1.3) * R, y - Math.sin(angle - 1.3) * R);
-        ctx.lineTo(ox, oy);
-        ctx.stroke();
-      }
-      const size = this.orbR * 5 * (angle !== null && power > 0.02 ? 0.92 : 1);
-      ctx.drawImage(padSprite, ox - size / 2, oy - size / 2, size, size);
-    }
-
-    // kb power arc
-    if (this.aimMode === "kb" && this.charging) {
-      const pc = this.powerColor(this.chargePow);
-      ctx.strokeStyle = `${pc}0.9)`;
-      ctx.lineWidth = 5;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.arc(x, y, R * 1.7, -Math.PI / 2, -Math.PI / 2 + this.chargePow * TAU);
-      ctx.stroke();
-      ctx.lineCap = "butt";
     }
   }
 
