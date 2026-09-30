@@ -57,6 +57,7 @@ import {
 } from "./renderers/obstacleRenderer";
 import { drawGhostTrail, drawLauncher } from "./renderers/launcherRenderer";
 import { drawOrbs } from "./renderers/orbRenderer";
+import { InputManager } from "./input/inputManager";
 
 export type {
   Screen,
@@ -151,16 +152,8 @@ export class Engine {
   private hitstop = 0;
   private flash = 0;
 
-  // aim
-  private aimMode: AimMode = "none";
-  private pullStart = { x: 0, y: 0 };
-  private pullCur = { x: 0, y: 0 };
-  private pointerId = -1;
-  private kbAngle = -0.7;
-  private kbAimX = 0;
-  private charging = false;
-  private chargePow = 0;
-  private chargeBucket = -1;
+  // input
+  private inputManager: InputManager;
 
   // statics (pre-rendered)
   private starfield: HTMLCanvasElement | null = null;
@@ -185,19 +178,35 @@ export class Engine {
       /* ignore */
     }
     this.best = this.hs.length ? this.hs[0].s : 0;
+
+    this.inputManager = new InputManager({
+      canvas: this.canvas,
+      getScreen: () => this.screen,
+      isLandscape: () => this.landscape,
+      hasActiveOrb: () => this.hasActiveOrb,
+      getOrbsCount: () => this.orbs,
+      getActiveClusterOrb: () =>
+        this.orbsList.find((o) => o.alive && o.coreType === "cluster" && !o.hasSplit),
+      splitClusterOrb: (orb) => this.splitClusterOrb(orb),
+      fire: (angle, power) => this.fire(angle, power),
+      selectCore: (core) => this.selectCore(core),
+      toggleMute: () => this.toggleMute(),
+      pause: () => this.pause(),
+      resume: () => this.resume(),
+      play: () => this.play(),
+      restart: () => this.restart(),
+      setMascot: (state, dialogue, duration, rotation) =>
+        this.setMascot(state, dialogue, duration, rotation),
+      pushUI: () => this.pushUI(),
+      getDimensions: () => ({ W: this.W, H: this.H }),
+    });
   }
 
   // ---------- lifecycle ----------
 
   init() {
-    window.addEventListener("keydown", this.onKeyDown);
-    window.addEventListener("keyup", this.onKeyUp);
+    this.inputManager.attach();
     document.addEventListener("visibilitychange", this.onVis);
-    this.canvas.addEventListener("pointerdown", this.onPtrDown);
-    this.canvas.addEventListener("pointermove", this.onPtrMove);
-    this.canvas.addEventListener("pointerup", this.onPtrUp);
-    this.canvas.addEventListener("pointercancel", this.onPtrCancel);
-    this.canvas.addEventListener("contextmenu", this.onCtxMenu);
     if (typeof ResizeObserver !== "undefined") {
       this.ro = new ResizeObserver(() => this.resize());
       this.ro.observe(this.canvas.parentElement ?? this.canvas);
@@ -224,14 +233,8 @@ export class Engine {
     this.unsubMute?.();
     sfx.setMusicMode("off");
     cancelAnimationFrame(this.raf);
-    window.removeEventListener("keydown", this.onKeyDown);
-    window.removeEventListener("keyup", this.onKeyUp);
+    this.inputManager.detach();
     document.removeEventListener("visibilitychange", this.onVis);
-    this.canvas.removeEventListener("pointerdown", this.onPtrDown);
-    this.canvas.removeEventListener("pointermove", this.onPtrMove);
-    this.canvas.removeEventListener("pointerup", this.onPtrUp);
-    this.canvas.removeEventListener("pointercancel", this.onPtrCancel);
-    this.canvas.removeEventListener("contextmenu", this.onCtxMenu);
     if (this.ro) this.ro.disconnect();
     else window.removeEventListener("resize", this.resize);
   }
@@ -281,8 +284,7 @@ export class Engine {
     sfx.setMusicMode("roadmap");
     this.previousScreen = this.screen;
     this.screen = "roadmap";
-    this.aimMode = "none";
-    this.charging = false;
+    this.inputManager.resetAim();
     this.pushUI();
   }
 
@@ -302,8 +304,7 @@ export class Engine {
   pause() {
     if (this.screen !== "playing") return;
     this.screen = "paused";
-    this.aimMode = "none";
-    this.charging = false;
+    this.inputManager.resetAim();
     sfx.click();
     sfx.setMusicMode("paused");
     this.pushUI();
@@ -323,8 +324,7 @@ export class Engine {
     sfx.setMusicMode("menu");
     this.screen = "menu";
     this.orb = null;
-    this.aimMode = "none";
-    this.charging = false;
+    this.inputManager.resetAim();
     this.victoryData = null;
     this.slowMo = 0;
     this.buildLevel(1);
@@ -461,164 +461,7 @@ export class Engine {
     this.pushUI();
   }
 
-  // ---------- input: pointer ----------
 
-  private onCtxMenu = (e: Event) => e.preventDefault();
-
-  private ptrPos(e: PointerEvent) {
-    const r = this.canvas.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
-  }
-
-  private onPtrDown = (e: PointerEvent) => {
-    sfx.ensure();
-    if (this.screen !== "playing") return;
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-
-    // In-flight cluster split check!
-    const activeCluster = this.orbsList.find((o) => o.alive && o.coreType === "cluster" && !o.hasSplit);
-    if (activeCluster) {
-      this.splitClusterOrb(activeCluster);
-      return;
-    }
-
-    if (this.hasActiveOrb) return;
-    this.pointerId = e.pointerId;
-    this.canvas.setPointerCapture(e.pointerId);
-    const p = this.ptrPos(e);
-    this.pullStart = p;
-    this.pullCur = p;
-    this.aimMode = "pull";
-    this.setMascot("aiming", "mascotAiming", undefined, 0);
-    this.pushUI();
-  };
-
-  private onPtrMove = (e: PointerEvent) => {
-    if (this.aimMode !== "pull" || e.pointerId !== this.pointerId) return;
-    this.pullCur = this.ptrPos(e);
-  };
-
-  private maxDragDistance(): number {
-    const minDim = Math.min(this.W, this.H);
-    return clamp(minDim * 0.22, 130, 190);
-  }
-
-  private onPtrUp = (e: PointerEvent) => {
-    if (this.aimMode !== "pull" || e.pointerId !== this.pointerId) return;
-    this.aimMode = "none";
-    this.pointerId = -1;
-    this.pushUI();
-    if (this.screen !== "playing" || this.orb?.alive) return;
-    const dx = this.pullStart.x - this.pullCur.x;
-    const dy = this.pullStart.y - this.pullCur.y;
-    const len = Math.hypot(dx, dy);
-    if (len < 10) {
-      if (len > 4) sfx.cancel();
-      this.setMascot("idle", "", undefined, 0);
-      return;
-    }
-    const power = clamp(len / this.maxDragDistance(), 0, 1);
-    this.fire(Math.atan2(dy, dx), power);
-  };
-
-  private onPtrCancel = (e: PointerEvent) => {
-    if (e.pointerId !== this.pointerId) return;
-    this.aimMode = "none";
-    this.pointerId = -1;
-    this.setMascot("idle", "", undefined, 0);
-    this.pushUI();
-  };
-
-  // ---------- input: keyboard ----------
-
-  private aimRange(): [number, number] {
-    return this.landscape ? [-3.08, -0.06] : [-2.4, -0.75];
-  }
-
-  private onKeyDown = (e: KeyboardEvent) => {
-    const k = e.key;
-    if ([" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(k)) e.preventDefault();
-    sfx.ensure();
-
-    if (k === "m" || k === "M") {
-      this.toggleMute();
-      return;
-    }
-    if (k === "p" || k === "P" || k === "Escape") {
-      if (this.screen === "playing") this.pause();
-      else if (this.screen === "paused") this.resume();
-      return;
-    }
-    if (k === "r" || k === "R") {
-      if (this.screen !== "menu") this.restart();
-      return;
-    }
-    if (k === "Enter" || k === " ") {
-      if (this.screen === "menu") {
-        this.play();
-        return;
-      }
-      if (this.screen === "gameover" && k === "Enter") {
-        this.restart();
-        return;
-      }
-    }
-
-    if (this.screen !== "playing") return;
-
-    // In-flight cluster split via keyboard
-    if (k === " " || k === "Enter") {
-      const activeCluster = this.orbsList.find((o) => o.alive && o.coreType === "cluster" && !o.hasSplit);
-      if (activeCluster) {
-        e.preventDefault();
-        this.splitClusterOrb(activeCluster);
-        return;
-      }
-    }
-
-    // Number keys 1-4 for core selection
-    if (k === "1") { this.selectCore("standard"); return; }
-    if (k === "2") { this.selectCore("cluster"); return; }
-    if (k === "3") { this.selectCore("blast"); return; }
-    if (k === "4") { this.selectCore("heavy"); return; }
-
-    if (k === "ArrowUp" || k === "w" || k === "W" || k === "ArrowLeft" || k === "a" || k === "A") {
-      this.kbAimX = -1;
-      if (this.aimMode === "none" && !this.hasActiveOrb) this.aimMode = "kb";
-    } else if (k === "ArrowDown" || k === "s" || k === "S" || k === "ArrowRight" || k === "d" || k === "D") {
-      this.kbAimX = 1;
-      if (this.aimMode === "none" && !this.hasActiveOrb) this.aimMode = "kb";
-    }
-
-    if (k === " " && !e.repeat) {
-      if (!this.hasActiveOrb && this.orbs > 0) {
-        this.aimMode = "kb";
-        this.charging = true;
-        this.chargePow = 0;
-        this.chargeBucket = -1;
-      }
-    }
-  };
-
-  private onKeyUp = (e: KeyboardEvent) => {
-    const k = e.key;
-    if (k === "ArrowUp" || k === "w" || k === "W" || k === "ArrowLeft" || k === "a" || k === "A") {
-      if (this.kbAimX === -1) this.kbAimX = 0;
-    } else if (k === "ArrowDown" || k === "s" || k === "S" || k === "ArrowRight" || k === "d" || k === "D") {
-      if (this.kbAimX === 1) this.kbAimX = 0;
-    } else if (k === " ") {
-      if (this.charging) {
-        this.charging = false;
-        this.aimMode = "none";
-        if (this.screen === "playing" && !this.orb?.alive && this.chargePow > 0.06) {
-          this.fire(this.kbAngle, this.chargePow);
-        } else {
-          sfx.cancel();
-        }
-        this.chargePow = 0;
-      }
-    }
-  };
 
   private onVis = () => {
     if (document.hidden && this.screen === "playing") this.pause();
@@ -763,7 +606,7 @@ export class Engine {
     if (this.gems.length > 0) {
       const avgX = this.gems.reduce((s, g) => s + g.x, 0) / this.gems.length;
       const avgY = this.gems.reduce((s, g) => s + g.y, 0) / this.gems.length;
-      this.kbAngle = Math.atan2(avgY - this.launcher.y, avgX - this.launcher.x);
+      this.inputManager.setKbAngle(Math.atan2(avgY - this.launcher.y, avgX - this.launcher.x));
     }
   }
 
@@ -1252,19 +1095,8 @@ export class Engine {
       return;
     }
 
-    // keyboard aim
-    if (this.kbAimX !== 0 && !this.orb?.alive) {
-      const [a0, a1] = this.aimRange();
-      this.kbAngle = clamp(this.kbAngle + this.kbAimX * 2.4 * dt, a0, a1);
-    }
-    if (this.charging) {
-      this.chargePow = Math.min(1, this.chargePow + 1.15 * dt);
-      const bucket = Math.floor(this.chargePow * 10);
-      if (bucket !== this.chargeBucket) {
-        this.chargeBucket = bucket;
-        sfx.chargeTick(this.chargePow);
-      }
-    }
+    // input aim & charging
+    this.inputManager.update(dt);
 
     // Update rotating obstacles
     for (const rot of this.rotators) {
@@ -1550,13 +1382,13 @@ export class Engine {
         padR: this.padR,
         orbR: this.orbR,
         t: this.t,
-        aimMode: this.aimMode,
-        pullStart: this.pullStart,
-        pullCur: this.pullCur,
-        maxDragDistance: this.maxDragDistance(),
-        kbAngle: this.kbAngle,
-        charging: this.charging,
-        chargePow: this.chargePow,
+        aimMode: this.inputManager.aimMode,
+        pullStart: this.inputManager.pullStart,
+        pullCur: this.inputManager.pullCur,
+        maxDragDistance: this.inputManager.maxDragDistance(),
+        kbAngle: this.inputManager.kbAngle,
+        charging: this.inputManager.charging,
+        chargePow: this.inputManager.chargePow,
         hasActiveOrb: this.hasActiveOrb,
         orbs: this.orbs,
         screen: this.screen,
@@ -1606,7 +1438,7 @@ export class Engine {
       firstShot: this.firstShot,
       launcherPos: { x: this.launcher.x, y: this.launcher.y },
       landscape: this.landscape,
-      isAiming: this.aimMode !== "none",
+      isAiming: this.inputManager.aimMode !== "none",
       selectedCore: this.selectedCore,
       victoryData: this.victoryData ?? undefined,
       progress: loadProgress(),
