@@ -4,7 +4,7 @@ import type { Language } from "../game/i18n";
 import { cn } from "../utils/cn";
 import "./VietnameseAstronaut.css";
 
-export type AstronautReaction = "idle" | "aiming" | "tracking" | "cheer" | "sad" | "victory" | "angry";
+export type AstronautReaction = "idle" | "aiming" | "tracking" | "cheer" | "sad" | "victory" | "angry" | "drag" | "drop";
 
 interface VietnameseAstronautProps {
   lang: Language;
@@ -14,6 +14,9 @@ interface VietnameseAstronautProps {
   showReactionBadge?: boolean;
   quotePlacement?: "top" | "bottom";
   dialogAlign?: "center" | "left" | "right";
+  draggable?: boolean;
+  onDragStart?: () => void;
+  onDragEnd?: (pos: { x: number; y: number }) => void;
 }
 
 const REACTION_TEXTS = {
@@ -24,6 +27,8 @@ const REACTION_TEXTS = {
     sad: "⚡ Cố lên nào!",
     victory: "🇻🇳 Vẻ vang!",
     angry: "💢 Tập trung cao độ!",
+    drag: "🛸 Bay lượn không trọng lực!",
+    drop: "✨ Tiếp đất an toàn!",
   },
   en: {
     aiming: "🎯 Locking coords...",
@@ -32,6 +37,8 @@ const REACTION_TEXTS = {
     sad: "⚡ You got this!",
     victory: "🇻🇳 Victorious!",
     angry: "💢 Super focused!",
+    drag: "🛸 Zero-G soaring!",
+    drop: "✨ Safe landing!",
   },
 };
 
@@ -49,6 +56,18 @@ const RADIO_QUOTES_ANGRY_VI = [
   "⚡ 'Năng lượng cực đại! Phóng đạn ngay thôi nào!'",
 ];
 
+const RADIO_QUOTES_DRAG_VI = [
+  "🛸 'Oa oa! Lực hấp dẫn bằng 0, trôi bồng bềnh thích quá cơ trưởng ơi!'",
+  "🚀 'Đang di chuyển tọa độ chiến lược! Giữ chắc tay lái!'",
+  "🌀 'Chóng mặt quá nha haha... Cơ trưởng dắt em đi đâu đó?!'",
+];
+
+const RADIO_QUOTES_DROP_VI = [
+  "✨ 'Hạ cánh êm ái! Tọa độ mới đã thiết lập cực kỳ vững chắc!'",
+  "🎯 'Vị trí này ngắm bắn quá chuẩn! Cháy hết mình thôi!'",
+  "⭐ 'Tiếp đất thành công! Trạm VNSC sẵn sàng khai hỏa!'",
+];
+
 const RADIO_QUOTES_EN = [
   "🇻🇳 'Proudly raising the Vietnam flag across the deep cosmos!'",
   "🚀 'VNSC Mission Control ready! Conquering the Molten Void!'",
@@ -63,6 +82,18 @@ const RADIO_QUOTES_ANGRY_EN = [
   "⚡ 'Full capacitor charge! Fire the orb already!'",
 ];
 
+const RADIO_QUOTES_DRAG_EN = [
+  "🛸 'Whoa! Zero gravity drift feels unreal, Commander!'",
+  "🚀 'Repositioning tactical base! Hold on tight!'",
+  "🌀 'Spinning around in orbit... Where are we flying to?!'",
+];
+
+const RADIO_QUOTES_DROP_EN = [
+  "✨ 'Smooth touchdown! New tactical coords secured!'",
+  "🎯 'Prime angle spotted! Time to unleash a star shot!'",
+  "⭐ 'Landed safely! VNSC station ready for launch!'",
+];
+
 export function VietnameseAstronaut({
   lang,
   className,
@@ -71,20 +102,123 @@ export function VietnameseAstronaut({
   showReactionBadge = false,
   quotePlacement = "top",
   dialogAlign = "center",
+  draggable = false,
+  onDragStart,
+  onDragEnd,
 }: VietnameseAstronautProps) {
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [angryQuoteIndex, setAngryQuoteIndex] = useState(0);
+  const [dragQuoteIndex, setDragQuoteIndex] = useState(0);
+  const [dropQuoteIndex, setDropQuoteIndex] = useState(0);
   const [showQuote, setShowQuote] = useState(false);
   const [boostEffect, setBoostEffect] = useState(false);
   const [localReaction, setLocalReaction] = useState<AstronautReaction | null>(null);
+  
+  // Dragging state
+  const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{
+    startX: number;
+    startY: number;
+    initLeft: number;
+    initTop: number;
+    hasMoved: boolean;
+  } | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
   const hideTimeoutRef = useRef<number | null>(null);
   const clickCountRef = useRef(0);
   const clickResetTimerRef = useRef<number | null>(null);
 
   const effectiveReaction: AstronautReaction =
-    reaction !== "idle" ? reaction : localReaction ?? "idle";
+    localReaction ?? (reaction !== "idle" ? reaction : "idle");
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!draggable) return;
+      if (e.button !== 0 && e.pointerType === "mouse") return;
+      const el = rootRef.current;
+      if (!el) return;
+
+      const rect = el.getBoundingClientRect();
+      dragStartRef.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        initLeft: rect.left,
+        initTop: rect.top,
+        hasMoved: false,
+      };
+      try {
+        (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+      } catch {
+        // Fallback for non-supported targets
+      }
+    },
+    [draggable],
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!draggable || !dragStartRef.current) return;
+      const { startX, startY, initLeft, initTop, hasMoved } = dragStartRef.current;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (!hasMoved && Math.hypot(dx, dy) > 7) {
+        dragStartRef.current.hasMoved = true;
+        setIsDragging(true);
+        setLocalReaction("drag");
+        setShowQuote(true);
+        setDragQuoteIndex((prev) => (prev + 1) % RADIO_QUOTES_DRAG_VI.length);
+        audio.thrusterBoost();
+        onDragStart?.();
+      }
+
+      if (dragStartRef.current.hasMoved) {
+        const el = rootRef.current;
+        const width = el?.offsetWidth ?? 80;
+        const height = el?.offsetHeight ?? 80;
+        const clampedX = Math.max(10, Math.min(window.innerWidth - width - 10, initLeft + dx));
+        const clampedY = Math.max(10, Math.min(window.innerHeight - height - 10, initTop + dy));
+        setDragPos({ x: clampedX, y: clampedY });
+      }
+    },
+    [draggable, onDragStart],
+  );
+
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!draggable || !dragStartRef.current) return;
+      const wasMoved = dragStartRef.current.hasMoved;
+      dragStartRef.current = null;
+
+      if (wasMoved) {
+        setIsDragging(false);
+        setLocalReaction("drop");
+        setShowQuote(true);
+        setDropQuoteIndex((prev) => (prev + 1) % RADIO_QUOTES_DROP_VI.length);
+        audio.spaceChime();
+
+        if (dragPos) {
+          onDragEnd?.(dragPos);
+        }
+
+        if (hideTimeoutRef.current) {
+          window.clearTimeout(hideTimeoutRef.current);
+        }
+        hideTimeoutRef.current = window.setTimeout(() => {
+          setShowQuote(false);
+          setLocalReaction(null);
+        }, 3600);
+      }
+    },
+    [draggable, dragPos, onDragEnd],
+  );
 
   const handleClick = useCallback(() => {
+    // If was just dragged, ignore regular click trigger
+    if (dragStartRef.current?.hasMoved) return;
+
     audio.ensure();
     clickCountRef.current += 1;
 
@@ -130,7 +264,19 @@ export function VietnameseAstronaut({
   const activeQuote =
     effectiveReaction === "angry"
       ? (lang === "vi" ? RADIO_QUOTES_ANGRY_VI : RADIO_QUOTES_ANGRY_EN)[angryQuoteIndex]
-      : (lang === "vi" ? RADIO_QUOTES_VI : RADIO_QUOTES_EN)[quoteIndex];
+      : effectiveReaction === "drag"
+        ? (lang === "vi" ? RADIO_QUOTES_DRAG_VI : RADIO_QUOTES_DRAG_EN)[dragQuoteIndex]
+        : effectiveReaction === "drop"
+          ? (lang === "vi" ? RADIO_QUOTES_DROP_VI : RADIO_QUOTES_DROP_EN)[dropQuoteIndex]
+          : (lang === "vi" ? RADIO_QUOTES_VI : RADIO_QUOTES_EN)[quoteIndex];
+
+  const computedDialogAlign = dragPos
+    ? dragPos.x < window.innerWidth / 2
+      ? "left"
+      : "right"
+    : dialogAlign;
+
+  const computedQuotePlacement = dragPos && dragPos.y < 130 ? "bottom" : quotePlacement;
 
   const reactionClass =
     effectiveReaction === "aiming"
@@ -145,7 +291,11 @@ export function VietnameseAstronaut({
               ? "vn-astronaut-victory"
               : effectiveReaction === "angry"
                 ? "vn-astronaut-angry"
-                : "vn-zero-g-float";
+                : effectiveReaction === "drag"
+                  ? "vn-astronaut-drag"
+                  : effectiveReaction === "drop"
+                    ? "vn-astronaut-drop"
+                    : "vn-zero-g-float";
 
   const helmetClass =
     effectiveReaction === "aiming"
@@ -160,16 +310,43 @@ export function VietnameseAstronaut({
               ? "vn-helmet-victory"
               : effectiveReaction === "angry"
                 ? "vn-helmet-angry"
-                : "vn-helmet-idle";
+                : effectiveReaction === "drag"
+                  ? "vn-helmet-drag"
+                  : effectiveReaction === "drop"
+                    ? "vn-helmet-drop"
+                    : "vn-helmet-idle";
 
   return (
     <div
+      ref={rootRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       onClick={handleClick}
       role="button"
       tabIndex={0}
       aria-label={lang === "vi" ? "Phi hành gia Việt Nam" : "Vietnamese Astronaut"}
+      style={
+        dragPos
+          ? {
+              position: "fixed",
+              left: `${dragPos.x}px`,
+              top: `${dragPos.y}px`,
+              zIndex: 70,
+              touchAction: "none",
+            }
+          : draggable
+            ? { touchAction: "none" }
+            : undefined
+      }
       className={cn(
-        "group relative flex shrink-0 cursor-pointer select-none items-center justify-center transition-transform duration-300 active:scale-95",
+        "group relative flex shrink-0 select-none items-center justify-center transition-transform",
+        draggable
+          ? isDragging
+            ? "cursor-grabbing scale-105"
+            : "cursor-grab hover:scale-105 active:scale-95"
+          : "cursor-pointer active:scale-95 duration-300",
         "h-28 w-28 sm:h-36 sm:w-36 md:h-40 md:w-40 lg:h-44 lg:w-44",
         className,
       )}
@@ -179,9 +356,9 @@ export function VietnameseAstronaut({
         <div
           className={cn(
             "animate-pop-in pointer-events-none absolute -top-8 whitespace-nowrap rounded-full border border-amber-400/80 bg-void-950/95 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 shadow-[0_0_16px_rgba(255,180,40,0.55)] backdrop-blur-md z-30 max-w-[min(88vw,16rem)] truncate",
-            dialogAlign === "right"
+            computedDialogAlign === "right"
               ? "right-0"
-              : dialogAlign === "left"
+              : computedDialogAlign === "left"
                 ? "left-0"
                 : "left-1/2 -translate-x-1/2"
           )}
@@ -195,23 +372,23 @@ export function VietnameseAstronaut({
         <div
           className={cn(
             "animate-pop-in pointer-events-none absolute z-40 w-56 sm:w-64 max-w-[calc(100vw-1.5rem)] flex flex-col",
-            dialogAlign === "right"
+            computedDialogAlign === "right"
               ? "right-0"
-              : dialogAlign === "left"
+              : computedDialogAlign === "left"
                 ? "left-0"
                 : "left-1/2 -translate-x-1/2",
-            quotePlacement === "bottom"
+            computedQuotePlacement === "bottom"
               ? "top-[calc(100%+0.5rem)]"
               : "bottom-[calc(100%+0.5rem)]"
           )}
         >
-          {quotePlacement === "bottom" && (
+          {computedQuotePlacement === "bottom" && (
             <div
               className={cn(
                 "h-0 w-0 border-x-[6px] border-b-[6px] border-x-transparent border-b-void-950/95",
-                dialogAlign === "right"
+                computedDialogAlign === "right"
                   ? "ml-auto mr-5 sm:mr-7"
-                  : dialogAlign === "left"
+                  : computedDialogAlign === "left"
                     ? "mr-auto ml-5 sm:ml-7"
                     : "mx-auto"
               )}
@@ -229,13 +406,13 @@ export function VietnameseAstronaut({
               {activeQuote}
             </p>
           </div>
-          {quotePlacement !== "bottom" && (
+          {computedQuotePlacement !== "bottom" && (
             <div
               className={cn(
                 "h-0 w-0 border-x-[6px] border-t-[6px] border-x-transparent border-t-void-950/95",
-                dialogAlign === "right"
+                computedDialogAlign === "right"
                   ? "ml-auto mr-5 sm:mr-7"
-                  : dialogAlign === "left"
+                  : computedDialogAlign === "left"
                     ? "mr-auto ml-5 sm:ml-7"
                     : "mx-auto"
               )}
@@ -352,7 +529,7 @@ export function VietnameseAstronaut({
 
           {/* ================= ZERO-G WEIGHTLESS LEGS & FLOATING MOON BOOTS ================= */}
           {/* Authentic proportional spacesuit legs with knee armor guards, cuffs, and floating moon boots */}
-          <g id="vn-zero-g-legs" className="vn-legs-sway" transform="rotate(-5 145 120)">
+          <g id="vn-zero-g-legs" className={effectiveReaction === "drag" ? "vn-legs-drag" : "vn-legs-sway"} transform="rotate(-5 145 120)">
             {/* Left Leg (Floating relaxed at subtle forward angle) */}
             <g id="vn-leg-left" transform="rotate(2 135 141)">
               {/* Thigh */}
@@ -698,6 +875,44 @@ export function VietnameseAstronaut({
                   <ellipse cx="155" cy="73" rx="3.5" ry="2" fill="#ef4444" opacity="0.9" />
                 </g>
               )}
+
+              {/* 8. DRAG: Dizzy Spiral Eyes @ @ & Open Surprised Mouth :o */}
+              {effectiveReaction === "drag" && (
+                <g className="vn-visor-drag">
+                  <path
+                    d="M 136 66 m -4 0 a 4 4 0 1 0 8 0 a 3 3 0 1 0 -6 0 a 2 2 0 1 0 4 0 a 1 1 0 1 0 -2 0"
+                    fill="none"
+                    stroke="#2ee6c9"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    className="vn-dizzy-eye-left"
+                  />
+                  <path
+                    d="M 150 66 m -4 0 a 4 4 0 1 0 8 0 a 3 3 0 1 0 -6 0 a 2 2 0 1 0 4 0 a 1 1 0 1 0 -2 0"
+                    fill="none"
+                    stroke="#2ee6c9"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    className="vn-dizzy-eye-right"
+                  />
+                  {/* Surprised oval mouth */}
+                  <ellipse cx="143" cy="74" rx="3" ry="4" fill="#0f172a" stroke="#ffd23e" strokeWidth="1" />
+                  {/* Rosy flustered cheeks */}
+                  <ellipse cx="130" cy="73" rx="3" ry="1.6" fill="#ff4d6d" opacity="0.8" />
+                  <ellipse cx="156" cy="73" rx="3" ry="1.6" fill="#ff4d6d" opacity="0.8" />
+                </g>
+              )}
+
+              {/* 9. DROP / LANDING: Cheerful Relaxed Happy Eyes ^ ^ & Victorious Smile */}
+              {effectiveReaction === "drop" && (
+                <g className="vn-visor-drop">
+                  <path d="M 132 67 Q 137 59 142 67" stroke="#34d399" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+                  <path d="M 144 67 Q 149 59 154 67" stroke="#34d399" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+                  <ellipse cx="131" cy="72" rx="3.5" ry="1.8" fill="#ff4d6d" opacity="0.85" />
+                  <ellipse cx="155" cy="72" rx="3.5" ry="1.8" fill="#ff4d6d" opacity="0.85" />
+                  <path d="M 139 71 Q 143 76 147 71" stroke="#ffffff" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+                </g>
+              )}
             </g>
 
             {/* Vocoder Chin Vent */}
@@ -895,6 +1110,33 @@ export function VietnameseAstronaut({
                   <circle cx="143" cy="18" r="7.5" fill="#1e293b" stroke="#7dfce7" strokeWidth="1" />
                   <text x="143" y="21.2" textAnchor="middle" fontSize="8" fill="#ffffff">👀</text>
                 </g>
+              </g>
+            )}
+
+            {/* DRAG: Floating UFO 🛸, Speed Lines & Zero-G Particles */}
+            {effectiveReaction === "drag" && (
+              <g className="vn-emotions-drag">
+                <g className="vn-mood-badge-drag">
+                  <circle cx="143" cy="18" r="8.5" fill="#0284c7" stroke="#38bdf8" strokeWidth="1.2" filter="drop-shadow(0 0 8px rgba(56,189,248,0.8))" />
+                  <text x="143" y="21.5" textAnchor="middle" fontSize="9" fill="#ffffff">🛸</text>
+                </g>
+                {/* Wind swirl paths */}
+                <path d="M 112 36 Q 118 32 126 36" stroke="#38bdf8" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.8" />
+                <path d="M 160 34 Q 168 30 176 35" stroke="#38bdf8" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.8" />
+                <circle cx="120" cy="22" r="1.5" fill="#7dfce7" className="animate-ping" />
+                <circle cx="168" cy="24" r="1.5" fill="#ffd23e" className="animate-ping" />
+              </g>
+            )}
+
+            {/* DROP: Sparkles ✨, Celebration Star & Safe Touchdown Badge */}
+            {effectiveReaction === "drop" && (
+              <g className="vn-emotions-drop">
+                <g className="vn-mood-badge-drop">
+                  <circle cx="143" cy="18" r="8.5" fill="#059669" stroke="#34d399" strokeWidth="1.2" filter="drop-shadow(0 0 8px rgba(52,211,153,0.8))" />
+                  <text x="143" y="21.5" textAnchor="middle" fontSize="9" fill="#ffffff">✨</text>
+                </g>
+                <polygon points="112,24 113.5,27.5 117,27.5 114,29.5 115.5,33 112,31 108.5,33 110,29.5 107,27.5 110.5,27.5" fill="#34d399" stroke="#ffffff" strokeWidth="0.5" className="vn-mood-star-1" />
+                <polygon points="174,24 175.5,27.5 179,27.5 176,29.5 177.5,33 174,31 170.5,33 172,29.5 169,27.5 172.5,27.5" fill="#ffd23e" stroke="#ffffff" strokeWidth="0.5" className="vn-mood-star-2" />
               </g>
             )}
           </g>
