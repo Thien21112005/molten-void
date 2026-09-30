@@ -240,6 +240,10 @@ export class Engine {
   private wormholes: Wormhole[] = [];
   private rotators: Rotator[] = [];
 
+  // ghost trajectory trail (Angry Birds style)
+  private ghostTrail: { x: number; y: number }[] = [];
+  private currentShotPath: { x: number; y: number }[] = [];
+
   // fx
   private particles: Particle[] = [];
   private texts: FloatText[] = [];
@@ -956,6 +960,8 @@ export class Engine {
     this.combo = 0;
     this.pending = null;
     this.firstShot = false;
+    this.ghostTrail = [];
+    this.currentShotPath = [];
 
     const cfg = getLevelConfig(n);
     this.orbs = cfg.parOrbs;
@@ -1046,6 +1052,7 @@ export class Engine {
     this.combo = 0;
     this.firstShot = true;
     this.setMascot("idle", "", undefined, 0);
+    this.currentShotPath = [{ x: this.launcher.x, y: this.launcher.y }];
     const sp = (0.2 + 0.8 * power) * this.maxSpeed;
     this.orbsList = [
       {
@@ -1367,6 +1374,10 @@ export class Engine {
     this.shake = Math.min(26, this.shake + 2);
 
     if (this.orbsList.length === 0) {
+      if (this.currentShotPath.length > 2) {
+        this.ghostTrail = [...this.currentShotPath];
+      }
+      this.currentShotPath = [];
       if (this.combo === 0) {
         if (this.orbs === 1) {
           this.setMascot("sad", "mascotLastCore", undefined, 2600);
@@ -1386,6 +1397,10 @@ export class Engine {
   }
 
   private doLevelClear() {
+    if (this.currentShotPath.length > 2) {
+      this.ghostTrail = [...this.currentShotPath];
+    }
+    this.currentShotPath = [];
     this.setMascot("victory", "mascotVictory", undefined, 4500);
     const cfg = getLevelConfig(this.level);
     let stars = 1;
@@ -1855,6 +1870,15 @@ export class Engine {
         }
       }
 
+      // Sample ghost trajectory path for the primary comet
+      if (activeOrbs[0] && activeOrbs[0].alive) {
+        const prim = activeOrbs[0];
+        const last = this.currentShotPath[this.currentShotPath.length - 1];
+        if (!last || (prim.x - last.x) ** 2 + (prim.y - last.y) ** 2 >= 144) {
+          this.currentShotPath.push({ x: prim.x, y: prim.y });
+        }
+      }
+
       for (const o of activeOrbs) {
         o.trail.push({ x: o.x, y: o.y });
         if (o.trail.length > 15) o.trail.shift();
@@ -2080,6 +2104,9 @@ export class Engine {
       }
     }
 
+    // ghost trajectory trail of previous shot (Angry Birds style)
+    if (this.screen !== "menu") this.drawGhostTrail();
+
     // launcher + aim
     if (this.screen !== "menu") this.drawLauncher();
 
@@ -2290,6 +2317,66 @@ export class Engine {
 
       ctx.restore();
     }
+  }
+
+  private drawGhostTrail() {
+    if (this.ghostTrail.length < 2 || this.screen === "menu") return;
+    const { ctx } = this;
+    ctx.save();
+
+    // 1. Subtle stardust dashed flight path line
+    ctx.beginPath();
+    ctx.moveTo(this.ghostTrail[0].x, this.ghostTrail[0].y);
+    for (let i = 1; i < this.ghostTrail.length; i++) {
+      ctx.lineTo(this.ghostTrail[i].x, this.ghostTrail[i].y);
+    }
+    ctx.strokeStyle = "rgba(148, 163, 215, 0.22)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 7]);
+    ctx.stroke();
+
+    // 2. Translucent stardust ghost beads
+    ctx.globalCompositeOperation = "lighter";
+    const total = this.ghostTrail.length;
+    const step = Math.max(1, Math.floor(total / 24));
+    for (let i = 0; i < total; i += step) {
+      const pt = this.ghostTrail[i];
+      const prog = i / total;
+      const alpha = 0.22 + 0.38 * (1 - prog * 0.45);
+
+      // Outer cyan-teal stardust halo
+      ctx.fillStyle = `rgba(46, 230, 201, ${alpha * 0.4})`;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 4.5, 0, TAU);
+      ctx.fill();
+
+      // Core white stardust pinprick
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.85})`;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 1.8, 0, TAU);
+      ctx.fill();
+    }
+
+    // 3. Terminal impact / expiry crosshair ring at final position
+    const last = this.ghostTrail[total - 1];
+    ctx.setLineDash([2, 3]);
+    ctx.strokeStyle = "rgba(255, 210, 62, 0.55)";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.arc(last.x, last.y, 7.5, 0, TAU);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.strokeStyle = "rgba(255, 210, 62, 0.45)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(last.x - 5, last.y);
+    ctx.lineTo(last.x + 5, last.y);
+    ctx.moveTo(last.x, last.y - 5);
+    ctx.lineTo(last.x, last.y + 5);
+    ctx.stroke();
+
+    ctx.restore();
   }
 
   private drawLauncher() {
