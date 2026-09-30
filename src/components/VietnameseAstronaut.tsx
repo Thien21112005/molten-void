@@ -13,6 +13,7 @@ interface VietnameseAstronautProps {
   reactionText?: string;
   showReactionBadge?: boolean;
   quotePlacement?: "top" | "bottom";
+  dialogAlign?: "center" | "left" | "right";
 }
 
 const REACTION_TEXTS = {
@@ -69,6 +70,7 @@ export function VietnameseAstronaut({
   reactionText,
   showReactionBadge = false,
   quotePlacement = "top",
+  dialogAlign = "center",
 }: VietnameseAstronautProps) {
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [angryQuoteIndex, setAngryQuoteIndex] = useState(0);
@@ -173,26 +175,47 @@ export function VietnameseAstronaut({
       )}
     >
       {/* Dynamic Floating Reaction Badge */}
-      {showReactionBadge && (reactionText || (effectiveReaction !== "idle" && REACTION_TEXTS[lang][effectiveReaction as keyof (typeof REACTION_TEXTS)["vi"]])) && (
-        <div className="animate-pop-in pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-amber-400/80 bg-void-950/95 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 shadow-[0_0_16px_rgba(255,180,40,0.55)] backdrop-blur-md z-30">
+      {showReactionBadge && !showQuote && (reactionText || (effectiveReaction !== "idle" && REACTION_TEXTS[lang][effectiveReaction as keyof (typeof REACTION_TEXTS)["vi"]])) && (
+        <div
+          className={cn(
+            "animate-pop-in pointer-events-none absolute -top-8 whitespace-nowrap rounded-full border border-amber-400/80 bg-void-950/95 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 shadow-[0_0_16px_rgba(255,180,40,0.55)] backdrop-blur-md z-30 max-w-[min(88vw,16rem)] truncate",
+            dialogAlign === "right"
+              ? "right-0"
+              : dialogAlign === "left"
+                ? "left-0"
+                : "left-1/2 -translate-x-1/2"
+          )}
+        >
           {reactionText ?? (effectiveReaction !== "idle" ? REACTION_TEXTS[lang][effectiveReaction as keyof (typeof REACTION_TEXTS)["vi"]] : "")}
         </div>
       )}
-
-
 
       {/* Cyber Radio Speech Bubble */}
       {showQuote && (
         <div
           className={cn(
-            "animate-pop-in pointer-events-none absolute left-1/2 z-40 w-56 -translate-x-1/2 sm:w-64",
+            "animate-pop-in pointer-events-none absolute z-40 w-56 sm:w-64 max-w-[calc(100vw-1.5rem)] flex flex-col",
+            dialogAlign === "right"
+              ? "right-0"
+              : dialogAlign === "left"
+                ? "left-0"
+                : "left-1/2 -translate-x-1/2",
             quotePlacement === "bottom"
-              ? "top-[calc(100%+0.6rem)] flex flex-col"
-              : "-top-16 sm:-top-20"
+              ? "top-[calc(100%+0.5rem)]"
+              : "bottom-[calc(100%+0.5rem)]"
           )}
         >
           {quotePlacement === "bottom" && (
-            <div className="mx-auto h-0 w-0 border-x-[6px] border-b-[6px] border-x-transparent border-b-void-950/95" />
+            <div
+              className={cn(
+                "h-0 w-0 border-x-[6px] border-b-[6px] border-x-transparent border-b-void-950/95",
+                dialogAlign === "right"
+                  ? "ml-auto mr-5 sm:mr-7"
+                  : dialogAlign === "left"
+                    ? "mr-auto ml-5 sm:ml-7"
+                    : "mx-auto"
+              )}
+            />
           )}
           <div className="rounded-xl border border-ember-400/60 bg-void-950/95 p-2.5 shadow-[0_0_24px_rgba(255,160,46,0.45)] backdrop-blur-md">
             <div className="mb-1 flex items-center justify-between text-[9px] font-bold tracking-widest text-ember-300 uppercase">
@@ -207,7 +230,16 @@ export function VietnameseAstronaut({
             </p>
           </div>
           {quotePlacement !== "bottom" && (
-            <div className="mx-auto h-0 w-0 border-x-[6px] border-t-[6px] border-x-transparent border-t-void-950/95" />
+            <div
+              className={cn(
+                "h-0 w-0 border-x-[6px] border-t-[6px] border-x-transparent border-t-void-950/95",
+                dialogAlign === "right"
+                  ? "ml-auto mr-5 sm:mr-7"
+                  : dialogAlign === "left"
+                    ? "mr-auto ml-5 sm:ml-7"
+                    : "mx-auto"
+              )}
+            />
           )}
         </div>
       )}
