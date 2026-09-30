@@ -417,7 +417,8 @@ export default function App() {
         >
           <VietnameseAstronaut
             lang={lang}
-            className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer drop-shadow-[0_0_16px_rgba(46,230,201,0.35)] hover:scale-105 active:scale-95 transition"
+            draggable
+            className="h-16 w-16 sm:h-20 sm:w-20 cursor-grab drop-shadow-[0_0_16px_rgba(46,230,201,0.35)] hover:scale-105 active:scale-95 transition"
             dialogAlign="right"
             reaction={
               ui.mascot?.reaction && ui.mascot.reaction !== "idle"

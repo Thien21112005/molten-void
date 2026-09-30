@@ -115,6 +115,8 @@
 .vn-helmet-sad,
 .vn-helmet-victory,
 .vn-helmet-angry,
+.vn-helmet-drag,
+.vn-helmet-drop,
 .vn-helmet-idle {
   transform-origin: 143px 94px;
 }
@@ -136,8 +138,41 @@
 .vn-helmet-angry {
   animation: vnHeadAngry 0.3s ease-in-out infinite;
 }
+.vn-helmet-drag {
+  animation: vnHeadDrag 0.32s ease-in-out infinite;
+}
+.vn-helmet-drop {
+  animation: vnHeadCheer 0.6s ease-in-out;
+}
 .vn-helmet-idle {
   transform: rotate(-5deg);
+}
+
+@keyframes vnHeadDrag {
+  0%, 100% {
+    transform: rotate(-7deg);
+  }
+  50% {
+    transform: rotate(7deg);
+  }
+}
+
+/* Dizzy Eye Rotation for Zero-G Dragging */
+@keyframes vnDizzySpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.vn-dizzy-eye-left {
+  transform-origin: 136px 66px;
+  animation: vnDizzySpin 0.9s linear infinite;
+}
+.vn-dizzy-eye-right {
+  transform-origin: 150px 66px;
+  animation: vnDizzySpin 0.9s linear infinite reverse;
 }
 
 /* Arm Gesture Keyframes */
@@ -351,9 +386,51 @@
 .vn-astronaut-angry {
   animation: vnAngry 0.25s ease-in-out infinite;
 }
+@keyframes vnAstronautDrag {
+  0%, 100% {
+    transform: translate3d(0, -3px, 0) rotate(-4deg) scale(1.08);
+  }
+  50% {
+    transform: translate3d(0, 3px, 0) rotate(4deg) scale(1.13);
+  }
+}
+.vn-astronaut-drag {
+  animation: vnAstronautDrag 0.38s ease-in-out infinite;
+  filter: drop-shadow(0 14px 28px rgba(46, 230, 201, 0.55));
+}
+@keyframes vnAstronautDrop {
+  0% {
+    transform: scale(1.14) translateY(-10px);
+  }
+  45% {
+    transform: scale(0.94, 1.06) translateY(5px);
+  }
+  75% {
+    transform: scale(1.03, 0.97) translateY(-2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+.vn-astronaut-drop {
+  animation: vnAstronautDrop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 12px 24px rgba(52, 211, 153, 0.55));
+}
 .vn-legs-sway {
   transform-origin: 145px 141px;
   animation: vnLegsZeroG 8.2s ease-in-out infinite;
+}
+@keyframes vnLegsFlail {
+  0%, 100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+.vn-legs-drag {
+  transform-origin: 145px 141px;
+  animation: vnLegsFlail 0.24s ease-in-out infinite;
 }
 .vn-arm-sway {
   transform-origin: 158px 100px;

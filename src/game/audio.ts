@@ -736,6 +736,17 @@ export class SoundEngine {
     this.tone(1760, 0.14, "sine", 0.08, 0.12);
   }
 
+  starPop(index: number) {
+    const freqs = [587.33, 880, 1318.51];
+    const f = freqs[Math.min(index, 2)] ?? 880;
+    this.tone(f, 0.12, "sine", 0.15);
+    this.tone(f * 1.5, 0.14, "triangle", 0.1, 0.04);
+  }
+
+  scoreTick() {
+    this.tone(1200 + Math.random() * 300, 0.02, "sine", 0.03);
+  }
+
   thrusterBoost() {
     this.noise(0.35, 0.16, 400, 3200, 0, 0.7);
     this.tone(220, 0.22, "triangle", 0.12, 0, 580);
