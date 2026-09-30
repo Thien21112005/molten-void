@@ -16,6 +16,10 @@ export class FloatTextSystem {
     return this.texts.length;
   }
 
+  public set length(val: number) {
+    this.texts.length = val;
+  }
+
   public banner(W: number, H: number, str: string, sub?: string): void {
     this.texts.push({
       x: W / 2,

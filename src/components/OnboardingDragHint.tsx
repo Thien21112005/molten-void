@@ -1,4 +1,3 @@
-import React from "react";
 import type { Translations } from "../game/i18n";
 
 interface OnboardingDragHintProps {

@@ -1,4 +1,4 @@
-import React from "react";
+import type { ReactNode } from "react";
 import type { PlayerProgress } from "../game/levels/types";
 import { getTotalStars, MAX_POSSIBLE_STARS } from "../game/levels/progress";
 import type { Translations } from "../game/i18n";
@@ -21,7 +21,7 @@ export interface CampaignIntelProps {
 interface SectorInfo {
   id: number;
   name: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   startLevel: number;
   endLevel: number;
   colorBorder: string;
@@ -32,8 +32,8 @@ interface SectorInfo {
 export function CampaignIntel({
   progress,
   t,
-  onOpenRoadmap,
-  bestScore = 0,
+  onOpenRoadmap: _onOpenRoadmap,
+  bestScore: _bestScore = 0,
 }: CampaignIntelProps) {
   const totalStars = getTotalStars(progress);
   const totalProgressPercent = Math.min(100, Math.round((totalStars / MAX_POSSIBLE_STARS) * 100));

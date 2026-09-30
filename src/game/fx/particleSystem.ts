@@ -16,6 +16,10 @@ export class ParticleSystem {
     return this.particles.length;
   }
 
+  public set length(val: number) {
+    this.particles.length = val;
+  }
+
   public clear(): void {
     this.particles = [];
   }

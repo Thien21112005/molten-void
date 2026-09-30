@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Engine, type UIState, type HighScore } from "./game/engine";
+import { Engine, type UIState } from "./game/engine";
 import { cn } from "./utils/cn";
 import { VictoryModal } from "./components/VictoryModal";
 import { RoadmapModal } from "./components/RoadmapModal";
@@ -8,7 +8,7 @@ import { CampaignIntel } from "./components/CampaignIntel";
 import { loadProgress, getTotalStars, MAX_POSSIBLE_STARS } from "./game/levels/progress";
 import { TRANSLATIONS, loadLanguage, type Language, type Translations } from "./game/i18n";
 import { audio } from "./game/audio";
-import { IconTacticalTarget, IconStar, IconSparkle, IconSpacesuit } from "./components/Icons";
+import { IconTacticalTarget, IconStar, IconSpacesuit } from "./components/Icons";
 import { VietnameseSpaceship } from "./components/VietnameseSpaceship";
 import { VietnameseAstronaut } from "./components/VietnameseAstronaut";
 import { CosmicDecorations } from "./components/CosmicDecorations";

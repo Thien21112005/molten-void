@@ -1,5 +1,4 @@
 import type { PlayerProgress } from "./levels";
-import type { SkinId } from "./skins/types";
 
 export type Screen = "menu" | "playing" | "paused" | "gameover" | "victory" | "roadmap";
 
@@ -23,8 +22,10 @@ export interface VictoryData {
 
 export type CoreType = "standard" | "cluster" | "blast" | "heavy";
 
+export type MascotReaction = "idle" | "aiming" | "cheer" | "sad" | "victory";
+
 export interface MascotState {
-  reaction: "idle" | "aiming" | "cheer" | "sad" | "victory";
+  reaction: MascotReaction;
   key: string;
   params?: Record<string, string | number>;
   id: number;

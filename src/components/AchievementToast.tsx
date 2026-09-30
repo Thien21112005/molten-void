@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { AchievementDef } from "../game/achievements/types";
 import { subscribeAchievementUnlocked } from "../game/achievements/achievementsData";
 import { audio } from "../game/audio";
 import type { Language, Translations } from "../game/i18n";
-import { cn } from "../utils/cn";
 
 interface AchievementToastProps {
   lang?: Language;
@@ -16,7 +15,7 @@ export function AchievementToast({ lang = "vi", t }: AchievementToastProps) {
   useEffect(() => {
     return subscribeAchievementUnlocked((ach) => {
       audio.spaceChime();
-      audio.shatter(2, 6);
+      audio.shatter(2, true);
       setCurrent(ach);
 
       const timer = setTimeout(() => {

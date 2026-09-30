@@ -11,7 +11,7 @@ export const haptics = {
     try {
       const s = loadSettings();
       // If user turned off screen shake, respect it as minimal haptics preference
-      return s.screenShake !== "off";
+      return Boolean(s.screenShake);
     } catch {
       return true;
     }

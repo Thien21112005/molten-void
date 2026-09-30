@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import type { VictoryData } from "../game/engine";
 import type { Translations } from "../game/i18n";
 import { StarRating } from "./StarRating";

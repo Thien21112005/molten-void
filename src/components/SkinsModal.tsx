@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { SKINS, loadEquippedSkin, saveEquippedSkin, isSkinUnlocked } from "../game/skins/skinsData";
 import type { SkinDef, SkinId } from "../game/skins/types";
 import { audio } from "../game/audio";

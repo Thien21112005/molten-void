@@ -1,4 +1,3 @@
-import React from "react";
 import { ACHIEVEMENTS, loadAchievements } from "../game/achievements/achievementsData";
 import type { AchievementDef, AchievementTier } from "../game/achievements/types";
 import type { Language, Translations } from "../game/i18n";

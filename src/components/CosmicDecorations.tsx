@@ -1,5 +1,3 @@
-import React from "react";
-
 /* Orbit calculation helpers for continuous Keplerian planetary revolution */
 function formatCalc(pct: number, val: number, unit: string): string {
   if (val >= 0) {

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { audio } from "../game/audio";
 import type { Language } from "../game/i18n";
 import { cn } from "../utils/cn";
@@ -131,9 +131,9 @@ export function VietnameseAstronaut({
       )}
     >
       {/* Dynamic Floating Reaction Badge */}
-      {showReactionBadge && (reactionText || (effectiveReaction !== "idle" && REACTION_TEXTS[lang][effectiveReaction])) && (
+      {showReactionBadge && (reactionText || (effectiveReaction !== "idle" && REACTION_TEXTS[lang][effectiveReaction as keyof (typeof REACTION_TEXTS)["vi"]])) && (
         <div className="animate-pop-in pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-amber-400/80 bg-void-950/95 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 shadow-[0_0_16px_rgba(255,180,40,0.55)] backdrop-blur-md z-30">
-          {reactionText ?? REACTION_TEXTS[lang][effectiveReaction]}
+          {reactionText ?? (effectiveReaction !== "idle" ? REACTION_TEXTS[lang][effectiveReaction as keyof (typeof REACTION_TEXTS)["vi"]] : "")}
         </div>
       )}
 

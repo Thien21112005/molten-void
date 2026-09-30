@@ -1,4 +1,4 @@
-import type { AimMode, CoreType, MascotState, Orb, Screen } from "../types";
+import type { AimMode, CoreType, MascotReaction, Orb, Screen } from "../types";
 import { clamp } from "../utils/math";
 import { sfx } from "../audio";
 
@@ -17,7 +17,12 @@ export interface InputHost {
   resume: () => void;
   play: () => void;
   restart: () => void;
-  setMascot: (state: MascotState, dialogue: string, duration?: number, rotation?: number) => void;
+  setMascot: (
+    reaction: MascotReaction,
+    key: string,
+    params?: Record<string, string | number>,
+    durationMs?: number
+  ) => void;
   pushUI: () => void;
   getDimensions: () => { W: number; H: number };
 }

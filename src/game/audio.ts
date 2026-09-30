@@ -218,6 +218,19 @@ export class SoundEngine {
     this.updateMusicPlayback();
   }
 
+  setMusicTrack(track: MusicTrack) {
+    this.musicTrack = track;
+    if (track === "odyssey" || track === "cyber") {
+      this.menuTrack = track;
+    }
+    try {
+      localStorage.setItem("mv_menu_track", track);
+    } catch {
+      /* ignore */
+    }
+    this.updateMusicPlayback();
+  }
+
   setMusicMode(mode: MusicMode) {
     const prev = this.musicMode;
     this.musicMode = mode === "ambient" ? "menu" : mode;

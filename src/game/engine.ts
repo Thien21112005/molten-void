@@ -7,13 +7,12 @@ import {
   loadProgress,
   getTotalStars,
   TOTAL_LEVELS,
-  type PlayerProgress,
 } from "./levels";
 import {
   unlockAchievement,
   checkCampaignMilestoneAchievements,
 } from "./achievements/achievementsData";
-import { SKINS, loadEquippedSkin } from "./skins/skinsData";
+import { loadEquippedSkin } from "./skins/skinsData";
 import type { SkinId } from "./skins/types";
 import {
   type Screen,
@@ -36,7 +35,7 @@ import {
   HS_KEY,
   MAX_ORBS,
 } from "./types";
-import { TAU, clamp, rand, pick, easeOutBack } from "./utils/math";
+import { TAU, clamp, rand, pick } from "./utils/math";
 import { ParticleSystem } from "./fx/particleSystem";
 import { FloatTextSystem } from "./fx/floatTextSystem";
 import { AmbientEnvironment } from "./fx/ambientEnvironment";
@@ -158,7 +157,6 @@ export class Engine {
   // statics (pre-rendered)
   private starfield: HTMLCanvasElement | null = null;
   private vignette: HTMLCanvasElement | null = null;
-  private orbSprite: HTMLCanvasElement | null = null;
   private iceSprite: HTMLCanvasElement | null = null;
   private goldSprite: HTMLCanvasElement | null = null;
 
@@ -195,8 +193,8 @@ export class Engine {
       resume: () => this.resume(),
       play: () => this.play(),
       restart: () => this.restart(),
-      setMascot: (state, dialogue, duration, rotation) =>
-        this.setMascot(state, dialogue, duration, rotation),
+      setMascot: (reaction, key, params, durationMs) =>
+        this.setMascot(reaction, key, params, durationMs),
       pushUI: () => this.pushUI(),
       getDimensions: () => ({ W: this.W, H: this.H }),
     });
@@ -253,8 +251,8 @@ export class Engine {
     this.level = clamp(lvl, 1, TOTAL_LEVELS);
     this.levelScore = 0;
     this.pending = null;
-    this.particles.length = 0;
-    this.texts.length = 0;
+    this.particles.clear();
+    this.texts.clear();
     this.orb = null;
     this.firstShot = false;
     this.victoryData = null;
@@ -342,7 +340,6 @@ export class Engine {
   setSkin(skinId: SkinId) {
     this.equippedSkin = skinId;
     this.spriteFactory.clearCoreCache();
-    this.orbSprite = this.spriteFactory.getOrbSprite("standard", this.equippedSkin);
     this.pushUI();
   }
 
@@ -508,7 +505,6 @@ export class Engine {
     this.vignette = SpriteFactory.buildVignette(W, H, dpr);
 
     // sprites
-    this.orbSprite = this.spriteFactory.getOrbSprite("standard", this.equippedSkin);
     this.iceSprite = this.spriteFactory.makeGemSprite("ice");
     this.goldSprite = this.spriteFactory.makeGemSprite("gold");
 
@@ -1184,7 +1180,7 @@ export class Engine {
           resolveBlockCollision(
             o,
             this.blocks,
-            (b, cx, cy) => {
+            (_b, cx, cy) => {
               sfx.thud(1.0);
               haptics.shatter(2);
               this.shake = Math.min(26, this.shake + 5);
