@@ -1,4 +1,18 @@
-export type SkinId = "classic" | "plasma_violet" | "ice_frost" | "solar_gold";
+export type SkinId =
+  | "classic"
+  | "nebula_cyan"
+  | "plasma_violet"
+  | "ice_frost"
+  | "void_singularity"
+  | "solar_gold";
+
+export type SkinCoreShape =
+  | "molten_flame"
+  | "spiral_galaxy"
+  | "pulsar_rings"
+  | "ice_crystal"
+  | "void_singularity"
+  | "solar_crown";
 
 export interface SkinDef {
   id: SkinId;
@@ -7,6 +21,7 @@ export interface SkinDef {
   descVi: string;
   descEn: string;
   requiredStars: number;
+  coreShape: SkinCoreShape;
   trailColor: string; // RGB string "r,g,b"
   glowColor: string; // Hex or CSS color
   palette: {
