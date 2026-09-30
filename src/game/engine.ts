@@ -15,170 +15,53 @@ import {
 } from "./achievements/achievementsData";
 import { SKINS, loadEquippedSkin } from "./skins/skinsData";
 import type { SkinId } from "./skins/types";
+import {
+  type Screen,
+  type HighScore,
+  type VictoryData,
+  type CoreType,
+  type MascotState,
+  type UIState,
+  type Gem,
+  type Block,
+  type GravityWell,
+  type Wormhole,
+  type Rotator,
+  type Orb,
+  type Particle,
+  type FloatText,
+  type Mote,
+  type TwStar,
+  type AimMode,
+  HS_KEY,
+  MAX_ORBS,
+} from "./types";
+import { TAU, clamp, rand, pick, easeOutBack } from "./utils/math";
+import { ParticleSystem } from "./fx/particleSystem";
+import { FloatTextSystem } from "./fx/floatTextSystem";
+import { AmbientEnvironment } from "./fx/ambientEnvironment";
+import { SpriteFactory } from "./renderers/spriteFactory";
 
-export type Screen = "menu" | "playing" | "paused" | "gameover" | "victory" | "roadmap";
-
-export interface HighScore {
-  s: number;
-  l: number;
-  d: string;
-}
-
-export interface VictoryData {
-  level: number;
-  levelName: string;
-  stars: number;
-  score: number;
-  levelScore: number;
-  coresBonus: number;
-  isNewBestScore: boolean;
-  isNewBestStars: boolean;
-  totalStars: number;
-}
-
-export type CoreType = "standard" | "cluster" | "blast" | "heavy";
-
-export interface MascotState {
-  reaction: "idle" | "aiming" | "cheer" | "sad" | "victory";
-  key: string;
-  params?: Record<string, string | number>;
-  id: number;
-}
-
-export interface UIState {
-  screen: Screen;
-  score: number;
-  level: number;
-  orbs: number;
-  maxOrbs: number;
-  gems: number;
-  best: number;
-  newBest: boolean;
-  hs: HighScore[];
-  muted: boolean;
-  firstShot: boolean;
-  launcherPos?: { x: number; y: number };
-  landscape?: boolean;
-  isAiming?: boolean;
-  selectedCore: CoreType;
-  victoryData?: VictoryData;
-  progress?: PlayerProgress;
-  isFromPaused?: boolean;
-  mascot?: MascotState;
-  hasActiveOrb?: boolean;
-}
-
-const HS_KEY = "mv_hs_v1";
-const MAX_ORBS = 9;
-const TAU = Math.PI * 2;
-
-const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
-const rand = (a: number, b: number) => a + Math.random() * (b - a);
-const pick = <T,>(arr: readonly T[]): T => arr[(Math.random() * arr.length) | 0];
-const easeOutBack = (x: number) => {
-  const c1 = 1.70158;
-  const c3 = c1 + 1;
-  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+export type {
+  Screen,
+  HighScore,
+  VictoryData,
+  CoreType,
+  MascotState,
+  UIState,
+  Gem,
+  Block,
+  GravityWell,
+  Wormhole,
+  Rotator,
+  Orb,
+  Particle,
+  FloatText,
+  Mote,
+  TwStar,
+  AimMode,
 };
-
-interface Gem {
-  x: number;
-  y: number;
-  r: number;
-  kind: "ice" | "gold";
-  phase: number;
-  dead: boolean;
-}
-interface Block {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-interface GravityWell {
-  x: number;
-  y: number;
-  radius: number;
-  strength: number;
-}
-interface Wormhole {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  r: number;
-}
-interface Rotator {
-  x: number;
-  y: number;
-  len: number;
-  width: number;
-  speed: number;
-  angle: number;
-}
-interface Orb {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  r: number;
-  t: number;
-  alive: boolean;
-  slowT: number;
-  trail: { x: number; y: number }[];
-  coreType: CoreType;
-  piercesLeft?: number;
-  piercedBlocks?: Set<Block>;
-  portalCooldown?: number;
-  bounces?: number;
-  gravityInfluenced?: boolean;
-  hasSplit?: boolean;
-  isSplitShard?: boolean;
-}
-interface Particle {
-  kind: 0 | 1 | 2 | 3; // shard | spark | smoke | ring
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  tl: number;
-  size: number;
-  rot: number;
-  vr: number;
-  col: string; // "r,g,b"
-  grav: number;
-  drag: number;
-}
-interface FloatText {
-  x: number;
-  y: number;
-  t: number;
-  life: number;
-  str: string;
-  size: number;
-  col: string;
-  sub?: string;
-  big?: boolean;
-}
-interface Mote {
-  x: number;
-  y: number;
-  spd: number;
-  phase: number;
-  size: number;
-  col: string;
-  a: number;
-}
-interface TwStar {
-  x: number;
-  y: number;
-  r: number;
-  ph: number;
-  sp: number;
-}
-
-type AimMode = "none" | "pull" | "kb";
+export { HS_KEY, MAX_ORBS };
 
 export class Engine {
   private canvas: HTMLCanvasElement;
@@ -227,7 +110,7 @@ export class Engine {
     return this.orbsList.some((o) => o.alive);
   }
   private equippedSkin: SkinId = loadEquippedSkin();
-  private coreSprites: Partial<Record<CoreType, HTMLCanvasElement>> = {};
+  private spriteFactory = new SpriteFactory();
   private launcher = { x: 100, y: 500 };
   private padR = 24;
   private orbR = 12;
@@ -244,11 +127,10 @@ export class Engine {
   private ghostTrail: { x: number; y: number }[] = [];
   private currentShotPath: { x: number; y: number }[] = [];
 
-  // fx
-  private particles: Particle[] = [];
-  private texts: FloatText[] = [];
-  private motes: Mote[] = [];
-  private twinkle: TwStar[] = [];
+  // fx systems
+  private particles = new ParticleSystem();
+  private texts = new FloatTextSystem();
+  private ambient = new AmbientEnvironment();
   private shake = 0;
   private hitstop = 0;
   private flash = 0;
@@ -443,8 +325,8 @@ export class Engine {
 
   setSkin(skinId: SkinId) {
     this.equippedSkin = skinId;
-    this.coreSprites = {};
-    this.orbSprite = this.makeOrbSprite();
+    this.spriteFactory.clearCoreCache();
+    this.orbSprite = this.spriteFactory.getOrbSprite("standard", this.equippedSkin);
     this.pushUI();
   }
 
@@ -763,191 +645,16 @@ export class Engine {
 
   private buildStatic() {
     const { W, H, dpr } = this;
-    // starfield
-    const sf = document.createElement("canvas");
-    sf.width = Math.round(W * dpr);
-    sf.height = Math.round(H * dpr);
-    const c = sf.getContext("2d")!;
-    c.scale(dpr, dpr);
-    const bg = c.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, "#0b0718");
-    bg.addColorStop(0.55, "#070510");
-    bg.addColorStop(1, "#050309");
-    c.fillStyle = bg;
-    c.fillRect(0, 0, W, H);
-    const neb = (x: number, y: number, r: number, col: string) => {
-      const g = c.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, col);
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      c.fillStyle = g;
-      c.fillRect(x - r, y - r, r * 2, r * 2);
-    };
-    neb(W * 0.18, H * 0.75, Math.max(W, H) * 0.5, "rgba(255,94,26,0.055)");
-    neb(W * 0.85, H * 0.15, Math.max(W, H) * 0.45, "rgba(32,226,192,0.05)");
-    neb(W * 0.55, H * 0.5, Math.max(W, H) * 0.6, "rgba(124,77,255,0.045)");
-    const starCols = ["255,255,255", "190,240,255", "255,225,170"];
-    for (let i = 0; i < 150; i++) {
-      c.fillStyle = `rgba(${pick(starCols)},${rand(0.15, 0.7)})`;
-      c.beginPath();
-      c.arc(rand(0, W), rand(0, H), rand(0.4, 1.4), 0, TAU);
-      c.fill();
-    }
-    this.starfield = sf;
-
-    // vignette
-    const vg = document.createElement("canvas");
-    vg.width = Math.round(W * dpr);
-    vg.height = Math.round(H * dpr);
-    const vc = vg.getContext("2d")!;
-    vc.scale(dpr, dpr);
-    const rad = vc.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.35, W / 2, H * 0.5, Math.max(W, H) * 0.75);
-    rad.addColorStop(0, "rgba(0,0,0,0)");
-    rad.addColorStop(1, "rgba(2,1,6,0.62)");
-    vc.fillStyle = rad;
-    vc.fillRect(0, 0, W, H);
-    this.vignette = vg;
+    this.starfield = SpriteFactory.buildStarfield(W, H, dpr);
+    this.vignette = SpriteFactory.buildVignette(W, H, dpr);
 
     // sprites
-    this.orbSprite = this.makeOrbSprite();
-    this.iceSprite = this.makeGemSprite("ice");
-    this.goldSprite = this.makeGemSprite("gold");
+    this.orbSprite = this.spriteFactory.getOrbSprite("standard", this.equippedSkin);
+    this.iceSprite = this.spriteFactory.makeGemSprite("ice");
+    this.goldSprite = this.spriteFactory.makeGemSprite("gold");
 
     // ambient twinkle + motes
-    this.twinkle = [];
-    for (let i = 0; i < 26; i++) {
-      this.twinkle.push({ x: rand(0, W), y: rand(0, H), r: rand(0.8, 2.2), ph: rand(0, TAU), sp: rand(0.6, 2.2) });
-    }
-    if (this.motes.length === 0) {
-      for (let i = 0; i < 24; i++) {
-        this.motes.push({
-          x: rand(0, W),
-          y: rand(0, H),
-          spd: rand(8, 26),
-          phase: rand(0, TAU),
-          size: rand(1, 2.6),
-          col: Math.random() < 0.5 ? "255,150,60" : "60,230,200",
-          a: rand(0.1, 0.3),
-        });
-      }
-    }
-  }
-
-  private makeOrbSprite(): HTMLCanvasElement {
-    return this.getOrbSprite("standard");
-  }
-
-  private getOrbSprite(coreType: CoreType): HTMLCanvasElement {
-    if (this.coreSprites[coreType]) return this.coreSprites[coreType]!;
-    const s = 128;
-    const c = document.createElement("canvas");
-    c.width = s;
-    c.height = s;
-    const g = c.getContext("2d")!;
-    const cx = s / 2;
-    const glow = g.createRadialGradient(cx, cx, 0, cx, cx, cx);
-
-    if (coreType === "cluster") {
-      glow.addColorStop(0, "rgba(230,255,250,0.98)");
-      glow.addColorStop(0.18, "rgba(125,252,231,0.95)");
-      glow.addColorStop(0.38, "rgba(46,230,201,0.75)");
-      glow.addColorStop(0.65, "rgba(0,180,216,0.2)");
-      glow.addColorStop(1, "rgba(0,180,216,0)");
-    } else if (coreType === "blast") {
-      glow.addColorStop(0, "rgba(255,250,220,0.98)");
-      glow.addColorStop(0.18, "rgba(255,160,40,0.95)");
-      glow.addColorStop(0.38, "rgba(255,60,20,0.85)");
-      glow.addColorStop(0.65, "rgba(200,20,20,0.25)");
-      glow.addColorStop(1, "rgba(200,20,20,0)");
-    } else if (coreType === "heavy") {
-      glow.addColorStop(0, "rgba(255,255,255,0.98)");
-      glow.addColorStop(0.18, "rgba(186,230,253,0.95)");
-      glow.addColorStop(0.38, "rgba(56,189,248,0.8)");
-      glow.addColorStop(0.65, "rgba(30,58,138,0.3)");
-      glow.addColorStop(1, "rgba(30,58,138,0)");
-    } else {
-      // standard with equipped skin customization
-      const skin = SKINS.find((s) => s.id === this.equippedSkin) || SKINS[0];
-      glow.addColorStop(0, skin.palette.core);
-      glow.addColorStop(0.2, skin.palette.mid);
-      glow.addColorStop(0.45, skin.palette.outer);
-      glow.addColorStop(0.7, skin.palette.ambient);
-      glow.addColorStop(1, "rgba(0,0,0,0)");
-    }
-
-    g.fillStyle = glow;
-    g.fillRect(0, 0, s, s);
-
-    // Core detail
-    g.strokeStyle = "rgba(255,255,255,0.7)";
-    g.lineWidth = 3;
-    g.beginPath();
-    g.arc(cx, cx, s * 0.13, -2.4, -0.6);
-    g.stroke();
-
-    this.coreSprites[coreType] = c;
-    return c;
-  }
-
-  private makeGemSprite(kind: "ice" | "gold"): HTMLCanvasElement {
-    const s = 128;
-    const c = document.createElement("canvas");
-    c.width = s;
-    c.height = s;
-    const g = c.getContext("2d")!;
-    const cx = s / 2;
-    const cy = s / 2;
-    const ice = kind === "ice";
-    const glowCol = ice ? "rgba(46,230,201," : "rgba(255,210,62,";
-    const base = ice ? "#12b39c" : "#f0b32a";
-    const light = ice ? "#8ffce9" : "#fff3b0";
-    const deep = ice ? "#0a5c52" : "#a06d10";
-
-    const glow = g.createRadialGradient(cx, cy, 0, cx, cy, cx);
-    glow.addColorStop(0, glowCol + "0.55)");
-    glow.addColorStop(0.5, glowCol + "0.16)");
-    glow.addColorStop(1, glowCol + "0)");
-    g.fillStyle = glow;
-    g.fillRect(0, 0, s, s);
-
-    const R = s * 0.3;
-    const pts: [number, number][] = [];
-    for (let i = 0; i < 6; i++) {
-      const a = -Math.PI / 2 + (i * TAU) / 6;
-      const rr = i % 2 === 0 ? R : R * 0.82;
-      pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]);
-    }
-    g.beginPath();
-    pts.forEach(([x, y], i) => (i === 0 ? g.moveTo(x, y) : g.lineTo(x, y)));
-    g.closePath();
-    const body = g.createLinearGradient(cx, cy - R, cx, cy + R);
-    body.addColorStop(0, light);
-    body.addColorStop(0.5, base);
-    body.addColorStop(1, deep);
-    g.fillStyle = body;
-    g.fill();
-    g.lineWidth = 3;
-    g.strokeStyle = ice ? "rgba(200,255,244,0.9)" : "rgba(255,250,210,0.9)";
-    g.stroke();
-
-    // facets
-    g.strokeStyle = ice ? "rgba(230,255,250,0.5)" : "rgba(255,250,220,0.55)";
-    g.lineWidth = 2;
-    g.beginPath();
-    g.moveTo(cx, cy - R);
-    g.lineTo(cx, cy + R * 0.8);
-    g.moveTo(pts[1][0], pts[1][1]);
-    g.lineTo(cx, cy + R * 0.8);
-    g.lineTo(pts[4][0], pts[4][1]);
-    g.stroke();
-    // inner highlight
-    g.beginPath();
-    g.moveTo(cx - R * 0.4, cy - R * 0.35);
-    g.lineTo(cx - R * 0.1, cy - R * 0.6);
-    g.lineTo(cx + R * 0.1, cy - R * 0.35);
-    g.closePath();
-    g.fillStyle = "rgba(255,255,255,0.5)";
-    g.fill();
-    return c;
+    this.ambient.init(W, H);
   }
 
   // ---------- level building ----------
@@ -1488,17 +1195,7 @@ export class Engine {
   }
 
   private banner(str: string, sub?: string) {
-    this.texts.push({
-      x: this.W / 2,
-      y: this.H * 0.3,
-      t: 0,
-      life: 1.5,
-      str,
-      size: clamp(Math.min(this.W, this.H) * 0.075, 26, 58),
-      col: "#ffd23e",
-      sub,
-      big: true,
-    });
+    this.texts.banner(this.W, this.H, str, sub);
   }
 
   // ---------- update ----------
@@ -1516,14 +1213,7 @@ export class Engine {
     this.t += dt;
 
     // ambient motes always
-    for (const m of this.motes) {
-      m.y -= m.spd * dt;
-      m.x += Math.sin(this.t * 0.7 + m.phase) * 8 * dt;
-      if (m.y < -8) {
-        m.y = this.H + 8;
-        m.x = rand(0, this.W);
-      }
-    }
+    this.ambient.update(dt, this.t, this.W, this.H);
 
     if (this.screen === "paused") return;
 
@@ -1534,8 +1224,8 @@ export class Engine {
     }
 
     // fx update (also during menu / gameover)
-    this.updateParticles(simDt);
-    this.updateTexts(simDt);
+    this.particles.update(simDt);
+    this.texts.update(simDt);
     this.shake = Math.max(0, this.shake - this.shake * 7 * dt - 10 * dt);
     this.flash = Math.max(0, this.flash - this.flash * 5 * dt);
 
@@ -1907,35 +1597,6 @@ export class Engine {
     }
   }
 
-  private updateParticles(dt: number) {
-    const arr = this.particles;
-    for (let i = arr.length - 1; i >= 0; i--) {
-      const p = arr[i];
-      p.life -= dt;
-      if (p.life <= 0) {
-        arr[i] = arr[arr.length - 1];
-        arr.pop();
-        continue;
-      }
-      p.vy += p.grav * dt;
-      p.vx *= 1 - Math.min(0.9, p.drag * dt);
-      p.vy *= 1 - Math.min(0.9, p.drag * dt * 0.5);
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.rot += p.vr * dt;
-    }
-    if (arr.length > 550) arr.splice(0, arr.length - 550);
-  }
-
-  private updateTexts(dt: number) {
-    for (let i = this.texts.length - 1; i >= 0; i--) {
-      const tx = this.texts[i];
-      tx.t += dt;
-      tx.y -= (tx.big ? 6 : 44) * dt;
-      if (tx.t >= tx.life) this.texts.splice(i, 1);
-    }
-  }
-
   // ---------- trajectory sim ----------
 
   private simTraj(angle: number, power: number) {
@@ -2027,22 +1688,8 @@ export class Engine {
 
     if (this.starfield) ctx.drawImage(this.starfield, 0, 0, W, H);
 
-    // twinkle
-    ctx.globalCompositeOperation = "lighter";
-    for (const s of this.twinkle) {
-      const a = 0.25 + 0.45 * (0.5 + 0.5 * Math.sin(this.t * s.sp + s.ph));
-      ctx.fillStyle = `rgba(220,240,255,${a})`;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, TAU);
-      ctx.fill();
-    }
-    for (const m of this.motes) {
-      ctx.fillStyle = `rgba(${m.col},${m.a})`;
-      ctx.beginPath();
-      ctx.arc(m.x, m.y, m.size, 0, TAU);
-      ctx.fill();
-    }
-    ctx.globalCompositeOperation = "source-over";
+    // ambient twinkle & motes
+    this.ambient.draw(ctx, this.t);
 
     // gravity wells (accretion halos under structures)
     this.drawGravityWells();
@@ -2113,7 +1760,7 @@ export class Engine {
     // orbs + trails
     for (const o of this.orbsList) {
       if (!o.alive) continue;
-      const sprite = this.getOrbSprite(o.coreType);
+      const sprite = this.spriteFactory.getOrbSprite(o.coreType, this.equippedSkin);
       ctx.globalCompositeOperation = "lighter";
       const skin = SKINS.find((s) => s.id === this.equippedSkin) || SKINS[0];
       let trailColor = skin.trailColor;
@@ -2135,10 +1782,10 @@ export class Engine {
     }
 
     // particles
-    this.drawParticles();
+    this.particles.draw(ctx);
 
     // texts
-    this.drawTexts();
+    this.texts.draw(ctx);
 
     ctx.restore();
 
@@ -2464,7 +2111,7 @@ export class Engine {
       this.orbs > 0 &&
       (this.screen === "playing" || this.screen === "paused")
     ) {
-      const padSprite = this.getOrbSprite(this.selectedCore);
+      const padSprite = this.spriteFactory.getOrbSprite(this.selectedCore, this.equippedSkin);
       let ox = x;
       let oy = y;
       if (angle !== null && power > 0.02) {
@@ -2496,82 +2143,6 @@ export class Engine {
       ctx.stroke();
       ctx.lineCap = "butt";
     }
-  }
-
-  private drawParticles() {
-    const { ctx } = this;
-    for (const p of this.particles) {
-      const f = p.life / p.tl;
-      if (p.kind === 0) {
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.fillStyle = `rgba(${p.col},${clamp(f * 1.3, 0, 1)})`;
-        const s = p.size;
-        ctx.beginPath();
-        ctx.moveTo(0, -s);
-        ctx.lineTo(s * 0.7, 0);
-        ctx.lineTo(0, s);
-        ctx.lineTo(-s * 0.7, 0);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-      } else if (p.kind === 1) {
-        ctx.globalCompositeOperation = "lighter";
-        ctx.strokeStyle = `rgba(${p.col},${clamp(f, 0, 1)})`;
-        ctx.lineWidth = p.size;
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p.x - p.vx * 0.022, p.y - p.vy * 0.022);
-        ctx.stroke();
-        ctx.globalCompositeOperation = "source-over";
-      } else if (p.kind === 2) {
-        ctx.fillStyle = `rgba(${p.col},${f * 0.22})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * (1.6 - f * 0.6), 0, TAU);
-        ctx.fill();
-      } else {
-        ctx.globalCompositeOperation = "lighter";
-        ctx.strokeStyle = `rgba(${p.col},${f * 0.9})`;
-        ctx.lineWidth = 3 * f + 1;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * (1 - f * 0.7), 0, TAU);
-        ctx.stroke();
-        ctx.globalCompositeOperation = "source-over";
-      }
-    }
-  }
-
-  private drawTexts() {
-    const { ctx } = this;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    for (const tx of this.texts) {
-      const f = tx.t / tx.life;
-      const inS = tx.big ? clamp(tx.t / 0.18, 0, 1) : clamp(tx.t / 0.1, 0, 1);
-      const scale = tx.big ? 0.6 + 0.4 * easeOutBack(inS) : easeOutBack(inS);
-      const alpha = f > 0.7 ? 1 - (f - 0.7) / 0.3 : 1;
-      ctx.save();
-      ctx.translate(tx.x, tx.y);
-      ctx.scale(scale, scale);
-      ctx.globalAlpha = alpha;
-      ctx.font = `${tx.size}px Bungee, sans-serif`;
-      ctx.lineWidth = Math.max(4, tx.size * 0.18);
-      ctx.lineJoin = "round";
-      ctx.strokeStyle = "rgba(7,5,16,0.85)";
-      ctx.strokeText(tx.str, 0, 0);
-      ctx.fillStyle = tx.col;
-      ctx.fillText(tx.str, 0, 0);
-      if (tx.sub) {
-        ctx.font = `${tx.size * 0.5}px Bungee, sans-serif`;
-        ctx.lineWidth = Math.max(3, tx.size * 0.1);
-        ctx.strokeText(tx.sub, 0, tx.size * 0.85);
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(tx.sub, 0, tx.size * 0.85);
-      }
-      ctx.restore();
-    }
-    ctx.globalAlpha = 1;
   }
 
   // ---------- UI sync ----------
